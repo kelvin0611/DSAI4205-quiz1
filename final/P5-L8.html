@@ -325,6 +325,7 @@ svg.dia .tshuf{fill:var(--shuf);font-weight:600}
 <h2 id="cent">三、Centrality：邊個 node 最重要</h2>
 <div class="key"><b>一分鐘重點</b><ul>
 <li><b>Degree</b>：朋友最多。<b>Closeness</b>：去邊都近。<b>Betweenness</b>：人哋要經你先搵到對方（橋樑）。<b>Eigenvector</b>：你嘅朋友都重要。</li>
+<li>兩大類：<b>geometric</b>（睇距離：closeness、harmonic、betweenness）vs <b>connectivity-based／spectral</b>（睇 eigen-structure：eigenvector、Katz）。</li>
 <li>唔同 centrality 可以揀出唔同嘅「最重要」node，冇一種係最好。</li>
 <li>認圖：最極端（一兩粒好大）= betweenness；最平均 = closeness；中間 = degree。</li></ul></div>
 <table class="stack"><tr><th>Centrality</th><th>問咩問題</th><th>高分嘅 node</th></tr>
@@ -332,7 +333,28 @@ svg.dia .tshuf{fill:var(--shuf);font-weight:600}
 <tr><td><b>Closeness</b></td><td>你去其他人平均有幾近？</td><td>喺圖中間</td></tr>
 <tr><td><b>Harmonic</b></td><td>同 closeness 一樣，但圖唔連通都用得</td><td>近又多朋友</td></tr>
 <tr><td><b>Betweenness</b></td><td>幾多對人要經過你？</td><td>橋樑、broker</td></tr>
-<tr><td>Eigenvector</td><td>你嘅朋友重唔重要？</td><td>連住重要人物</td></tr></table>
+<tr><td><b>Eigenvector</b></td><td>你嘅朋友重唔重要？</td><td>連住重要人物</td></tr></table>
+
+<div class="concept" id="types">
+<h3>0. Centrality 兩大類（L8 p.31、36、54）</h3>
+<span class="lab">一句講完</span>
+<p><b>Geometric</b>：重要程度係「同其他 node 嘅<b>距離</b>」嘅 function。<b>Connectivity-based（spectral）</b>：重要程度由 graph matrix 嘅 <b>eigen-structure</b> 決定，即係「你鄰居重唔重要」。</p>
+<span class="lab pic">分類圖</span>
+<figure class="fig"><svg viewBox="0 0 340 200" role="img" aria-label="centrality types" style="max-width:340px">
+<g font-size="12" text-anchor="middle">
+<rect class="bx" x="105" y="8" width="130" height="30" rx="8"/><text x="170" y="28" font-weight="700">Centrality measures</text>
+<line class="ln" x1="170" y1="38" x2="85" y2="62"/><line class="ln" x1="170" y1="38" x2="255" y2="62"/>
+<rect class="hl" x="10" y="62" width="150" height="44" rx="8"/><text x="85" y="80" font-weight="700">Geometric</text><text x="85" y="97">睇距離</text>
+<rect class="ac" x="180" y="62" width="150" height="44" rx="8"/><text x="255" y="80" font-weight="700">Connectivity-based</text><text x="255" y="97">睇 eigen-structure</text>
+<line class="ln" x1="85" y1="106" x2="85" y2="122"/><line class="ln" x1="255" y1="106" x2="255" y2="122"/>
+<rect class="bx" x="10" y="122" width="150" height="70" rx="8"/><text x="85" y="142">Closeness</text><text x="85" y="160">Harmonic</text><text x="85" y="178">Betweenness</text>
+<rect class="bx" x="180" y="122" width="150" height="70" rx="8"/><text x="255" y="142">Eigenvector</text><text x="255" y="160">Katz</text><text x="255" y="178">（PageRank 係變種）</text></g>
+</svg><figcaption>Degree 係最基本嘅一個，slide 單獨講，唔屬於呢兩類</figcaption></figure>
+<span class="lab why">點記</span>
+<p>公式入面有 \(d(x, y)\)（距離）或者最短路徑 ⇒ geometric；公式係 \(c = Ac\)、要 power iteration ⇒ connectivity-based。</p>
+<span class="lab trap">易錯</span>
+<p>Betweenness 數嘅係「最短路徑經唔經你」，slide 將佢放喺 <b>geometric</b> 下面。MCQ 問「邊個唔係 geometric」，答 eigenvector 或者 Katz。</p>
+</div>
 
 <div class="concept">
 <h3>1. Degree centrality</h3>
@@ -390,17 +412,63 @@ svg.dia .tshuf{fill:var(--shuf);font-weight:600}
 <tr><td>其他對</td><td>—</td><td>唔經 C</td><td class="c">0</td></tr>
 <tr><th colspan="3">合計</th><td class="c"><b>1</b></td></tr></table>
 <p>快捷：star（中間連住 n 個 leaf）中心 = \(n(n-1)/2\)，例如 5 個 leaf = 10。</p>
+<span class="lab eg">Slide 例子 (a)：Path A–B–C–D–E（L8 p.47）</span>
+<figure class="fig"><svg viewBox="0 0 330 80" role="img" aria-label="path betweenness" style="max-width:330px">
+<g class="ln"><line x1="35" y1="35" x2="295" y2="35"/></g>
+<circle class="bx" cx="35" cy="35" r="16"/><circle class="hl" cx="100" cy="35" r="18"/><circle class="ac" cx="165" cy="35" r="20"/><circle class="hl" cx="230" cy="35" r="18"/><circle class="bx" cx="295" cy="35" r="16"/>
+<g text-anchor="middle"><text x="35" y="40">A</text><text x="100" y="40">B</text><text x="165" y="40" font-weight="700">C</text><text x="230" y="40">D</text><text x="295" y="40">E</text>
+<g font-size="13" font-weight="700"><text x="35" y="74">0</text><text x="100" y="74">3</text><text x="165" y="74">4</text><text x="230" y="74">3</text><text x="295" y="74">0</text></g></g>
+</svg><figcaption>Betweenness：0, 3, 4, 3, 0（networkx 核對）</figcaption></figure>
+<ul><li>B：A 去 C、D、E 都要經 B ⇒ 3 對（A–C、A–D、A–E）。</li>
+<li>C：左邊 {A, B} 去右邊 {D, E} 都要經 C ⇒ 2 × 2 = <b>4</b> 對。</li>
+<li>A、E 喺尾，冇人要經佢哋 ⇒ 0。</li></ul>
+<span class="lab eg">Slide 例子 (b)：兩個三角形 + 中間一粒（bow-tie，L8 p.48）</span>
+<figure class="fig"><svg viewBox="0 0 340 150" role="img" aria-label="bow tie betweenness" style="max-width:340px">
+<g class="ln"><line x1="30" y1="30" x2="30" y2="120"/><line x1="30" y1="30" x2="100" y2="75"/><line x1="30" y1="120" x2="100" y2="75"/><line x1="100" y1="75" x2="170" y2="75"/><line x1="170" y1="75" x2="240" y2="75"/><line x1="240" y1="75" x2="310" y2="30"/><line x1="240" y1="75" x2="310" y2="120"/><line x1="310" y1="30" x2="310" y2="120"/></g>
+<circle class="bx" cx="30" cy="30" r="14"/><circle class="bx" cx="30" cy="120" r="14"/><circle class="hl" cx="100" cy="75" r="17"/><circle class="ac" cx="170" cy="75" r="19"/><circle class="hl" cx="240" cy="75" r="17"/><circle class="bx" cx="310" cy="30" r="14"/><circle class="bx" cx="310" cy="120" r="14"/>
+<g text-anchor="middle" font-size="12"><text x="30" y="35">a</text><text x="30" y="125">b</text><text x="100" y="80">c</text><text x="170" y="80" font-weight="700">d</text><text x="240" y="80">e</text><text x="310" y="35">f</text><text x="310" y="125">g</text>
+<g font-weight="700" font-size="13"><text x="100" y="112">8</text><text x="170" y="112">9</text><text x="240" y="112">8</text><text x="55" y="80">0</text><text x="285" y="80">0</text></g></g>
+</svg><figcaption>中間 d = 9；接駁點 c、e = 8；三角形外面 4 粒 = 0（networkx 核對）</figcaption></figure>
+<ul><li>d：左邊 {a, b, c} 去右邊 {e, f, g} 全部要經 d ⇒ 3 × 3 = <b>9</b>。</li>
+<li>c：{a, b} 去 {d, e, f, g} 全部要經 c ⇒ 2 × 4 = <b>8</b>。e 一樣 = 8。</li>
+<li>a、b：三角形入面 a–b 直接連住，冇人要經佢哋 ⇒ 0。</li></ul>
+<div class="tip"><b>快捷計法</b>如果拎走 v 之後個 graph 斷開做兩邊，大細係 m 同 n，而且所有跨邊嘅最短路徑都要經 v（冇第二條路），咁 v 嘅 betweenness 至少係 \(m \times n\)。Path 嘅 C = 2 × 2、bow-tie 嘅 d = 3 × 3、c = 2 × 4 都係咁計。</div>
 <span class="lab trap">易錯</span>
 <p>有幾條一樣短嘅路徑時要<b>攤分</b>（partial credit）；唔好當成全部經你。</p>
 </div>
 
 <div class="concept">
-<h3>4. Eigenvector centrality</h3>
+<h3 id="eig">4. Eigenvector centrality</h3>
 <span class="lab">一句講完</span>
 <p>你嘅分數 = 你鄰居分數加埋。連住重要人物，你都重要。</p>
 <div class="fx">$$c \leftarrow A\,c, \qquad c \leftarrow \frac{c}{\lVert c \rVert_2}$$</div>
 <span class="lab eg">例子</span>
 <p>A–B、A–C、A–D、C–D，由 \(c^{(0)} = [1,1,1,1]\) 開始：A = B+C+D = 3、B = A = 1、C = A+D = 2、D = A+C = 2；除 \(\sqrt{18}\) 得 [0.707, 0.236, 0.471, 0.471]。繼續 iterate 收斂去 [0.612, 0.282, 0.523, 0.523]。PageRank 同 Katz 都係佢嘅變種。</p>
+<span class="lab">Slide algorithm（L8 p.59）</span>
+<ol class="steps">
+<li>\(c^{(0)} = [1, 1, \dots, 1]\)。</li>
+<li>\(c^{(k)} = A\,c^{(k-1)}\)：每粒 node 嘅新分數 = 鄰居舊分數加埋。</li>
+<li>\(c^{(k)} = c^{(k)} / \lVert c^{(k)} \rVert_2\)：除 L2 norm（\(\sqrt{\text{平方和}}\)），唔係除總和。</li>
+<li>如果 \(\lVert c^{(k)} - c^{(k-1)} \rVert &gt; \varepsilon\)，返去 Step 2；否則停。</li></ol>
+<span class="lab eg">Slide 例子：5 粒 node（L8 p.59–60）</span>
+<figure class="fig"><svg viewBox="0 0 280 170" role="img" aria-label="eigenvector example graph" style="max-width:280px">
+<g class="ln"><line x1="50" y1="40" x2="140" y2="85"/><line x1="50" y1="40" x2="50" y2="140"/><line x1="140" y1="85" x2="50" y2="140"/><line x1="140" y1="85" x2="240" y2="40"/><line x1="140" y1="85" x2="240" y2="140"/><line x1="50" y1="140" x2="240" y2="140"/></g>
+<circle class="hl" cx="50" cy="40" r="17"/><circle class="ac" cx="140" cy="85" r="21"/><circle class="hl" cx="50" cy="140" r="19"/><circle class="bx" cx="240" cy="40" r="14"/><circle class="hl" cx="240" cy="140" r="17"/>
+<g text-anchor="middle" font-weight="700"><text x="50" y="45">1</text><text x="140" y="90">2</text><text x="50" y="145">3</text><text x="240" y="45">4</text><text x="240" y="145">5</text></g>
+</svg><figcaption>Edges：1–2、1–3、2–3、2–4、2–5、3–5</figcaption></figure>
+<div class="tw"><table class="nostack" style="font-size:13.5px"><tr><th>node</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th></tr>
+<tr><td>c⁽⁰⁾</td><td class="c">1</td><td class="c">1</td><td class="c">1</td><td class="c">1</td><td class="c">1</td></tr>
+<tr><td>A c⁽⁰⁾</td><td class="c">2</td><td class="c">4</td><td class="c">3</td><td class="c">1</td><td class="c">2</td></tr>
+<tr><td>c⁽¹⁾</td><td class="c">0.34</td><td class="c">0.69</td><td class="c">0.51</td><td class="c">0.17</td><td class="c">0.34</td></tr>
+<tr><td>c⁽²⁾</td><td class="c">0.45</td><td class="c">0.51</td><td class="c">0.51</td><td class="c">0.26</td><td class="c">0.45</td></tr>
+<tr><td>c⁽³⁾</td><td class="c">0.38</td><td class="c">0.62</td><td class="c">0.53</td><td class="c">0.19</td><td class="c">0.38</td></tr>
+<tr><td>收斂</td><td class="c">0.412</td><td class="c">0.583</td><td class="c">0.524</td><td class="c">0.217</td><td class="c">0.412</td></tr>
+<tr><td><b>÷ node 1</b></td><td class="c"><b>1</b></td><td class="c"><b>1.41</b></td><td class="c"><b>1.27</b></td><td class="c"><b>0.52</b></td><td class="c"><b>1</b></td></tr></table></div>
+<ul><li>\(A c^{(0)}\) = [2, 4, 3, 1, 2]，即係 degree；\(\lVert\cdot\rVert_2 = \sqrt{34} = 5.831\)。</li><li>\(A c^{(1)}\) = [1.20, 1.37, 1.37, 0.69, 1.20]，÷ 2.668 得 \(c^{(2)}\)。</li><li>之後擺嚟擺去慢慢收斂（λ ≈ 2.686）；最後一行係 slide 嘅寫法：全部除 node 1。</li></ul>
+<p>第一步 \(A c^{(0)}\) 永遠等於每粒 node 嘅 degree。之後 node 2（degree 4，又連住 1、3、5）最高；node 4 只連住 node 2，但因為 node 2 重要，佢都有 0.52，唔係 0。（numpy 核對；slide 第一步寫 0.68，係 0.686 截斷，node 4 收斂值 0.527 slide 寫 0.52。）</p>
+<span class="lab trap">易錯</span>
+<ul><li>除 <b>L2 norm</b>（√平方和），唔係除總和；兩個做法比例一樣，但數字唔同，答題要跟 slide。</li>
+<li>無向圖 A 係對稱；\(A c\) 嘅第 i 格 = node i 所有鄰居嘅分數加埋。</li></ul>
 </div>
 
 <div class="concept">
@@ -519,7 +587,12 @@ c(1) = [0.707, 0.236, 0.471, 0.471]</code></pre>
 {"t":"L8","s":"<p>In a directed graph, d(A,B) = 1. What can you say about d(B,A)?</p>","o":["It is also 1","It is 0","It may be different from 1, or even infinite","It is always 2"],"a":2,"e":"有向圖 distance <b>唔對稱</b>，要跟箭咀行，可能更長或者去唔到。"},
 {"t":"L8","s":"<p>For the path A–B–C–D–E, what is the closeness centrality (1/Σd) of node B?</p>","o":["1/10","1/7","1/6","1/4"],"a":1,"e":"B 去 A、C、D、E：1 + 1 + 2 + 3 = 7 → <b>1/7 ≈ 0.14</b>。"},
 {"t":"L8","s":"<p>Which statement about centrality measures is correct?</p>","o":["Betweenness is always the best","Different centralities can pick different 'most important' nodes, as in the Krackhardt kite graph","All centralities give the same ranking","Centrality measures the exact difference in importance between nodes"],"a":1,"e":"Lecture：冇一種係最好；Krackhardt kite 三種 centrality 揀出三個唔同 node。Ranking 亦唔量化差距有幾大。"},
-{"t":"L8","s":"<p>In the MSN network, the average path length is 6.6 while N is 180 million. What property does this illustrate?</p>","o":["The network is dense","Small-world: even huge networks have short average distances","The network is disconnected","High clustering"],"a":1,"e":"大網絡但平均幾步就到 = <b>small world</b>（六度分隔）。MSN 平均 degree 14.4，所以其實好 sparse。"}
+{"t":"L8","s":"<p>In the MSN network, the average path length is 6.6 while N is 180 million. What property does this illustrate?</p>","o":["The network is dense","Small-world: even huge networks have short average distances","The network is disconnected","High clustering"],"a":1,"e":"大網絡但平均幾步就到 = <b>small world</b>（六度分隔）。MSN 平均 degree 14.4，所以其實好 sparse。"},
+{"t":"L8","s":"<p>Which centrality is NOT a geometric measure according to the lecture?</p>","o":["Closeness","Harmonic","Betweenness","Eigenvector"],"a":3,"e":"Geometric = 睇距離（closeness、harmonic、betweenness）；<b>eigenvector</b>（同 Katz）係 connectivity-based，睇 eigen-structure。"},
+{"t":"L8","s":"<p>Path A–B–C–D–E (undirected). What is the betweenness of C?</p>","o":["2","3","4","6"],"a":2,"e":"{A, B} 去 {D, E} 全部經 C ⇒ 2 × 2 = <b>4</b>。B、D 各 3，A、E 0。"},
+{"t":"L8","s":"<p>Two triangles {a, b, c} and {e, f, g} are joined through a middle node d (c–d–e). Betweenness of d?</p>","o":["6","8","9","3"],"a":2,"e":"左邊 3 粒去右邊 3 粒全部經 d ⇒ 3 × 3 = <b>9</b>。c、e 各 2 × 4 = 8。"},
+{"t":"L8","s":"<p>Eigenvector power iteration starts from c⁽⁰⁾ = [1, …, 1]. What is A c⁽⁰⁾?</p>","o":["All ones","The degree of each node","The closeness of each node","The eigenvalues"],"a":1,"e":"A c 嘅第 i 格 = 鄰居分數加埋；全部係 1 就等於鄰居數目 = <b>degree</b>。之後再除 L2 norm。"},
+{"t":"L8","s":"<p>In the slide's eigenvector algorithm, after computing c = A c, you normalise by:</p>","o":["The sum of c","The L2 norm √(Σ c²)","The largest degree","N"],"a":1,"e":"Slide Step 3：除 <b>L2 norm</b>。例如 [2, 4, 3, 1, 2] ÷ √34。"}
 ]</script></div>
 
 <h2 id="short">七、短答題</h2>
@@ -530,6 +603,8 @@ c(1) = [0.707, 0.236, 0.471, 0.471]</code></pre>
 
 <h2 id="faq">八、常見疑問</h2>
 <dl class="faq">
+<dt>Q：Geometric 同 connectivity-based 點分？</dt><dd>公式有距離／最短路徑 ⇒ geometric（closeness、harmonic、betweenness）；要 \(c = Ac\) power iteration ⇒ connectivity-based（eigenvector、Katz，PageRank 係變種）。</dd>
+<dt>Q：Eigenvector 每步除 L2 norm 定除總和？</dt><dd>跟 slide 除 L2 norm（√平方和）。最後 slide 再將所有數除 node 1，寫成 [1, 1.41, 1.27, 0.52, 1]，方便比較。</dd>
 <dt>Q：Betweenness 要唔要 normalize？</dt><dd>過去題目只問「邊個最高」，用原始數比較就得。要 normalize 嘅話，無向圖除以 \((N-1)(N-2)/2\)。</dd>
 <dt>Q：Betweenness 計 (s,t) 同 (t,s) 兩次？</dt><dd>無向圖每對計一次（lecture 嘅 star 例子 5×4/2 = 10 就係咁）。</dd>
 <dt>Q：Closeness 用 1/Σd 定 (N−1)/Σd？</dt><dd>Lecture 兩個都有：slide 38 用 1/Σd，slide 39 用 (N−1)/Σd。兩個排名一樣，寫清楚你用邊個。</dd>
@@ -602,4 +677,4 @@ if(pp){var pages=JSON.parse(pp.dataset.pages);var html='';
     html+='<div class="row"><a href="'+p[0]+'">'+p[1]+'</a><span>'+(m||n?'溫完 '+n+' 部分 · MCQ '+a+'/'+m+'（啱 '+c+'）':'未開始')+'</span></div>'});
   pp.innerHTML=html}
 })();
-</script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\(',right:'\)',display:false}],ignoredClasses:['mcq'],throwOnError:false})"></script></body></html>
+</script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],ignoredClasses:['mcq'],throwOnError:false})"></script></body></html>

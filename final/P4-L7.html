@@ -169,13 +169,15 @@ svg.dia .tshuf{fill:var(--shuf);font-weight:600}
 <ul class="toc">
 <li><a href="#exam">一、點考</a></li><li><a href="#notes">二、筆記：由零講起</a></li>
 <li><a href="#demo">三、完整示範：2025s1 Q3</a></li><li><a href="#drill">四、計數 drill</a></li>
-<li><a href="#code">五、PySpark PageRank code</a></li><li><a href="#mcq">六、MCQ</a></li>
-<li><a href="#short">七、短答題</a></li><li><a href="#faq">八、常見疑問</a></li></ul>
+<li><a href="#code">五、PySpark PageRank code（2025s1）</a></li><li><a href="#t7">六、T7 RDD PageRank（收斂 loop）</a></li>
+<li><a href="#mcq">七、MCQ</a></li><li><a href="#short">八、短答題</a></li><li><a href="#faq">九、常見疑問</a></li></ul>
 
 <h2 id="exam">一、點考</h2>
 <table class="stack"><tr><th>卷</th><th>題目</th><th>分數</th></tr>
 <tr><td>2025s1 Q3</td><td>5 頁 graph：(a) stochastic matrix (b) iteration 1、2 + 排序 (c) 用 RDD 寫 power iteration</td><td>25</td></tr>
 <tr><td>2026s2 Q3 ／ Revision Qs</td><td>(a) 兩個問題 + 例子 + 解決方法 (b) 4 頁 graph：matrix + 2 個 iteration + 排序</td><td>18</td></tr>
+<tr><td>L7 p.46–48（slide 例子）</td><td>Complete algorithm（S 補返）：dead end、spider trap 逐步計，β = 0.85（答案喺 <a href="#complete">7b</a>）</td><td>—</td></tr>
+<tr><td>L7 p.49–50、T7</td><td>MapReduce Links.txt 例子（<a href="#mr">8</a>）；T7 RDD PageRank fill-in + 收斂 loop（<a href="#t7">六</a>）</td><td>—</td></tr>
 <tr><td>COMP4434 舊卷</td><td>寫每頁嘅 PageRank equation + 2 個 iteration（damping 0.85）</td><td>參考</td></tr></table>
 <p>每次嘅題目都係同一個套路，只係換 graph。跟住下面五步做，就唔會漏分：</p>
 <ol class="steps">
@@ -346,7 +348,7 @@ svg.dia .tshuf{fill:var(--shuf);font-weight:600}
 <span class="lab">一句講完</span>
 <p>Random surfer 每一步：機率 \(\beta\) 跟 link 行，機率 \(1-\beta\) 隨機跳去任何一頁。</p>
 <div class="fx">$$r_j = \sum_{i \to j} \beta\,\frac{r_i}{d_i} + \frac{1-\beta}{N}$$</div>
-<p>\(\beta\) 通常 0.8 至 0.9，考試用 0.8。所以每頁每次都有一份「保底」\((1-\beta)/N\)。</p>
+<p>\(\beta\) 通常 0.8 至 0.9。<b>題目俾幾多就用幾多</b>：2025s1 卷同 slide 嘅 Google matrix 例子用 0.8，slide 嘅 complete algorithm 例子同 T7 用 0.85，COMP4434 舊卷用 0.85。所以每頁每次都有一份「保底」\((1-\beta)/N\)。</p>
 <span class="lab pic">圖解</span>
 <figure class="fig"><svg viewBox="0 0 330 190" role="img" aria-label="teleport" style="max-width:330px">
 <defs><marker id="v7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker><marker id="v7b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#BF4A14"/></marker></defs>
@@ -386,29 +388,99 @@ svg.dia .tshuf{fill:var(--shuf);font-weight:600}
 <p>冇 dead end 時 \(1 - S = 1 - \beta\)，即係同直接加 \((1-\beta)/N\) 一樣；有 dead end 就漏多啲，用 \(1-S\) 一次過補返。</p>
 </div>
 
-<div class="concept">
-<h3>8. MapReduce 版本</h3>
+<div class="concept" id="complete">
+<h3>7b. Complete algorithm（L7 p.46–48）：S 補返 + 兩個 worked example</h3>
 <span class="lab">一句講完</span>
-<p>每個 iteration 係一個 MapReduce job：Map 將每頁分數分俾 out-link，Reduce 將收到嘅加埋再加 teleport。</p>
-<span class="lab pic">圖解（lecture slide 49：A → B,C,D；B → A,D；C → A；D → B,C；每頁初始 1/4）</span>
+<p>每個 iteration 分兩步：① 只用 sparse 嘅 M 計 \(r' = \beta M r\)（冇 in-link 嘅頁 = 0）；② 數 \(S = \sum_j r'_j\)，將漏咗嘅 \(1 - S\) 平均補返俾每頁。Dead end 同 spider trap 一齊搞掂。</p>
+<span class="lab">Pseudocode（L7 p.46）</span>
+<pre><code>Input: graph G, β
+r_j(0) = 1/N for every j
+repeat until Σ_j |r_j(t) − r_j(t−1)| &lt; ε:
+    for every page j:
+        if in-degree of j &gt; 0:  r'_j = Σ_{i→j} β · r_i / d_i
+        else:                   r'_j = 0
+    S = Σ_j r'_j
+    for every page j:  r_j(t) = r'_j + (1 − S) / N</code></pre>
+<div class="fx">$$r'_j = \sum_{i \to j} \beta\,\frac{r_i}{d_i}, \qquad S = \sum_j r'_j, \qquad r_j = r'_j + \frac{1-S}{N}$$</div>
+<span class="lab why">點解叫 1 − S</span>
+<p>冇 dead end 時，\(\beta M r\) 加埋 = β，所以 \(1 - S = 1 - \beta\)，同 \((1-\beta)/N\) 一樣。有 dead end 時，dead end 嘅分數冇人接，S 再細啲；用 \(1 - S\) 就連 dead end 漏走嗰份一齊補返。呢個做法同「將 dead end column 改成 1/N」計出嚟<b>一模一樣</b>，只係唔使改 matrix。</p>
+
+<span class="lab eg">例子 (a)：Dead end，β = 0.85</span>
+<div class="grid2">
+<figure class="fig"><svg viewBox="0 0 220 90" role="img" aria-label="a to b, b dead end" style="max-width:220px">
+<defs><marker id="ce1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<circle class="bx" cx="50" cy="45" r="22"/><circle class="ac" cx="170" cy="45" r="22"/>
+<g font-size="15" text-anchor="middle" font-weight="700"><text x="50" y="50">a</text><text x="170" y="50">b</text></g>
+<line class="ln" x1="73" y1="45" x2="146" y2="45" marker-end="url(#ce1)"/>
+<text x="170" y="84" font-size="11.5" text-anchor="middle" fill="#BF4A14">冇 out-link</text></svg>
+<figcaption>a → b；b 係 dead end</figcaption></figure>
+<div class="tw"><table class="nostack"><tr><th></th><th class="c">from a</th><th class="c">from b</th></tr><tr><th>to a</th><td class="c">0</td><td class="c">0</td></tr><tr><th>to b</th><td class="c">1</td><td class="c">0</td></tr></table><p class="sub" style="margin:4px 0 0">M（b 嗰個 column 全 0）</p></div></div>
+<ol class="steps">
+<li>\(r^{(0)} = (\tfrac12, \tfrac12)\)。a 冇 in-link ⇒ \(r'_a = 0\)；\(r'_b = 0.85 \times \tfrac12 = 0.425\)。</li>
+<li>\(S = 0.425\)，\(1 - S = 0.575\)，每頁補 \(0.575 / 2 = 0.2875\)。</li>
+<li>\(r^{(1)} = (0 + 0.2875,\; 0.425 + 0.2875) = (0.2875,\; 0.7125)\)。總和 = 1 ✓</li>
+<li>Iteration 2：\(r'_b = 0.85 \times 0.2875 = 0.244375\)，\(S = 0.244375\)，補 \(0.3778125\) ⇒ \(r^{(2)} = (0.3778125,\; 0.6221875)\)。</li></ol>
+<div class="tw"><table class="nostack"><tr><th>t</th><th class="c">0</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">…收斂</th></tr>
+<tr><th>a</th><td class="c">0.5</td><td class="c">0.2875</td><td class="c">0.3778</td><td class="c">0.3394</td><td class="c">0.3509</td></tr>
+<tr><th>b</th><td class="c">0.5</td><td class="c">0.7125</td><td class="c">0.6222</td><td class="c">0.6606</td><td class="c">0.6491</td></tr></table></div>
+
+<span class="lab eg">例子 (b)：Spider trap，β = 0.85</span>
+<div class="grid2">
+<figure class="fig"><svg viewBox="0 0 260 100" role="img" aria-label="a to b, b to c, c to b" style="max-width:260px">
+<defs><marker id="ce2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<circle class="bx" cx="40" cy="50" r="22"/><circle class="ac" cx="130" cy="50" r="22"/><circle class="ac" cx="220" cy="50" r="22"/>
+<g font-size="15" text-anchor="middle" font-weight="700"><text x="40" y="55">a</text><text x="130" y="55">b</text><text x="220" y="55">c</text></g>
+<line class="ln" x1="63" y1="50" x2="106" y2="50" marker-end="url(#ce2)"/>
+<path class="ln" d="M150 38 Q175 22 200 38" marker-end="url(#ce2)"/><path class="ln" d="M200 62 Q175 78 150 62" marker-end="url(#ce2)"/>
+<text x="175" y="96" font-size="11.5" text-anchor="middle" fill="#BF4A14">b ⇄ c = spider trap</text></svg>
+<figcaption>a → b；b → c；c → b</figcaption></figure>
+<div class="tw"><table class="nostack"><tr><th></th><th class="c">a</th><th class="c">b</th><th class="c">c</th></tr><tr><th>a</th><td class="c">0</td><td class="c">0</td><td class="c">0</td></tr><tr><th>b</th><td class="c">1</td><td class="c">0</td><td class="c">1</td></tr><tr><th>c</th><td class="c">0</td><td class="c">1</td><td class="c">0</td></tr></table><p class="sub" style="margin:4px 0 0">M（column = from）</p></div></div>
+<ol class="steps">
+<li>\(r^{(0)} = (\tfrac13, \tfrac13, \tfrac13)\)。\(r'_a = 0\)；\(r'_b = 0.85(r_a + r_c) = 0.85 \times \tfrac23 = 0.5667\)；\(r'_c = 0.85\, r_b = 0.2833\)。</li>
+<li>冇 dead end ⇒ \(S = 0.85\)，\(1 - S = 0.15\)，每頁補 0.05。</li>
+<li>\(r^{(1)} = (0.05,\; 0.6167,\; 0.3333)\)。之後 b、c 會互相擺嚟擺去（iteration 2 = 0.05, 0.3758, 0.5742），慢慢收斂到 <b>(0.05, 0.4865, 0.4635)</b>。</li></ol>
+<p>a 冇 in-link，所以永遠只得保底 \((1-\beta)/N = 0.05\)；b、c 吸走其餘分數，但因為 teleport，唔會吸到 1。（全部數字已用 numpy 跑過，同 slide 一樣。）</p>
+<span class="lab trap">易錯</span>
+<ul><li>冇 in-link 嘅頁 \(r'_j = 0\)，<b>唔係</b>跳過唔計；佢最後仍然有 \((1-S)/N\)。</li>
+<li>\(S\) 每個 iteration 都要重新數，唔係固定 β。</li>
+<li>呢兩個 slide 例子用 β = <b>0.85</b>，唔係 0.8。</li></ul>
+</div>
+
+<div class="concept" id="mr">
+<h3>8. MapReduce 版本（L7 p.49–50：Links.txt）</h3>
+<span class="lab">一句講完</span>
+<p>每個 iteration 係一個 MapReduce job：Map 將每頁分數平均分俾 out-link，Reduce 將收到嘅加埋（再加 teleport）。</p>
+<span class="lab">Slide 嘅輸入</span>
+<div class="grid2">
+<div class="tw"><table class="nostack"><tr><th>Links.txt</th><th>意思</th></tr><tr><td><code>A B C D</code></td><td>A → B, C, D</td></tr><tr><td><code>B A D</code></td><td>B → A, D</td></tr><tr><td><code>C A B</code></td><td>C → A, B</td></tr><tr><td><code>D B C</code></td><td>D → B, C</td></tr></table></div>
+<div class="tw"><table class="nostack"><tr><th>Initial PageRank</th></tr><tr><td>A 1</td></tr><tr><td>B 1</td></tr><tr><td>C 1</td></tr><tr><td>D 1</td></tr></table><p class="sub" style="margin:4px 0 0">Slide 起點用 <b>1</b>，唔係 1/N</p></div></div>
+<span class="lab pic">圖解：Map → Shuffle → Reduce</span>
 <div class="mflow">
-<div class="mfcol"><div class="mfh">① Map：每頁分分數</div>
-<div class="fb">A (1/4, 3 條) → (B, 1/12) (C, 1/12) (D, 1/12)</div>
-<div class="fb">B (1/4, 2 條) → (A, 1/8) (D, 1/8)</div>
-<div class="fb">C (1/4, 1 條) → (A, 1/4)</div>
-<div class="fb">D (1/4, 2 條) → (B, 1/8) (C, 1/8)</div></div>
+<div class="mfcol"><div class="mfh">① Map：PR ÷ out-degree</div>
+<div class="fb">A (1, 3 條) → (B, 1/3) (C, 1/3) (D, 1/3)</div>
+<div class="fb">B (1, 2 條) → (A, 1/2) (D, 1/2)</div>
+<div class="fb">C (1, 2 條) → (A, 1/2) (B, 1/2)</div>
+<div class="fb">D (1, 2 條) → (B, 1/2) (C, 1/2)</div></div>
 <div class="mfarr"></div>
 <div class="mfcol"><div class="mfh">② Shuffle：按頁 group</div>
-<div class="fb hl2">A ← [1/8, 1/4]<br>B ← [1/12, 1/8]<br>C ← [1/12, 1/8]<br>D ← [1/12, 1/8]</div></div>
+<div class="fb hl2">A ← [1/2, 1/2]<br>B ← [1/3, 1/2, 1/2]<br>C ← [1/3, 1/2]<br>D ← [1/3, 1/2]</div></div>
 <div class="mfarr"></div>
 <div class="mfcol"><div class="mfh">③ Reduce：加埋</div>
-<div class="fb ac2">A = 3/8<br>B = 5/24<br>C = 5/24<br>D = 5/24<br>（有 teleport 就 ×β 再加 (1−β)/N）</div></div></div>
+<div class="fb ac2">A = 1<br>B = 4/3 ≈ 1.333<br>C = 5/6 ≈ 0.833<br>D = 5/6 ≈ 0.833<br>總和 = 4 = N</div></div></div>
 <pre><code>Map(key = page, value = PR(page)):
-    for each dst in Adj[page]:
-        emit(dst, PR(page) / len(Adj[page]))
+    for each dst in Adj[key]:
+        emit(dst, PR(key) / sizeof(Adj[key]))
 
 Reduce(key = page, values = contributions):
-    emit(page, β · sum(values) + (1 − β) / N)</code></pre>
+    PR(key) = (1 − β) / N
+    for each pagerank in values:
+        PR(key) += β · pagerank
+    emit(key, PR(key))</code></pre>
+<p>加 teleport（例如 β = 0.8）：A = 0.05 + 0.8(1) = 0.85、B = 0.05 + 0.8(4/3) = 1.117、C = D = 0.05 + 0.8(5/6) = 0.717。排名 <b>B &gt; A &gt; C = D</b>，同唔加 teleport 一樣（已用 Python 核對）。</p>
+<span class="lab trap">易錯</span>
+<ul><li>題目俾 initial PR = 1 就跟題目用 1；Map 照出 PR ÷ out-degree（A 出 1/3，唔係 1/12）。用 1 做起點，總和係 N 唔係 1，唔使驚。</li>
+<li>Map 嘅 key 係<b>目的地頁</b>（dst），唔係自己。</li>
+<li>Reduce 先放 \((1-\beta)/N\)，再逐個加 \(\beta \times\) 貢獻。</li></ul>
 </div>
 
 <h2 id="demo">三、完整示範：2025s1 Q3（25 分）</h2>
@@ -567,7 +639,81 @@ for page, r in sorted(ranks.collect()):
 <tr><td><code>mapValues(β·s + (1−β)/N)</code></td><td>加 teleport</td></tr></table></div>
 <p>輸出：1 0.04、2 0.3547、3 0.2107、4 0.0507、5 0.344，同人手計一樣（已用 Python 模擬 RDD 運算核對）。</p>
 
-<h2 id="mcq">六、MCQ</h2>
+<h2 id="t7">六、T7 RDD PageRank（tutorial 版，有收斂 loop）</h2>
+<p>同上面 2025s1 嘅 code 唔同：T7 由 <b>edge list</b> 開始，自己砌 adjacency list，而且用 <b>L1 change &lt; ε</b> 做停止條件。Notebook 每格 code 都係 <code>...</code>（俾你填），所以考 fill-in 好可能就係呢 7 步。</p>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>Graph：1 → 2, 3；2 → 3；3 → 1（即 A → B, C；B → C；C → A），β = 0.85，N = 3。</li>
+<li>Step 1–3：<code>groupByKey().mapValues(list)</code> → <code>count()</code> → 每頁 1/N。</li>
+<li>Step 4–6：<code>join</code> → <code>flatMap</code> 分貢獻 → <code>reduceByKey(add)</code> → <code>mapValues(β·s + (1−β)/N)</code>。</li>
+<li>Step 7：L1 change = \(\sum_j |r_j^{new} - r_j^{old}|\)，&lt; ε = 10⁻⁴ 就停；呢個 graph <b>第 17 次</b>收斂。</li></ul></div>
+<div class="concept">
+<h3>每一步輸出（notebook 原本輸出）</h3>
+<figure class="fig"><svg viewBox="0 0 240 150" role="img" aria-label="T7 graph" style="max-width:240px">
+<defs><marker id="t7a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<circle class="bx" cx="120" cy="30" r="20"/><circle class="bx" cx="40" cy="120" r="20"/><circle class="bx" cx="200" cy="120" r="20"/>
+<g font-size="14" text-anchor="middle" font-weight="700"><text x="120" y="35">1</text><text x="40" y="125">2</text><text x="200" y="125">3</text></g>
+<line class="ln" x1="106" y1="45" x2="56" y2="103" marker-end="url(#t7a)"/>
+<line class="ln" x1="128" y1="48" x2="186" y2="102" marker-end="url(#t7a)"/>
+<line class="ln" x1="61" y1="120" x2="177" y2="120" marker-end="url(#t7a)"/>
+<path class="ln" d="M206 100 Q 215 45 140 28" marker-end="url(#t7a)"/></svg>
+<figcaption>links = (1,2), (1,3), (2,3), (3,1)</figcaption></figure>
+<div class="tw"><table class="stack"><tr><th>Step</th><th>Code</th><th>輸出</th></tr>
+<tr><td>0</td><td><code>links = spark.parallelize([(1, 2), (1, 3), (2, 3), (3, 1)])</code></td><td>edge list</td></tr>
+<tr><td>1 adjacency list</td><td><code>links.groupByKey().mapValues(list)</code></td><td>[(1, [2, 3]), (2, [3]), (3, [1])]</td></tr>
+<tr><td>2 N</td><td><code>adj_list.count()</code></td><td>3</td></tr>
+<tr><td>3 初始 rank</td><td><code>adj_list.map(lambda x: (x[0], 1.0 / number_vertices))</code></td><td>[(1, 0.3333), (2, 0.3333), (3, 0.3333)]</td></tr>
+<tr><td>4 join</td><td><code>adj_list.join(ranks)</code></td><td>[(1, ([2, 3], 0.3333)), (2, ([3], 0.3333)), (3, ([1], 0.3333))]</td></tr>
+<tr><td>5 M·r</td><td><code>flatMap(…).reduceByKey(add)</code></td><td>[(1, 0.3333), (2, 0.1667), (3, 0.5)]</td></tr>
+<tr><td>6 加 teleport</td><td><code>mapValues(lambda s: beta * s + (1 - beta) / number_vertices)</code></td><td><b>[(1, 0.3333), (2, 0.1917), (3, 0.475)]</b></td></tr></table></div>
+<span class="lab why">Step 5、6 點計</span>
+<p>頁 1 有 2 條 out-link，每條分 \(\tfrac13 \div 2 = \tfrac16\)；頁 2 分 \(\tfrac13\) 俾頁 3；頁 3 分 \(\tfrac13\) 俾頁 1。所以 \(M r = (\tfrac13,\; \tfrac16,\; \tfrac16 + \tfrac13) = (0.3333, 0.1667, 0.5)\)。</p>
+<div class="fx">$$r_2 = 0.85 \times \tfrac16 + \frac{1-0.85}{3} = 0.1417 + 0.05 = 0.1917$$</div>
+<span class="lab trap">易錯</span>
+<ul><li><b>T7 notebook 文字寫 \(r^{t+1} = \beta M r^t + \frac{\beta}{n}\) 係筆誤</b>，正確係 \(\frac{1-\beta}{n}\)。證據：notebook 自己嘅輸出 0.1917 = 0.85 × 1/6 + <b>0.05</b>，而 0.05 = (1 − 0.85)/3；如果真係用 β/n，三個分數加埋第一步已經 = 1.7，第三步 ≈ 2.80。</li>
+<li>Step 2 要數 <b>node</b> 唔係 edge：<code>links.count()</code> = 4 係錯。呢個 graph 每頁都有 out-link，所以 <code>adj_list.count()</code> 啱；如果有 node 冇 out-link，要用 <code>links.flatMap(lambda x: x).distinct().count()</code>。</li>
+<li>呢個 graph 每頁都有 in-link，所以唔使 2025s1 嗰個 <code>union(… 0.0)</code>；有頁冇 in-link 就要加。</li></ul>
+</div>
+
+<div class="practice fill"><span class="src">Drill · T7 Step 1–7 fill-in（撳「對答案」核對）</span>
+<pre><code>from operator import add
+links = spark.parallelize([(1, 2), (1, 3), (2, 3), (3, 1)])
+adj_list = links.<span class="bn">1</span><input class="blank" data-ans="groupByKey" aria-label="Blank 1" autocomplete="off" spellcheck="false">().mapValues(<span class="bn">2</span><input class="blank" data-ans="list" aria-label="Blank 2" autocomplete="off" spellcheck="false">)                    # Step 1
+number_vertices = adj_list.<span class="bn">3</span><input class="blank" data-ans="count" aria-label="Blank 3" autocomplete="off" spellcheck="false">()                                    # Step 2
+ranks = adj_list.map(lambda x: (x[0], 1.0 / number_vertices))      # Step 3
+beta = 0.85
+eps = 1e-4
+it = 0
+while True:                                                        # Step 7
+    it += 1
+    contribs = adj_list.<span class="bn">4</span><input class="blank" data-ans="join" aria-label="Blank 4" autocomplete="off" spellcheck="false">(ranks).<span class="bn">5</span><input class="blank" data-ans="flatMap" aria-label="Blank 5" autocomplete="off" spellcheck="false">(                       # Step 4–5
+        lambda x: [(dst, x[1][1] / len(x[1][0])) for dst in x[1][0]]
+    ).<span class="bn">6</span><input class="blank" data-ans="reduceByKey" aria-label="Blank 6" autocomplete="off" spellcheck="false">(add)
+    new_ranks = contribs.mapValues(
+        lambda s: beta * s + <span class="bn">7</span><input class="blank" data-ans="(1 - beta) / number_vertices§(1-beta)/number_vertices" aria-label="Blank 7" autocomplete="off" spellcheck="false">)   # Step 6
+    change = new_ranks.join(ranks).map(
+        lambda x: <span class="bn">8</span><input class="blank" data-ans="abs" aria-label="Blank 8" autocomplete="off" spellcheck="false">(x[1][0] - x[1][1])).<span class="bn">9</span><input class="blank" data-ans="sum" aria-label="Blank 9" autocomplete="off" spellcheck="false">()                    # L1 change
+    print(f"Iteration {it}, L1 change: {change:.10f}")
+    ranks = new_ranks
+    if change <span class="bn">10</span><input class="blank" data-ans="&lt;" aria-label="Blank 10" autocomplete="off" spellcheck="false"> eps:
+        break
+print(f"Converged after {it} iterations.")</code></pre>
+<div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+<div class="tip"><b>重建標記</b>T7 notebook 每格 code 都係 <code>...</code>，上面成段 code 係<b>重建</b>（按 notebook 每步嘅輸出同 Step 7 印出嚟嘅格式反推），唔係老師原文；輸出已用 Python 模擬 RDD 運算核對，同 notebook 一樣。</div>
+<details class="ans"><summary>睇收斂過程（notebook 輸出，Python 核對）</summary><div>
+<div class="tw"><table class="nostack"><tr><th class="c">Iteration</th><th class="c">L1 change</th><th class="c">r₁</th><th class="c">r₂</th><th class="c">r₃</th></tr>
+<tr><td class="c">1</td><td class="c">0.2833333</td><td class="c">0.3333</td><td class="c">0.1917</td><td class="c">0.4750</td></tr>
+<tr><td class="c">2</td><td class="c">0.2408333</td><td class="c">0.4537</td><td class="c">0.1917</td><td class="c">0.3546</td></tr>
+<tr><td class="c">3</td><td class="c">0.2047083</td><td class="c">0.3514</td><td class="c">0.2428</td><td class="c">0.4058</td></tr>
+<tr><td class="c">4</td><td class="c">0.0870010</td><td class="c">0.3949</td><td class="c">0.1993</td><td class="c">0.4058</td></tr>
+<tr><td class="c">…</td><td class="c">…</td><td class="c">…</td><td class="c">…</td><td class="c">…</td></tr>
+<tr><td class="c">15</td><td class="c">0.0004550</td><td class="c">0.3879</td><td class="c">0.2147</td><td class="c">0.3974</td></tr>
+<tr><td class="c">16</td><td class="c">0.0001934</td><td class="c">0.3878</td><td class="c">0.2148</td><td class="c">0.3974</td></tr>
+<tr><td class="c">17</td><td class="c">0.0000822</td><td class="c">0.3878</td><td class="c">0.2148</td><td class="c">0.3974</td></tr></table></div>
+<p>第 17 次 L1 change = 0.0000822 &lt; 0.0001 ⇒ 停，印 “Converged after 17 iterations.”。最終 r ≈ (0.3878, 0.2148, 0.3974)：頁 3 最高（頁 1、2 都 link 佢），頁 1 第二（頁 3 全部分數俾佢），頁 2 最低。</p>
+</div></details>
+</div>
+
+<h2 id="mcq">七、MCQ</h2>
 <div class="mcq" data-set="A"><script type="application/json">[
 {"t":"L7","s":"<p>In PageRank, a page is considered more important if it has:</p>","o":["Many out-links","Many in-links from important pages","Many words","A long URL"],"a":1,"e":"Links as votes：睇 <b>in-link</b>，而且 link 你嗰頁越重要，票越重。Out-link 自己控制得到，可以作弊。"},
 {"t":"L7","s":"<p>Page i has 4 out-links and rank r_i. How much rank does it pass to each linked page (no teleport)?</p>","o":["r_i","4 r_i","r_i / 4","r_i / N"],"a":2,"e":"Flow formulation：平均分俾 out-link，每條 <b>r_i / d_i</b>。"},
@@ -588,10 +734,16 @@ for page, r in sorted(ranks.collect()):
 {"t":"L7","s":"<p>The random walk interpretation says r_j is:</p>","o":["The number of links to j","The probability that the random surfer is at page j in the long run","The out-degree of j","The PageRank of the previous iteration"],"a":1,"e":"PageRank = random surfer 長遠停喺頁 j 嘅<b>機率</b>（stationary distribution），所以所有 r 加埋 = 1。"},
 {"t":"L7","s":"<p>After computing iteration 1, you get A = 0.35, B = 0.2167, C = 0.2167, D = 0.2. What should you suspect?</p>","o":["Nothing, it is fine","There is an arithmetic error, because the ranks must sum to 1","D is a dead end","β is too large"],"a":1,"e":"0.35 + 0.2167 × 2 + 0.2 = 0.983 ≠ 1。有 teleport 又冇 dead end 嘅話，<b>總和一定係 1</b>，係最好嘅自我檢查方法。"},
 {"t":"L7","s":"<p>Which statement about teleport and spider traps is correct?</p>","o":["Teleport makes spider traps impossible to enter","With teleport, the surfer escapes a spider trap within a finite number of steps","Teleport removes all links of the trap","Teleport only fixes dead ends"],"a":1,"e":"Teleport 唔係刪 link，而係令 surfer 每步都有 1 − β 機率跳走，所以幾步內就會離開 trap。"},
-{"t":"L7","s":"<p>In the sparse formulation, after computing r' = βMr, the ranks sum to S &lt; 1. What do we do?</p>","o":["Stop the iteration","Add (1 − S)/N to every page","Multiply by β again","Divide by S"],"a":1,"e":"將漏咗嘅 1 − S <b>平均補返</b>俾每頁：r_j = r'_j + (1 − S)/N。"}
+{"t":"L7","s":"<p>In the sparse formulation, after computing r' = βMr, the ranks sum to S &lt; 1. What do we do?</p>","o":["Stop the iteration","Add (1 − S)/N to every page","Multiply by β again","Divide by S"],"a":1,"e":"將漏咗嘅 1 − S <b>平均補返</b>俾每頁：r_j = r'_j + (1 − S)/N。"},
+{"t":"L7","s":"<p>Complete algorithm, β = 0.85: a → b and b has no out-links. Starting from r = (0.5, 0.5), what is r after one iteration?</p>","o":["(0.075, 0.925)","(0.2875, 0.7125)","(0.5, 0.5)","(0, 0.425)"],"a":1,"e":"r' = (0, 0.425)，S = 0.425，每頁補 (1 − 0.425)/2 = 0.2875 ⇒ <b>(0.2875, 0.7125)</b>。"},
+{"t":"L7","s":"<p>In the complete algorithm, if the graph has no dead ends, the leaked amount 1 − S equals:</p>","o":["0","β","1 − β","1/N"],"a":2,"e":"冇 dead end 時 βMr 加埋 = β，所以 1 − S = <b>1 − β</b>，同加 (1 − β)/N 一樣。"},
+{"t":"L7","s":"<p>T7: links (1,2), (1,3), (2,3), (3,1), β = 0.85, r = 1/3 each. What is r₂ after one iteration?</p>","o":["0.1667","0.1917","0.475","0.4250"],"a":1,"e":"M·r 俾頁 2 = (1/3)/2 = 1/6；0.85 × 1/6 + 0.15/3 = 0.1417 + 0.05 = <b>0.1917</b>。"},
+{"t":"L7","s":"<p>The T7 notebook writes r(t+1) = βMr(t) + β/n. What is wrong?</p>","o":["Nothing","It should be (1 − β)/n; with β/n the ranks no longer sum to 1","It should be β/n²","It should be 1 − β without /n"],"a":1,"e":"筆誤。正確係 (1 − β)/n：notebook 輸出 0.1917 = 0.85/6 + 0.05。用 β/n 第一步總和已經 = 1.7。"},
+{"t":"L7","s":"<p>In the MapReduce example, Links.txt has A → B, C, D and the initial PageRank of every page is 1. What does the mapper emit for page A?</p>","o":["(A, 1)","(B, 1/3), (C, 1/3), (D, 1/3)","(B, 1/12), (C, 1/12), (D, 1/12)","(B, 1), (C, 1), (D, 1)"],"a":1,"e":"PR(A) ÷ out-degree = 1/3，key 係目的地頁。題目起點用 1 就跟題目，唔係 1/4。"},
+{"t":"L7","s":"<p>In the T7 convergence loop, the L1 change is:</p>","o":["max |r_new − r_old|","Σ |r_new − r_old| over all pages","Σ r_new","|Σ r_new − 1|"],"a":1,"e":"L1 change = 每頁差嘅<b>絕對值加埋</b>；&lt; ε（10⁻⁴）就停。"}
 ]</script></div>
 
-<h2 id="short">七、短答題</h2>
+<h2 id="short">八、短答題</h2>
 <p class="q">S1. 用一句講 dead end 同 spider trap，各畀一個例子，再講解決方法。（2026s2 Q3a，8 分）</p>
 <details class="ans"><summary>參考答案</summary><div>
 <ul><li><b>Dead end</b>：頁冇 out-link，random surfer 去到冇路行，importance 漏走。例子：A → B，B 冇任何 link。</li>
@@ -603,7 +755,7 @@ for page, r in sorted(ranks.collect()):
 <p class="q">S3. 解釋點解 power iteration 適合大型 web graph。</p>
 <details class="ans"><summary>參考答案</summary><div><p>Gaussian elimination 要 O(N³)，N 係十億級做唔到。Power iteration 每步只係一次 sparse matrix 乘 vector（只同 link 數成正比），可以用 MapReduce／Spark 平行計，通常 50 次左右就收斂。</p></div></details>
 
-<h2 id="faq">八、常見疑問</h2>
+<h2 id="faq">九、常見疑問</h2>
 <dl class="faq">
 <dt>Q：考試要寫 matrix 定寫每頁 equation？</dt><dd>2025s1、2026s2 都要求先寫 stochastic matrix；舊 COMP4434 卷要求寫 equation。最穩陣兩樣都寫：matrix 一個表，然後由每個 row 寫 equation 再代數。</dd>
 <dt>Q：row 同 column 點分？</dt><dd>Column = from，row = to。睇 A 嗰個 column，就係 A 將分數分俾邊個。寫完檢查每個 column 加埋係咪 1。</dd>
@@ -612,6 +764,9 @@ for page, r in sorted(ranks.collect()):
 <dt>Q：有 dead end 嘅題目點做？</dt><dd>將 dead end 嗰個 column 改成全部 1/N（一定 teleport），然後照常計。寫明你做咗呢個處理先攞到分。</dd>
 <dt>Q：兩頁分數一樣，排序點寫？</dt><dd>寫等號，例如 A &gt; B = C = D，講明打和。</dd>
 <dt>Q：題目話「Stochastic Adjacent matrix」要唔要加 teleport？</dt><dd>唔使。佢就係 M（每格 \(1/d_i\)）。Teleport 喺計 iteration 先加。</dd>
+<dt>Q：β 用 0.8 定 0.85？</dt><dd>題目俾幾多用幾多。Slide 同 past paper 兩個都有：2025s1 卷 0.8、slide complete algorithm 例子同 T7 用 0.85。</dd>
+<dt>Q：Dead end 用「column 改 1/N」定「S 補返」？</dt><dd>兩個答案一樣。改 column 做法：dead end 嘅分數平均分俾所有頁；S 補返做法：dead end 漏走嘅分數算入 1 − S，再平均補返。題目冇指定就揀一個，寫清楚。</dd>
+<dt>Q：T7 notebook 條公式寫 β/n，係咪我記錯？</dt><dd>唔係你記錯，係 notebook 筆誤。正確係 \((1-\beta)/n\)，notebook 自己嘅輸出（0.1917）都係用 \((1-\beta)/n\) 計出嚟。</dd>
 <dt>Q：小數要留幾多位？</dt><dd>至少 4 位，或者用分數。過程唔好太早四捨五入，否則總和唔係 1。</dd>
 <dt>Q：Random surfer 同 PageRank 有咩關係？</dt><dd>PageRank 就係 random surfer 長遠停喺每頁嘅機率。所以全部頁加埋一定 = 1，可以用嚟檢查計數。</dd>
 </dl>
@@ -679,4 +834,4 @@ if(pp){var pages=JSON.parse(pp.dataset.pages);var html='';
     html+='<div class="row"><a href="'+p[0]+'">'+p[1]+'</a><span>'+(m||n?'溫完 '+n+' 部分 · MCQ '+a+'/'+m+'（啱 '+c+'）':'未開始')+'</span></div>'});
   pp.innerHTML=html}
 })();
-</script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\(',right:'\)',display:false}],ignoredClasses:['mcq'],throwOnError:false})"></script></body></html>
+</script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],ignoredClasses:['mcq'],throwOnError:false})"></script></body></html>

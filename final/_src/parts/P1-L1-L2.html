@@ -2,7 +2,7 @@
 <p class="sub">MapReduce 長題每次 16–20 分（必考）；6Vs、HDFS、Dask 多數出 MCQ · 對應 L1、L2、L3 Part 1–2、2025s1 Q1、2026s2 Q1–Q2、Revision Qs</p>
 <ul class="toc">
 <li><a href="#exam">一、點考</a></li><li><a href="#l1l2">二、L1 Big Data · L2 Parallelism、HDFS、Dask</a></li>
-<li><a href="#case">三、Big Data Vs case study</a></li><li><a href="#mr">四、MapReduce 概念同答題模板</a></li>
+<li><a href="#case">三、Big Data Vs case study（Palantir、Netflix）</a></li><li><a href="#mr">四、MapReduce 概念同答題模板</a></li>
 <li><a href="#past">五、Past paper 全答</a></li><li><a href="#drill">六、MapReduce 練習（14 題）</a></li>
 <li><a href="#mcq">七、MCQ</a></li><li><a href="#short">八、短答題</a></li><li><a href="#faq">九、常見疑問</a></li></ul>
 
@@ -11,6 +11,7 @@
 <tr><td>2025s1 Q1(a)</td><td>Inverted index：寫一個 MapReduce job 嘅 pseudocode</td><td>10</td></tr>
 <tr><td>2026s2 Q2(a) ／ Revision Qs</td><td>Mutual friends：畫 Map-Shuffle-Reduce 圖 + pseudocode</td><td>8</td></tr>
 <tr><td>2026s2 Q1</td><td>Palantir case study：4Vs 各搵證據 + 解決方法</td><td>8</td></tr>
+<tr><td>L1 p.19 practice</td><td>Netflix profile：4Vs 各搵證據 + 解決方法（答案喺 <a href="#netflix">三</a>）</td><td>—</td></tr>
 <tr><td>COMP4434 舊卷</td><td>Table 分散喺多個 file：每個城市／部門符合條件嘅人數（Map + Reduce pseudocode）</td><td>參考</td></tr>
 <tr><td>MCQ</td><td>6Vs、HDFS、scale up/out、sharding vs replication、Dask chunks、task graph</td><td>—</td></tr></table></div>
 <div class="memo"><b>MapReduce 答題模板</b>① 寫明 Map 嘅 input (key, value) 同 output (key, value) ② 寫明 Reduce 嘅 input (key, list of values) 同 output ③ 用題目例子 trace 一次：Map 出咩 → Shuffle 點 group → Reduce 出咩。圖題要分三欄畫：Map、Shuffle、Reduce。</div>
@@ -88,7 +89,7 @@
 <div class="warn"><b>易錯</b><code>chunks</code> 係<b>每塊嘅形狀</b>，唔係「分幾多塊」。<code>chunks=1</code> 即係每塊得 1 個元素，會慢到死。建議每塊 100 MB 至 1 GB；太細 overhead 大，太大放唔落 memory。<code>rechunk</code> 好貴。</div>
 <p><b>Block algorithm 例子</b>：4×4 array 用 <code>chunks=(2,2)</code> 分 4 塊，<code>sum()</code> 先計每塊（14、22、46、54），再加埋 = 136。<code>.visualize()</code> 畫出 task graph：node = task，線 = dependency。Dask 係 <b>lazy</b>，<code>.compute()</code> 先真正計。</p>
 
-<h2 id="case">三、Big Data Vs case study（2026s2 Q1，8 分）</h2>
+<h2 id="case">三、Big Data Vs case study（2026s2 Q1 + L1 Netflix practice）</h2>
 <p>Palantir Skywise：每次飛行 500 GB–1 TB sensor 數據、總共幾百 PB；即時處理 streaming telemetry 做 in-flight 診斷；要結合 structured（航班表、零件庫存）同 unstructured（手寫機師日誌、技術手冊、sensor time series）；有 data lineage 工具記錄每個改動，確保數據準確合規。</p>
 <details class="ans"><summary>參考答案（每個 V：證據 + 解決方法）</summary><div>
 <div class="tw"><table><tr><th>V</th><th>證據</th><th>解決方法</th></tr>
@@ -98,6 +99,27 @@
 <tr><td><b>Veracity</b></td><td>強調 data integrity、data lineage 記錄每個改動、要合規</td><td>Data validation 同 cleaning、lineage／audit trail、版本控制，確保安全決策用嘅數據可信</td></tr></table></div>
 <p>老師講長題唔考背書，所以就算出呢類題，都係要你<b>由情境搵證據</b>，唔係默定義。</p>
 </div></details>
+<div class="practice" id="netflix"><span class="src">L1 p.19 · 老師自己出嘅 practice question（同 2026s2 Q1 一個款）</span>
+<h4>Netflix：將 4V（Volume、Velocity、Variety、Veracity）對返個 profile，每個寫 1 個證據 + 解決方法</h4>
+<p>Profile 重點（意譯）：</p>
+<ul><li>每日超過 5 億小時觀看、190 多個國家，每個鐘產生幾 TB 用戶數據（觀看習慣、搜尋、評分、裝置互動）。</li>
+<li>數據即時湧入（用戶 binge-watch），晚上高峰期要處理大量即時更新，預測趨勢、減少用戶流失。</li>
+<li>格式多樣：structured log（timestamp、user ID）、semi-structured JSON metadata、unstructured 評論同字幕。</li>
+<li>要做個人化推介；挑戰包括私隱法規（GDPR）同埋用戶 feedback 可能好 noisy。</li>
+<li>每年因為優化內容採購慳到超過 10 億美元。</li></ul>
+<span class="lab eg">答題步驟</span>
+<ol class="steps"><li>逐句讀 profile，用「關鍵字」對 V：數量單位（TB、億小時）→ Volume；real-time、peak hours → Velocity；structured／JSON／text → Variety；noisy、accurate → Veracity。</li>
+<li>每個 V 抄<b>一個具體數字或字眼</b>做證據，唔好淨係講定義。</li>
+<li>每個 V 配一個<b>技術</b>解決方法（講得出工具名最好）。</li></ol>
+<details class="ans"><summary>參考答案</summary><div>
+<div class="tw"><table><tr><th>V</th><th>證據（由 profile 搵）</th><th>解決方法</th></tr>
+<tr><td><b>Volume</b></td><td>每日 5 億小時觀看、每個鐘幾 TB 用戶數據、190+ 國家</td><td>Scale out 分散式儲存（HDFS／cloud object storage，partition + replication）；用 Spark／MapReduce 平行處理</td></tr>
+<tr><td><b>Velocity</b></td><td>數據 real-time 湧入；晚上高峰期大量即時更新</td><td>Streaming 處理（例如 Kafka + Spark Streaming）、in-memory 計算；高峰期自動加 node（scale out）</td></tr>
+<tr><td><b>Variety</b></td><td>Structured log + semi-structured JSON + unstructured 評論／字幕</td><td>Data lake／NoSQL，schema-on-read；DataFrame 統一處理；文字用 NLP（tokenize、TF-IDF、embedding）</td></tr>
+<tr><td><b>Veracity</b></td><td>用戶 feedback 可能 noisy，要確保 insight 準確</td><td>Data cleaning + validation（去重、去 outlier、處理 missing value）、異常偵測、記錄 data lineage</td></tr></table></div>
+<div class="warn"><b>易錯</b>「每年慳 10 億美元」係 <b>Value</b>；「用戶口味會變」係 <b>Variability</b>：兩個都唔喺題目要嘅 4V 入面，唔好放錯格。GDPR 係私隱／合規挑戰，唔係一個 V；硬要放可以作為 Veracity 嘅補充（數據要可信、合規），但主證據要用 noisy feedback。</div>
+</div></details></div>
+
 
 <h2 id="mr">四、MapReduce 概念同答題模板</h2>
 <div class="key"><b>一分鐘重點</b><ul>

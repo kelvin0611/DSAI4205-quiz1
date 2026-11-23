@@ -2,24 +2,26 @@
 <p class="sub">長題常客：Levenshtein、BPE、TF-IDF、Skip-gram／CBOW · 對應 L5、L6、T05、T06、Practice Quiz 2、2025s1 Q2+Q4、2026s2 Q4</p>
 <ul class="toc">
 <li><a href="#exam">一、點考</a></li><li><a href="#nlp">二、L5 NLP 前處理同文字表示</a></li>
-<li><a href="#tfidf">三、TF-IDF + user profile + cosine（log₂ 版）</a></li><li><a href="#sim">四、L6 Text similarity</a></li>
-<li><a href="#emb">五、L6 Word embedding</a></li><li><a href="#past">六、Past paper 全答</a></li>
-<li><a href="#drill">七、計數 drill</a></li><li><a href="#mcq">八、MCQ</a></li>
-<li><a href="#short">九、短答題</a></li><li><a href="#faq">十、常見疑問</a></li></ul>
+<li><a href="#tfidf">三、TF-IDF + user profile + cosine（log₂ 版）</a></li><li><a href="#tfidfrdd">四、RDD 手計 TF-IDF（T5）</a></li>
+<li><a href="#sim">五、L6 Text similarity（Levenshtein 兩個擺法）</a></li>
+<li><a href="#emb">六、L6 Word embedding</a></li><li><a href="#past">七、Past paper 全答</a></li>
+<li><a href="#drill">八、計數 drill</a></li><li><a href="#mcq">九、MCQ</a></li>
+<li><a href="#short">十、短答題</a></li><li><a href="#faq">十一、常見疑問</a></li></ul>
 
 <h2 id="exam">一、點考</h2>
 <div class="tw"><table><tr><th>題型</th><th>出現過喺</th><th>分數</th></tr>
 <tr><td>Levenshtein：填 DP 表、traceback／subproblem、句子距離</td><td>2026s2 Q4e、Quiz 2 Q2、Revision Qs</td><td>8–10</td></tr>
-<tr><td>BPE：將字串減到指定 token 數</td><td>2026s2 Q4d、Practice Quiz 2</td><td>6</td></tr>
+<tr><td>BPE：將字串減到指定 token 數；用 merge rules 切新句子（segmenter）</td><td>2026s2 Q4d、Practice Quiz 2、L5 p.20</td><td>6</td></tr>
 <tr><td>Skip-gram windows + CBOW 架構圖</td><td>2025s1 Q2a,b、Practice Quiz 2</td><td>9</td></tr>
 <tr><td>TF-IDF + user profile + cosine（<b>log₂ + 1</b>）</td><td>2025s1 Q4</td><td>20</td></tr>
+<tr><td>RDD 手計 TF-IDF（TF／DF 模板 fill-in）</td><td>T5 TODO 0、1.1；T4 汽車例子</td><td>—</td></tr>
 <tr><td>Embedding 定義、NLL、SGNS、Word2Vec 問題</td><td>2026s2 Q4a–c、Revision Qs</td><td>4 每題</td></tr></table></div>
 <div class="warn"><b>兩個 TF-IDF 公式唔同</b>Practice Quiz 2 用 PySpark 版 <code>ln((N+1)/(df+1))</code>；2025s1 期考 formula sheet 用 <code>log₂((N+1)/(df+1)) + 1</code>。考試<b>一定跟當張卷嘅 formula sheet</b>。</div>
 
 <h2 id="nlp">二、L5 NLP 前處理同文字表示</h2>
 <div class="key"><b>一分鐘重點</b><ul>
 <li>NLP 前處理：cleaning → tokenization → stop words → stemming／lemmatization → POS／NER。</li>
-<li>BPE：由單字母開始，每輪合併<b>最常出現嘅相鄰 pair</b>，解決 OOV。</li>
+<li>BPE：由單字母開始，每輪合併<b>最常出現嘅相鄰 pair</b>，解決 OOV。切新句子（segmenter）就<b>按學到嘅次序</b>逐條 merge rule apply。</li>
 <li>文字變數字：one-hot → bag of words → n-gram → <b>TF-IDF</b>（常見字權重低、罕見字權重高）。</li></ul></div>
 <div class="concept">
 <h3>BPE：每輪合併最常見嘅相鄰 pair</h3>
@@ -40,6 +42,30 @@
 </svg><figcaption>每合併一次，token 總數就減「嗰個 pair 出現嘅次數」</figcaption></figure>
 <span class="lab trap">易錯</span>
 <p>數 pair 次數要計埋字嘅重複：“hug” 出現 3 次，“u g” 就有 3 次。打和揀邊個都得，但要寫明揀咗邊個。</p>
+</div>
+<div class="concept" id="bpe-seg">
+<h3>BPE segmenter：用學到嘅 merge rules 切新句子</h3>
+<span class="lab">一句講完</span>
+<p>BPE 有兩部分：<b>learner</b>（由 corpus 學 merge rules，上面嗰個流程）同 <b>segmenter／encoder</b>（將新句子切成 token）。Segmenter 嘅做法係：先拆做單字母，再<b>按學到嘅次序</b>逐條 merge rule 喺成句度 apply 一次。</p>
+<span class="lab why">點解要跟次序</span>
+<p>後面嘅 rule 係由前面嘅 rule 砌出嚟（例如 <code>fred_</code> = <code>fr</code> + <code>ed_</code>，而 <code>ed_</code> = <code>e</code> + <code>d_</code>）。唔跟次序，<code>ed_</code> 都未出現，<code>fred_</code> 就砌唔到。<b>唔係揀最長嗰個 token</b>。</p>
+<span class="lab eg">例子：L5 p.20</span>
+<p>Training corpus “fred fed ted bread, and ted fed fred bread”（空格寫做 _）。學到嘅 vocabulary（slide 編號 1–13）：</p>
+<div class="tw"><table class="nostack"><tr><th>id</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th></tr>
+<tr><td>token</td><td>a</td><td>b</td><td>d</td><td>e</td><td>f</td><td>n</td><td>r</td><td>t</td><td>_</td><td>d_</td><td>ed_</td><td>fr</td><td>fred_</td></tr></table></div>
+<p>Merge rules 次序：① d + _ → d_ ② e + d_ → ed_ ③ f + r → fr ④ fr + ed_ → fred_。新句子：“ted and fred are friends”。</p>
+<ol class="steps">
+<li>拆字母：<code>t e d _ a n d _ f r e d _ a r e _ f r i e n d s</code></li>
+<li>Rule ① d_：<code>t e <b>d_</b> a n <b>d_</b> f r e <b>d_</b> a r e _ f r i e n d s</code>（friends 尾嗰個 d 後面係 s，唔合併）</li>
+<li>Rule ② ed_：<code>t <b>ed_</b> a n d_ f r <b>ed_</b> a r e _ f r i e n d s</code>（and 嘅 d_ 前面係 n，唔係 e）</li>
+<li>Rule ③ fr：<code>t ed_ a n d_ <b>fr</b> ed_ a r e _ <b>fr</b> i e n d s</code></li>
+<li>Rule ④ fred_：<code>t ed_ a n d_ <b>fred_</b> a r e _ fr i e n d s</code></li>
+<li>轉 token id：<code>8 11 1 6 10 13 1 7 4 9 12 ? 4 6 3 ?</code>（i 同 s 唔喺 vocabulary，出 ?）</li></ol>
+<p>以上每一步已用 Python 照 rule 次序跑過，同 slide 一樣。</p>
+<span class="lab trap">易錯</span>
+<ul><li>“are_” 嘅 e _ 唔會合併：rule 係 d + _，唔係 e + _。</li>
+<li>句尾 “friends” 後面冇空格，所以冇 _。</li>
+<li>Slide 嘅 vocabulary 寫 ‘fred’，但由 fr + ed_ 合併出嚟，其實係 <code>fred_</code>（帶空格）。</li></ul>
 </div>
 {{Q2SEC:nlp}}
 
@@ -95,28 +121,234 @@ cos(profile, M2) = 0.968</code></pre>
 <p>Profile 最似 M2（user 最鍾意嗰套）；未睇嘅 M3 cosine = <b>0.631</b>（已用 numpy 核對）。如果要推介，就揀未睇過嘅戲入面 cosine 最高嗰套。</p>
 </div></details>
 
-<h2 id="sim">四、L6 Text similarity</h2>
-{{Q2SEC:similarity}}
+<h2 id="tfidfrdd">四、RDD 手計 TF-IDF（T5 TODO 0、1.1、1.2）</h2>
+<p>T5 老師揀咗呢題做 tutorial，同 TF-IDF 長題同類，而且 code 嘅 TF／DF 寫法同 T4 汽車例子逐行一樣，考 fill-in 好可能就係呢幾行。Operator 本身點用（mapValues、flatMapValues、countByKey、countByValue）喺 <a href="P2-L3-L4.html#ops2">P2 operator 表</a>。</p>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>公式：raw TF × \(\ln\frac{n+1}{df+1}\)（PySpark 版，自然 log）；n = 文件數（code 叫 <code>num_of_documents</code>）。</li>
+<li>TF 模板：<code>flatMapValues(lambda x: x).countByValue()</code> → key 係 <b>(doc, word)</b>。</li>
+<li>DF 模板：<code>flatMapValues(lambda x: x).distinct().map(lambda x: (x[1], x[0])).countByKey()</code>，<b>distinct 去走同一份文件嘅重複字</b>。</li>
+<li>countByValue／countByKey 係 <b>action</b>，返回 Python dict，唔係 RDD；所以 TF-IDF 要 join 嗰陣，老師改用 <code>reduceByKey</code> 同 <code>mapValues</code> 整 RDD。</li></ul></div>
+
 <div class="concept">
-<h3>Levenshtein DP：每格睇三個鄰居</h3>
+<h3>汽車例子 = TF／DF 模板</h3>
 <span class="lab">一句講完</span>
-<p>\(D[i][j]\) = 將 source 頭 i 個字母變成 target 頭 j 個字母最少要幾多步。</p>
-$$D[i][j] = \min\begin{cases} D[i-1][j-1] + \begin{cases}0 & x_i = y_j\\ 1 & x_i \ne y_j\end{cases} & \text{match／substitute} \\ D[i-1][j] + 1 & \text{delete } x_i \\ D[i][j-1] + 1 & \text{insert } y_j \end{cases}$$
-<span class="lab pic">圖解（source 放 row、target 放 column）</span>
-<figure class="fig"><svg viewBox="0 0 260 200" role="img" aria-label="levenshtein neighbours" style="max-width:260px">
-<defs><marker id="l1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
-<rect class="bx" x="40" y="30" width="80" height="60"/><rect class="bx" x="120" y="30" width="80" height="60"/><rect class="bx" x="40" y="90" width="80" height="60"/><rect class="ac" x="120" y="90" width="80" height="60"/>
-<g font-size="12" text-anchor="middle"><text x="80" y="58">D[i−1][j−1]</text><text x="80" y="75">↖ 對角</text><text x="160" y="58">D[i−1][j]</text><text x="160" y="75">↑ 上面</text><text x="80" y="118">D[i][j−1]</text><text x="80" y="135">← 左邊</text><text x="160" y="125" font-weight="700">D[i][j]</text></g>
-<g class="ln"><line x1="105" y1="80" x2="135" y2="105" marker-end="url(#l1)"/><line x1="160" y1="80" x2="160" y2="100" marker-end="url(#l1)"/><line x1="110" y1="125" x2="128" y2="125" marker-end="url(#l1)"/></g>
-<g font-size="12"><text x="210" y="62">+1 delete</text><text x="8" y="170">+1 insert</text><text x="20" y="22">+0／+1 match／substitute</text></g>
-</svg><figcaption>呢個擺法：↑ = delete source 字母，← = insert target 字母；擺法調轉就調轉</figcaption></figure>
+<p>T4 嘅「每年出咗咩牌子」同 T5 嘅「每份文件有咩字」係同一條問題：<b>年份 = 文件、牌子 = 字</b>。</p>
+<div class="tw"><table class="stack"><tr><th>T4 汽車（4.4）</th><th>T5 TF-IDF</th><th>Code</th></tr>
+<tr><td>(2018, [Mazda, Ferrari])</td><td>(0, [i, am, billy, …])</td><td><code>rdd.map(lambda x: (key, text_processing(text)))</code></td></tr>
+<tr><td>每個 (year, brand) 出現幾次</td><td><b>TF</b>：每個 (doc, word) 出現幾次</td><td><code>flatMapValues(lambda x: x).countByValue()</code></td></tr>
+<tr><td>幾多年有呢個 brand（Mazda 3）</td><td><b>DF</b>：幾多份文件有呢個字</td><td><code>flatMapValues(lambda x: x).distinct().map(lambda x: (x[1], x[0])).countByKey()</code></td></tr>
+<tr><td>幾多年（3）</td><td><b>n</b>：文件數</td><td><code>count()</code>（T5 寫 <code>len(rdd.collect())</code>）</td></tr></table></div>
+<span class="lab pic">圖解：flatMapValues 之後點分 TF 同 DF</span>
+<figure class="fig"><div class="mflow">
+<div class="mfcol"><div class="mfh">tokenized</div><div class="fb">(0, [i, am, …, i, am, …])</div><div class="fb">(1, [ada, is, …])</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">flatMapValues</div><div class="fb">(0, i)<br>(0, am)<br>…<br>(0, i)<br>(0, am)</div><div class="fb">(1, ada) …</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">TF：countByValue</div><div class="fb hl2">{(0,i): 2, (0,am): 2, (1,ada): 1, …}</div><div class="mfh">DF：distinct → (word, doc) → countByKey</div><div class="fb ac2">{in: 3, computer: 3, billy: 2, …}</div></div></div>
+<figcaption>TF 數成個 (doc, word)；DF 要先 distinct，再將 word 搬去 key 位</figcaption></figure>
+<span class="lab trap">易錯</span>
+<ul><li>唔 distinct 就直接 countByKey，數到嘅係「總出現次數」而唔係 DF：D0 有兩個 in，就會數多咗。</li>
+<li>countByKey 數 <b>key</b>，所以要先 <code>map(lambda x: (x[1], x[0]))</code> 將 word 放去 key 位；唔調轉就變咗數每份文件有幾多個字。</li>
+<li>countByValue 數嘅係<b>成個 element</b>（成個 tuple），唔係 value。</li></ul>
+</div>
+
+<div class="concept">
+<h3>TF-IDF 全 RDD 版（TODO 1.1）</h3>
+<span class="lab">資料</span>
+<p>D0：“I am Billy studying in Computer and I am also studying in Business Course”；D1：“Ada is studying in Computer”；D2：“Billy and Ada know each other in a computer course course”。<code>text_processing</code> = split by space + lowercase。n = 3。</p>
+$$\text{tfidf} = tf \times \ln\frac{n+1}{df+1} = tf \times \ln\frac{4}{df+1}$$
+<span class="lab pic">資料流</span>
+<div class="mflow">
+<div class="mfcol"><div class="fb">① DF：flatMapValues → distinct → (word, 1) → reduceByKey(add)</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">② IDF：map (word, ln((n+1)/(df+1)))</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">③ TF：mapValues 數每份文件每個字 → flatMapValues → (word, (tf, doc))</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb hl2">④ tf.join(idf) → (word, ((tf, doc), idf))</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb ac2">⑤ map (word, tf × idf, doc) → sortBy</div></div></div>
+<span class="lab why">點解要 join by word</span>
+<p>TF 係每份文件一個數，IDF 係每個字一個數。要相乘，就要將兩邊都變成 key = word 嘅 pair RDD，join 之後同一個字嘅 TF 同 IDF 就會喺同一個 element 入面。</p>
+</div>
+
+<div class="practice fill"><span class="src">Drill · T5 TODO 1.1（只准用 mapValues、map、flatMapValues、join、sortBy；撳「對答案」核對）</span>
+<pre><code>from operator import add
+import math
+num_of_documents = len(tokenized_text.collect())   # 3
+df = tokenized_text.<span class="bn">1</span><input class="blank" data-ans="flatMapValues" aria-label="Blank 1" autocomplete="off" spellcheck="false">(lambda x: x).<span class="bn">2</span><input class="blank" data-ans="distinct" aria-label="Blank 2" autocomplete="off" spellcheck="false">()
+df = df.map(lambda x: (x[1], 1)).<span class="bn">3</span><input class="blank" data-ans="reduceByKey" aria-label="Blank 3" autocomplete="off" spellcheck="false">(add)                # (word, df)
+idf = df.map(lambda x: (x[0], math.log((num_of_documents + 1) / (<span class="bn">4</span><input class="blank" data-ans="x[1] + 1§x[1]+1" aria-label="Blank 4" autocomplete="off" spellcheck="false">))))
+tf = tokenized_text.<span class="bn">5</span><input class="blank" data-ans="mapValues" aria-label="Blank 5" autocomplete="off" spellcheck="false">(lambda words: {word: words.count(word) for word in set(words)})
+tf = tf.mapValues(lambda words: {(word, cnt) for word, cnt in words.items()})
+tf = tf.flatMapValues(lambda x: x).map(lambda x: (x[1][0], (x[1][1], x[0])))   # (word, (tf, doc))
+tfidf = tf.<span class="bn">6</span><input class="blank" data-ans="join" aria-label="Blank 6" autocomplete="off" spellcheck="false">(idf).map(lambda x: (x[0], x[1][0][0] * x[1][1], x[1][0][1]))
+tfidf.sortBy(lambda x: (x[2], x[0])).collect()   # 重建</code></pre>
+<div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+<div class="tip"><b>重建標記</b>T5 solution PDF 截斷咗幾行：<code>set(words)})</code>、<code>sortBy(lambda x: …)</code> 嘅 key 同 <code>.collect()</code> 係按 notebook 輸出次序（先 doc 再 word）<b>重建</b>，唔係原文。其餘行同 PDF 一樣。</div>
+<details class="ans"><summary>睇 25 個輸出（已用 Python 核對）</summary><div>
+<div class="tw"><table class="nostack" style="font-size:13px"><tr><th>doc</th><th>word</th><th class="c">tf</th><th class="c">df</th><th class="c">idf</th><th class="c">tf-idf</th></tr>
+<tr><td>D0</td><td>also</td><td class="c">1</td><td class="c">1</td><td class="c">0.693</td><td class="c">0.693</td></tr>
+<tr><td>D0</td><td>am</td><td class="c">2</td><td class="c">1</td><td class="c">0.693</td><td class="c"><b>1.386</b></td></tr>
+<tr><td>D0</td><td>and</td><td class="c">1</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.288</td></tr>
+<tr><td>D0</td><td>billy</td><td class="c">1</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.288</td></tr>
+<tr><td>D0</td><td>business</td><td class="c">1</td><td class="c">1</td><td class="c">0.693</td><td class="c">0.693</td></tr>
+<tr><td>D0</td><td>computer</td><td class="c">1</td><td class="c">3</td><td class="c">0.000</td><td class="c">0.000</td></tr>
+<tr><td>D0</td><td>course</td><td class="c">1</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.288</td></tr>
+<tr><td>D0</td><td>i</td><td class="c">2</td><td class="c">1</td><td class="c">0.693</td><td class="c"><b>1.386</b></td></tr>
+<tr><td>D0</td><td>in</td><td class="c">2</td><td class="c">3</td><td class="c">0.000</td><td class="c">0.000</td></tr>
+<tr><td>D0</td><td>studying</td><td class="c">2</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.575</td></tr>
+<tr><td>D1</td><td>ada</td><td class="c">1</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.288</td></tr>
+<tr><td>D1</td><td>computer</td><td class="c">1</td><td class="c">3</td><td class="c">0.000</td><td class="c">0.000</td></tr>
+<tr><td>D1</td><td>in</td><td class="c">1</td><td class="c">3</td><td class="c">0.000</td><td class="c">0.000</td></tr>
+<tr><td>D1</td><td>is</td><td class="c">1</td><td class="c">1</td><td class="c">0.693</td><td class="c">0.693</td></tr>
+<tr><td>D1</td><td>studying</td><td class="c">1</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.288</td></tr>
+<tr><td>D2</td><td>a</td><td class="c">1</td><td class="c">1</td><td class="c">0.693</td><td class="c">0.693</td></tr>
+<tr><td>D2</td><td>ada</td><td class="c">1</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.288</td></tr>
+<tr><td>D2</td><td>and</td><td class="c">1</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.288</td></tr>
+<tr><td>D2</td><td>billy</td><td class="c">1</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.288</td></tr>
+<tr><td>D2</td><td>computer</td><td class="c">1</td><td class="c">3</td><td class="c">0.000</td><td class="c">0.000</td></tr>
+<tr><td>D2</td><td>course</td><td class="c">2</td><td class="c">2</td><td class="c">0.288</td><td class="c">0.575</td></tr>
+<tr><td>D2</td><td>each</td><td class="c">1</td><td class="c">1</td><td class="c">0.693</td><td class="c">0.693</td></tr>
+<tr><td>D2</td><td>in</td><td class="c">1</td><td class="c">3</td><td class="c">0.000</td><td class="c">0.000</td></tr>
+<tr><td>D2</td><td>know</td><td class="c">1</td><td class="c">1</td><td class="c">0.693</td><td class="c">0.693</td></tr>
+<tr><td>D2</td><td>other</td><td class="c">1</td><td class="c">1</td><td class="c">0.693</td><td class="c">0.693</td></tr></table></div>
+<ul><li><b>“Computer” 同 “computer”</b> lowercase 之後先係同一個字 ⇒ df = 3 ⇒ IDF = ln(4/4) = <b>0</b>。in 都係 3 份都有 ⇒ 0。</li>
+<li>只喺一份文件出現嘅字：IDF = ln(4/2) = <b>0.693</b>（唔係 ln 3）。D0 嘅 i、am 出現兩次 ⇒ 2 × 0.693 = <b>1.386</b>，係全表最高。</li>
+<li>df = 2：IDF = ln(4/3) = 0.288；D0 studying、D2 course 各出現兩次 ⇒ 0.575。</li></ul>
+</div></details>
+</div>
+
+<div class="concept">
+<h3>DataFrame 版（TODO 1.2）對照</h3>
+<p>DF、IDF、TF 嘅 RDD 部分一樣，最後兩步改用 DataFrame：</p>
+<pre><code>idf_df = ss.createDataFrame(idf_rdd, ["word", "idf"])
+tf_rdd = tf.flatMapValues(lambda x: x).map(lambda x: (x[0], x[1][0], x[1][1])).collect()  # .collect() 重建
+tf_df  = ss.createDataFrame(tf_rdd, ["doc_id", "word", "tf"])
+tfidf_df = tf_df.join(idf_df, "word", "inner") \
+    .withColumn("tfidf", col("tf") * col("idf")) \
+    .select("word", "tfidf", "doc_id") \
+    .sort("doc_id", "word")
+tfidf_df.show(100, truncate=False)</code></pre>
+<div class="tw"><table class="stack"><tr><th>步驟</th><th>RDD 版</th><th>DataFrame 版</th></tr>
+<tr><td>相乘前對齊</td><td>兩邊都整成 (word, …) 再 <code>join</code></td><td><code>join(idf_df, "word", "inner")</code></td></tr>
+<tr><td>相乘</td><td><code>map(lambda x: x[1][0][0] * x[1][1])</code>，要數 index</td><td><code>withColumn("tfidf", col("tf") * col("idf"))</code>，用欄名</td></tr>
+<tr><td>排序</td><td><code>sortBy(lambda x: …)</code></td><td><code>sort("doc_id", "word")</code></td></tr></table></div>
+<p>輸出 25 行同 RDD 版一樣。DataFrame 版易讀好多，因為唔使記 <code>x[1][0][0]</code> 係乜。</p>
+</div>
+
+<h2 id="sim">五、L6 Text similarity</h2>
+
+  
+  <div class="tw"><table>
+    <thead><tr><th>類別</th><th>方法</th><th>公式</th><th>例子 “The quick brown fox” vs “The quick brown dog”</th><th>優點／缺點</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2"><b>Edit-based</b></td><td>Hamming</td><td>相同長度，數位置唔同嘅字母（只計 substitution）</td><td>taking vs making = 1；dump vs puma = 2</td><td>快；<b>只可以用喺等長字串</b>，唔計 insert／delete</td></tr>
+      <tr><td>Levenshtein</td><td>最少 insert / delete / substitute 次數</td><td>kitten → sitting = 3</td><td>彈性；計算較貴（DP）</td></tr>
+      <tr><td rowspan="5"><b>Token-based</b></td><td>Jaccard</td><td>|A∩B| / |A∪B|</td><td>3 / 5 = 0.6</td><td>易明；受 set 大細影響</td></tr>
+      <tr><td>Sørensen-Dice</td><td>2|A∩B| / (|A| + |B|)</td><td>6 / 8 = 0.75</td><td>重視 overlap；仍受大細影響</td></tr>
+      <tr><td>Tversky</td><td>|A∩B| / (|A∩B| + α|A−B| + β|B−A|)</td><td>α = β = 0.5：3 / (3 + 0.5 + 0.5) = 0.75</td><td>Jaccard（α=β=1）同 Dice（α=β=0.5）嘅推廣；複雜</td></tr>
+      <tr><td>Overlap</td><td>|A∩B| / min(|A|, |B|)</td><td>3 / 4 = 0.75</td><td>較唔受大細影響；大細差好遠時唔好</td></tr>
+      <tr><td>Cosine</td><td>A·B / (‖A‖‖B‖)</td><td>3 / (2 × 2) = 0.75</td><td>高維都好用；<b>唔理向量長度</b></td></tr>
+      <tr><td><b>Hybrid</b></td><td>Monge-Elkan</td><td>對第一個 set 每個元素，用 secondary similarity 搵另一個 set 最高分，再取平均</td><td>—</td><td>處理到不同大小；計算量大，靠揀 secondary function</td></tr>
+    </tbody>
+  </table></div>
+  <p>其他：Tanimoto distance 都係 token-based。Lecture 嘅 embedding 例子：cosine(Jay, Steven) = 0.1897，cosine(Jay, Allie) = 0.3458 → Jay 同 Allie 較似。</p>
+
+  <h4>Levenshtein DP table 點填</h4>
+  <p><code>DP[i][j] = min( DP[i−1][j−1] + (相同 ? 0 : 1),  DP[i−1][j] + 1,  DP[i][j−1] + 1 )</code>：對角 = substitute（或 match 唔使錢）；上面同左邊 = insert 或 delete。第一行、第一列邊個叫 insertion、邊個叫 deletion，<b>視乎擺法</b>（見下面兩個擺法並排）。下面 BUT／ANT 表係老師擺法：ANT（source）喺頂，BUT（target）喺左。</p>
+  <div class="grid2">
+    <div class="card"><h4>Lecture：ANT → BUT（擺法 A，距離 2）</h4>
+      <div class="tw dp"><table>
+        <thead><tr><th></th><th>“”</th><th>A</th><th>N</th><th>T</th></tr></thead>
+        <tbody><tr><th>“”</th><td>0</td><td>1</td><td>2</td><td>3</td></tr><tr><th>B</th><td>1</td><td>1</td><td>2</td><td>3</td></tr><tr><th>U</th><td>2</td><td>2</td><td>2</td><td>3</td></tr><tr><th>T</th><td>3</td><td>3</td><td>3</td><td class="hl">2</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="card"><h4>練習卷：Teh vs The（距離 2）</h4><p class="sub" style="margin:0">Teh 喺左（row）、The 喺頂（column）</p>
+      <div class="tw dp"><table>
+        <thead><tr><th></th><th>“”</th><th>T</th><th>e</th><th>h</th></tr></thead>
+        <tbody><tr><th>“”</th><td>0</td><td>1</td><td>2</td><td>3</td></tr><tr><th>T</th><td>1</td><td>0</td><td>1</td><td>2</td></tr><tr><th>h</th><td>2</td><td>1</td><td>1</td><td>1</td></tr><tr><th>e</th><td>3</td><td>2</td><td>1</td><td class="hl">2</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+
+<div class="concept" id="lev">
+<h3>Levenshtein DP：每格睇三個鄰居（兩個擺法並排）</h3>
+<span class="lab">一句講完</span>
+<p>每格 = 「將 source 嘅某個前綴變成 target 嘅某個前綴，最少要幾多步」。每格都係由三個鄰居揀最細，再加今次嗰步：</p>
+$$D[\text{格}] = \min\begin{cases} D[\nwarrow] + c & \text{對角}\\ D[\uparrow] + 1 & \text{上面}\\ D[\leftarrow] + 1 & \text{左邊}\end{cases}$$
+$$c = \begin{cases}0 & \text{match}\\ 1 & \text{substitute}\end{cases}$$
+<p>數字點計<b>兩個擺法都一樣</b>，連最後個距離都一樣。唯一唔同嘅係：<b>↑ 同 ← 邊個叫 insert、邊個叫 delete</b>。題目要你寫 traceback 操作名嘅時候先會影響分數。</p>
+
+<span class="lab pic">圖解：兩個擺法並排</span>
+<div class="grid2">
+<figure class="fig"><svg viewBox="0 0 300 250" role="img" aria-label="擺法 A：target 放 row，上面等於 insert" style="max-width:300px">
+<defs><marker id="la" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g font-size="12" text-anchor="middle">
+<text x="190" y="16" font-weight="700" fill="#0B7472">source（ANT）放 column →</text>
+<text x="22" y="140" font-weight="700" fill="#BF4A14" transform="rotate(-90 22 140)">target（BUT）放 row ↓</text>
+<rect class="bx" x="90" y="40" width="90" height="70"/><rect class="bx" x="180" y="40" width="90" height="70"/>
+<rect class="bx" x="90" y="110" width="90" height="70"/><rect class="ac" x="180" y="110" width="90" height="70"/>
+<text x="135" y="72">↖ 對角</text><text x="135" y="90">match／sub</text>
+<text x="225" y="72">↑ 上面</text><text x="225" y="90" font-weight="700" fill="#BF4A14">+1 insert</text>
+<text x="135" y="142">← 左邊</text><text x="135" y="160" font-weight="700" fill="#0B7472">+1 delete</text>
+<text x="225" y="150" font-weight="700">D[i][j]</text></g>
+<g class="ln"><line x1="160" y1="100" x2="195" y2="125" marker-end="url(#la)"/><line x1="225" y1="96" x2="225" y2="128" marker-end="url(#la)"/><line x1="166" y1="146" x2="196" y2="146" marker-end="url(#la)"/></g>
+<g font-size="11.5" text-anchor="middle"><text x="180" y="205">第一行（頂）= 刪 source 到空 = deletions</text><text x="180" y="222">第一列（左）= 由空砌 target = insertions</text><text x="180" y="242" fill="#566273">rows = len(target)+1，cols = len(source)+1</text></g>
+</svg><figcaption><b>擺法 A：老師 slides（Exam Review p.87–91）＋ L6 code</b><br>↑ = insert、← = delete</figcaption></figure>
+<figure class="fig"><svg viewBox="0 0 300 250" role="img" aria-label="擺法 B：source 放 row，上面等於 delete" style="max-width:300px">
+<defs><marker id="lb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g font-size="12" text-anchor="middle">
+<text x="190" y="16" font-weight="700" fill="#BF4A14">target（ARCS）放 column →</text>
+<text x="22" y="140" font-weight="700" fill="#0B7472" transform="rotate(-90 22 140)">source（CART）放 row ↓</text>
+<rect class="bx" x="90" y="40" width="90" height="70"/><rect class="bx" x="180" y="40" width="90" height="70"/>
+<rect class="bx" x="90" y="110" width="90" height="70"/><rect class="ac" x="180" y="110" width="90" height="70"/>
+<text x="135" y="72">↖ 對角</text><text x="135" y="90">match／sub</text>
+<text x="225" y="72">↑ 上面</text><text x="225" y="90" font-weight="700" fill="#0B7472">+1 delete</text>
+<text x="135" y="142">← 左邊</text><text x="135" y="160" font-weight="700" fill="#BF4A14">+1 insert</text>
+<text x="225" y="150" font-weight="700">D[i][j]</text></g>
+<g class="ln"><line x1="160" y1="100" x2="195" y2="125" marker-end="url(#lb)"/><line x1="225" y1="96" x2="225" y2="128" marker-end="url(#lb)"/><line x1="166" y1="146" x2="196" y2="146" marker-end="url(#lb)"/></g>
+<g font-size="11.5" text-anchor="middle"><text x="180" y="205">第一行（頂）= 由空砌 target = insertions</text><text x="180" y="222">第一列（左）= 刪 source 到空 = deletions</text><text x="180" y="242" fill="#566273">rows = len(source)+1，cols = len(target)+1</text></g>
+</svg><figcaption><b>擺法 B：Quiz 2 真卷（CART → ARCS）</b><br>↑ = delete、← = insert</figcaption></figure>
+</div>
+<div class="tw"><table class="nostack"><tr><th></th><th>擺法 A（老師 slides、L6 code）</th><th>擺法 B（Quiz 2 真卷）</th></tr>
+<tr><td>寫喺左邊（rows）</td><td><b>target</b></td><td><b>source</b></td></tr>
+<tr><td>寫喺頂（columns）</td><td><b>source</b></td><td><b>target</b></td></tr>
+<tr><td>↑ 由上面嚟 +1</td><td><b>insert</b>（加一個 target 字母）</td><td><b>delete</b>（刪一個 source 字母）</td></tr>
+<tr><td>← 由左邊嚟 +1</td><td><b>delete</b>（刪一個 source 字母）</td><td><b>insert</b>（加一個 target 字母）</td></tr>
+<tr><td>↖ 對角</td><td colspan="2" class="c">match（+0）／substitute（+1）：兩個擺法一樣</td></tr></table></div>
+
+<span class="lab why">點解會調轉？一條通用規則</span>
+<p>唔使死記兩套。記一句：<b>沿住 source 條軸行一格 = 用走一個 source 字母、冇砌到 target = delete；沿住 target 條軸行一格 = 砌多一個 target 字母 = insert</b>。</p>
+<ul><li>擺法 A：source 寫喺<b>頂</b>（橫排），由左邊格向右行一格（←）= 用走一個 source 字母 = delete；target 寫喺<b>左</b>（直排），由上面格向下行一格（↑）= insert。</li>
+<li>擺法 B：source 寫喺<b>左</b>，所以 ↑ = delete；target 寫喺<b>頂</b>，所以 ← = insert。</li></ul>
+
+<span class="lab eg">考試時點樣由題目字眼判斷（4 步）</span>
+<ol class="steps">
+<li><b>搵 source 同 target</b>：“transform X into Y”、“from X to Y”、“convert X to Y” ⇒ X = source，Y = target。題目直接寫 Source Word／Target Word 就跟佢。</li>
+<li><b>睇表頭</b>：題目俾咗空表就睇 X 寫喺頂（column）定左邊（row）。冇俾表、叫你自己畫，就揀擺法 A（老師擺法），並喺表旁邊寫明「rows = target, cols = source」。</li>
+<li><b>喺表旁邊寫三行</b>：例如擺法 A 寫「↑ = insert，← = delete，↖ = match／sub」。寫完先開始填。</li>
+<li><b>Traceback 由右下角行返去 [0][0]</b>：每步寫坐標 + 操作名 + 邊個字母（例如「D[3][3] → D[2][2]：substitute A→B」），用第 3 步嗰三行對號入座。</li></ol>
+
+<span class="lab eg">例子：Exam Review 嘅 BUT／ANT（擺法 A）</span>
+<p>Slide 寫明 <b>Source Word = ANT（放頂）</b>、<b>Target Word = BUT（放左）</b>，即係將 ANT 變成 BUT。</p>
+<div class="tw dp"><table class="nostack"><tr><th class="c"></th><th class="c">“”</th><th class="c">A</th><th class="c">N</th><th class="c">T</th></tr>
+<tr><th class="c">“”</th><td class="c"><b>0</b></td><td class="c">1</td><td class="c">2</td><td class="c">3</td></tr>
+<tr><th class="c">B</th><td class="c">1</td><td class="c"><b>1</b></td><td class="c">2</td><td class="c">3</td></tr>
+<tr><th class="c">U</th><td class="c">2</td><td class="c">2</td><td class="c"><b>2</b></td><td class="c">3</td></tr>
+<tr><th class="c">T</th><td class="c">3</td><td class="c">3</td><td class="c">3</td><td class="c"><b>2</b></td></tr></table></div>
+<ol class="steps">
+<li>頂行 0,1,2,3 = 將 “”、A、AN、ANT 刪到空要幾多步（slide 標 <b>Deletions</b>）；左列 0,1,2,3 = 由空砌 “”、B、BU、BUT（slide 標 <b>Insertions</b>）。</li>
+<li>計 (U, N) 格：↑ D[1][2] + 1 = 3（AN→B 要 2 步，再 <b>insert</b> U）；← D[2][1] + 1 = 3（A→BU 要 2 步，再 <b>delete</b> N）；↖ D[1][1] + 1 = 2（A→B 1 步，再 substitute N→U）。取最細 = <b>2</b>。</li>
+<li>Traceback：D[3][3] → D[2][2]：match T（+0）；D[2][2] → D[1][1]：substitute N→U；D[1][1] → D[0][0]：substitute A→B。距離 = <b>2</b>。</li></ol>
+
+<span class="lab trap">易錯</span>
+<ul><li>Slide p.90「By deletion」個框嘅說明文字係由「By insertion」框抄過嚟（寫咗 remove N from AN…），<b>唔好跟字，跟 DP index</b>：deletion 嗰條係 ← D[2][1] + 1。</li>
+<li>Slide 標題寫 “BUT to ANT”，但表頭標 Source = ANT。距離數字一樣（Levenshtein 對稱），但操作名會調轉，所以答題時要寫清楚你當邊個係 source。</li>
+<li>Quiz 2 真卷（擺法 B）同 slides（擺法 A）相反。期考如果俾空表，<b>一定先睇表頭</b>。</li></ul>
+
 <span class="lab eg">諗 subproblem 嘅方法</span>
 <p>淨係諗<b>最後一個字母</b>點處理：substitute／match 就兩邊都剪走最尾（對角格）；delete 就只剪 source；insert 就只剪 target。剩低嗰部分就係 table 已經計好嘅細題目，再加今次嗰步嘅 0 或 1。</p>
 </div>
 
-<div class="warn"><b>Levenshtein 擺法提醒</b>考試題目會講明邊個字串放 row、邊個放 column。Rows 係 source（X）嘅話：↑ 上面 = <b>delete</b> X 嘅字母，← 左邊 = <b>insert</b> Y 嘅字母，↖ 對角 = match／substitute。擺法調轉，insert 同 delete 就調轉。開始之前喺表旁邊寫低呢三行。</div>
+<div class="warn"><b>Levenshtein 擺法提醒</b>老師 slides 同 L6 code：<b>target 放 row、source 放 column，↑ = insert、← = delete</b>。Quiz 2 真卷：<b>source 放 row，↑ = delete、← = insert</b>。通用規則：沿 source 軸行 = delete，沿 target 軸行 = insert。開始之前喺表旁邊寫低三行。</div>
 
-<h2 id="emb">五、L6 Word embedding</h2>
+<h2 id="emb">六、L6 Word embedding</h2>
 <div class="key"><b>一分鐘重點</b><ul>
 <li>Word embedding = 每個字一個 dense 低維向量，意思近嘅字向量近。</li>
 <li>Skip-gram：center 估 context；CBOW：context 估 center。Hidden layer node 數 = d，output = V。</li>
@@ -128,22 +360,22 @@ $$D[i][j] = \min\begin{cases} D[i-1][j-1] + \begin{cases}0 & x_i = y_j\\ 1 & x_i
 <tr><td><b>SGNS 目的</b></td><td>完整 softmax 每步要計成個 vocabulary（幾十萬字），好慢。SGNS 將問題變成<b>二元分類</b>：真 context 字（正例）vs k 個隨機抽嘅字（負例），每步只更新 k+1 個字嘅 vector，快好多，效果仍然好。</td></tr>
 <tr><td>Word2Vec 嘅限制</td><td>一個字一個固定 vector（一字多義撈埋一齊）；只睇 context，反義詞（increased／decreased）會好似；冇見過嘅字（OOV）冇 vector → 用 subword（BPE、FastText）。</td></tr></table></div>
 
-<h2 id="past">六、Past paper 全答</h2>
+<h2 id="past">七、Past paper 全答</h2>
 <p>以下係 Practice Quiz 2 嘅題目，其中 BPE 同 Levenshtein 係 2026s2 原題，Skip-gram／CBOW 係 2025s1 原題。Revision Qs 嘅 shoe／sock 同 Word2Vec 問題喺 <a href="index.html#rq">總覽 RQ2、RQ3</a>。</p>
 {{Q2EXAM:2}}
 {{Q2EXAM:3}}
 {{Q2EXAM:4}}
 {{Q2EXAM:5}}
 
-<h2 id="drill">七、計數 drill</h2>
+<h2 id="drill">八、計數 drill</h2>
 {{Q2DRILL:0}}
 {{Q2DRILL:1}}
 {{Q2DRILL:2}}
 {{Q2DRILL:3}}
 {{Q2DRILL:4}}
 {{Q2DRILL:5}}
-<div class="practice"><span class="src">Levenshtein · 期考格式（6×6、index 1 係空字串）</span>
-<h4>題 7：X = “CART”（row）→ Y = “ARCS”（column）</h4>
+<div class="practice"><span class="src">Levenshtein · 期考格式（6×6、index 1 係空字串）· 擺法 B（Quiz 2 真卷）</span>
+<h4>題 7：X = “CART”（source，row）→ Y = “ARCS”（target，column）</h4>
 <p>Quiz 2 真題。填表，再由 D[5][5] 倒退返 D[1][1]，每步寫坐標同操作。</p>
 <details class="ans"><summary>睇答案</summary><div>
 <div class="tw dp"><table><tr><th class="c">idx</th><th class="c">0</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th></tr>
@@ -156,7 +388,27 @@ $$D[i][j] = \min\begin{cases} D[i-1][j-1] + \begin{cases}0 & x_i = y_j\\ 1 & x_i
 <p>距離 = 3：D[5][5]→D[5][4] insert S；D[5][4]→D[4][3] substitute T→C；D[4][3]→D[3][2] match R；D[3][2]→D[2][1] match A；D[2][1]→D[1][1] delete C。即 CART → ART → ARC → ARCS。D[5][5] 對角都係 3（substitute T→S，再 insert C），屬打和。</p>
 </div></details></div>
 
-<h2 id="mcq">八、MCQ</h2>
+<div class="practice"><span class="src">Levenshtein · 同一題轉用擺法 A（老師擺法）</span>
+<h4>題 8：source = “CART” 放 column，target = “ARCS” 放 row</h4>
+<p>同題 7 一樣嘅兩個字，但表轉咗方向。填表，traceback，寫每步操作。比較同題 7 有咩唔同。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<div class="tw dp"><table class="nostack"><tr><th class="c"></th><th class="c">“”</th><th class="c">C</th><th class="c">A</th><th class="c">R</th><th class="c">T</th></tr>
+<tr><th class="c">“”</th><td class="c"><b>0</b></td><td class="c"><b>1</b></td><td class="c">2</td><td class="c">3</td><td class="c">4</td></tr>
+<tr><th class="c">A</th><td class="c">1</td><td class="c">1</td><td class="c"><b>1</b></td><td class="c">2</td><td class="c">3</td></tr>
+<tr><th class="c">R</th><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c"><b>1</b></td><td class="c">2</td></tr>
+<tr><th class="c">C</th><td class="c">3</td><td class="c">2</td><td class="c">3</td><td class="c">2</td><td class="c"><b>2</b></td></tr>
+<tr><th class="c">S</th><td class="c">4</td><td class="c">3</td><td class="c">3</td><td class="c">3</td><td class="c"><b>3</b></td></tr></table></div>
+<p>擺法 A：↑ = insert，← = delete。Traceback（坐標 = [row][col]）：</p>
+<ol class="steps">
+<li>D[4][4] = 3 → ↑ D[3][4] = 2：<b>insert S</b></li>
+<li>D[3][4] = 2 → ↖ D[2][3] = 1：<b>substitute T→C</b></li>
+<li>D[2][3] = 1 → ↖ D[1][2] = 1：match R</li>
+<li>D[1][2] = 1 → ↖ D[0][1] = 1：match A</li>
+<li>D[0][1] = 1 → ← D[0][0] = 0：<b>delete C</b></li></ol>
+<p><b>比較</b>：表係題 7 嘅轉置，距離同樣係 3，操作都係「delete C、substitute T→C、insert S」三樣。分別只係箭咀方向：題 7 delete 係 ↑、insert 係 ←；呢題 delete 係 ←、insert 係 ↑。（已用 Python 兩個擺法都跑過。）</p>
+</div></details></div>
+
+<h2 id="mcq">九、MCQ</h2>
 <p>Set A 係 Quiz 2 溫習包嘅 L5／L6 題目；Set B 係新加嘅期考題。</p>
 <div class="mcq" data-set="A"><script type="application/json">{{Q2MCQ:L5,L6}}</script></div>
 <div class="mcq" data-set="B"><script type="application/json">[
@@ -167,17 +419,26 @@ $$D[i][j] = \min\begin{cases} D[i-1][j-1] + \begin{cases}0 & x_i = y_j\\ 1 & x_i
 {"t":"L6","s":"<p>Both Skip-gram and CBOW train with negative log-likelihood mainly because:</p>","o":["It makes the vectors sparse","Maximising the probability of the true words is equivalent to minimising −log of it, which turns products into sums and works with gradient descent","It removes the need for softmax","It sorts the vocabulary"],"a":1,"e":"最大化 likelihood ＝ 最小化 NLL；log 將相乘變相加，數值穩定又易微分。"},
 {"t":"L6","s":"<p>In Revision Qs, 'increased' and 'decreased' appear in identical sentences. What will Word2Vec most likely learn?</p>","o":["Opposite vectors","Very similar vectors, because both words share the same contexts","No vectors","Random vectors"],"a":1,"e":"Word2Vec 只睇 context，相同 context ⇒ 相似 vector，<b>反義詞都會變相似</b>。"},
 {"t":"L6","s":"<p>How does subword tokenisation help with OOV words in embeddings?</p>","o":["It deletes unknown words","An unseen word can be split into known subword pieces whose vectors are combined","It replaces every word with UNK","It increases the vocabulary to every possible word"],"a":1,"e":"例如 “unearning” 拆成 un、earn、ing，都係見過嘅 subword，可以砌返個 vector。"},
-{"t":"L6","s":"<p>What is the Levenshtein distance between “shoe” and “sock”?</p>","o":["2","3","4","1"],"a":1,"e":"s 一樣，之後 h→o、o→c、e→k 三次 substitute，或者其他同樣係 3 步嘅路。答案 <b>3</b>。"}
+{"t":"L6","s":"<p>What is the Levenshtein distance between “shoe” and “sock”?</p>","o":["2","3","4","1"],"a":1,"e":"s 一樣，之後 h→o、o→c、e→k 三次 substitute，或者其他同樣係 3 步嘅路。答案 <b>3</b>。"},
+{"t":"L6","s":"<p>In the lecture's DP table, the target word is written down the rows and the source word across the columns. Moving from the cell above, D[i−1][j] + 1, means:</p>","o":["Deletion","Insertion","Substitution","Match"],"a":1,"e":"老師擺法（擺法 A）：↑ 沿住 target 條軸行 = 砌多一個 target 字母 = <b>insertion</b>；← = deletion。"},
+{"t":"L6","s":"<p>A Levenshtein table has the source word down the rows and the target word across the columns. Which move is a deletion?</p>","o":["From the left cell D[i][j−1]","From the cell above D[i−1][j]","From the diagonal D[i−1][j−1]","None"],"a":1,"e":"擺法 B（Quiz 2 真卷）：source 喺 row，↑ = 用走一個 source 字母 = <b>delete</b>。通用規則：沿 source 軸 = delete，沿 target 軸 = insert。"},
+{"t":"L6","s":"<p>Swapping which word goes on the rows and which on the columns changes:</p>","o":["The final distance","Only whether ↑ / ← are called insert or delete","Nothing at all","The diagonal cost"],"a":1,"e":"表變成轉置，距離一樣；只係 insert／delete 嘅箭咀方向調轉。"},
+{"t":"L5","s":"<p>With merge rules learned in the order d+_ → d_, e+d_ → ed_, f+r → fr, fr+ed_ → fred_, how is “fred_” segmented?</p>","o":["f r e d _","fr ed_","fred_","fre d_"],"a":2,"e":"按次序：f r e <b>d_</b> → f r <b>ed_</b> → <b>fr</b> ed_ → <b>fred_</b>。Segmenter 要按學到嘅次序逐條 rule apply。"},
+{"t":"L5","s":"<p><code>rdd = [(0, ['a','b','a']), (1, ['a'])]</code>. What does <code>rdd.flatMapValues(lambda x: x).distinct().map(lambda x: (x[1], x[0])).countByKey()</code> return for 'a'?</p>","o":["3","2","1","An RDD"],"a":1,"e":"distinct 之後 (0,a) 只剩一個，(1,a) 一個 ⇒ 'a' 喺 <b>2</b> 份文件出現，即係 DF。countByKey 係 action，返回 dict，唔係 RDD。"},
+{"t":"L5","s":"<p>In T5 (TF × ln((n+1)/(df+1)), n = 3), why is the TF-IDF of “computer” 0 in every document?</p>","o":["It is a stop word","After lowercasing it appears in all 3 documents, so ln(4/4) = 0","Its TF is 0","The join drops it"],"a":1,"e":"“Computer”／“computer” lowercase 之後係同一個字，df = 3，IDF = ln(4/4) = <b>0</b>。"}
 ]</script></div>
 
-<h2 id="short">九、短答題</h2>
+<h2 id="short">十、短答題</h2>
 {{Q2CONCEPT:4,5,6,7,8,11}}
 
-<h2 id="faq">十、常見疑問</h2>
+<h2 id="faq">十一、常見疑問</h2>
 <dl class="faq">
 <dt>Q：TF 同 df 有咩分別？</dt><dd>TF 數一個字喺<b>一份文件入面</b>出現幾多次；df 數有<b>幾多份文件</b>有呢個字，每份最多計 1。同一份文件有兩個 big，TF = 2，但 df 只加 1。</dd>
 <dt>Q：IDF 點解要 +1（分子分母）？</dt><dd>避免 df = 0 時除以 0（smoothing）。2025s1 版最尾再 +1，令所有文件都有嘅字 IDF = 1 而唔係 0。</dd>
 <dt>Q：Levenshtein 嘅 subproblem 點嚟？</dt><dd>淨係諗<b>最後一個字母</b>點處理：substitute／match 就兩邊都剪走最尾（對角格）；insert 就只剪 target（insert 方向嗰格）；delete 就只剪 source。剩低嗰部分就係細啲嘅題目，table 已經計咗。</dd>
+<dt>Q：↑ 係 insert 定 delete？我成日搞亂。</dt><dd>先搵 source 喺邊條軸。<b>沿 source 軸行一格 = delete，沿 target 軸行一格 = insert</b>。老師擺法（target 放 row）：↑ = insert、← = delete。Quiz 2 真卷（source 放 row）：↑ = delete、← = insert。距離數字兩個擺法都一樣。</dd>
+<dt>Q：BPE segmenter 係咪揀最長嘅 token？</dt><dd>唔係。由單字母開始，<b>按 learner 學到 merge rule 嘅次序</b>逐條 apply。見 <a href="#bpe-seg">BPE segmenter</a>。</dd>
+<dt>Q：countByValue 同 countByKey 邊個計 TF、邊個計 DF？</dt><dd>TF：<code>flatMapValues → countByValue</code>（數 (doc, word)）。DF：<code>flatMapValues → distinct → (word, doc) → countByKey</code>。見 <a href="#tfidfrdd">RDD 手計 TF-IDF</a>。</dd>
 <dt>Q：CBOW hidden layer 有幾多個 node？</dt><dd>等於 embedding dimension d，同 vocabulary 大細 V、window m 都無關。Output layer 先係 V 個 node。</dd>
 <dt>Q：Skip-gram 數 pair 要唔要計 PAD？</dt><dd>題目話用 PAD 就計；兩個答案（含 PAD／唔含 PAD）都寫出嚟最穩陣。</dd>
 <dt>Q：BPE 打和點揀？</dt><dd>次數一樣嘅 pair 揀邊個都得，但要寫明你揀咗邊個，同埋最後 token 數一定要啱。</dd>

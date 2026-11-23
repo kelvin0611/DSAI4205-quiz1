@@ -2,7 +2,7 @@
 <p class="sub">Code 題必考（RDD fill-in 或者 DataFrame + UDF）· 對應 L3、L4、T03、T04、Quiz 1、Quiz 2、2025s1 Q1b、2026s2 Q2b、Revision Qs</p>
 <ul class="toc">
 <li><a href="#exam">一、點考</a></li><li><a href="#spark">二、Spark 核心概念</a></li>
-<li><a href="#ops">三、RDD 操作速查</a></li><li><a href="#sql">四、Hive → Shark → Spark SQL、DataFrame</a></li>
+<li><a href="#ops">三、RDD 操作速查（＋ countByKey／countByValue／flatMapValues）</a></li><li><a href="#sql">四、Hive → Shark → Spark SQL、DataFrame（＋ top-2 三種寫法）</a></li>
 <li><a href="#past">五、Past paper 全答</a></li><li><a href="#fill">六、RDD 填充（11 題）</a></li>
 <li><a href="#dffill">七、DataFrame + UDF 填充（7 題）</a></li><li><a href="#mcq">八、MCQ</a></li>
 <li><a href="#short">九、短答題</a></li><li><a href="#faq">十、常見疑問</a></li></ul>
@@ -13,6 +13,8 @@
 <tr><td>2025s1 Q3(c)</td><td>用 RDD 寫 PageRank power iteration（答案喺 <a href="P4-L7.html#code">P4</a>）</td><td>10</td></tr>
 <tr><td>2026s2 Q2(b) ／ Revision Qs</td><td>Mutual friends RDD fill-in：flatMap、groupByKey、list（答案喺 <a href="index.html#rq">總覽 RQ1</a>）</td><td>8</td></tr>
 <tr><td>Revision Qs</td><td>DataFrame：groupBy + sum + orderBy desc（答案喺 <a href="index.html#rq">總覽 RQ2</a>）</td><td>—</td></tr>
+<tr><td>Exam Review p.42–47、L4 p.6–13</td><td>每個 category top-2 URL：兩階段 MapReduce pseudocode ／ HiveQL <code>RANK() OVER</code>（答案喺 <a href="#top2">下面</a>）</td><td>—</td></tr>
+<tr><td>T4、T5</td><td>countByKey／countByValue／flatMapValues 做 TF／DF（答案喺 <a href="#ops2">下面</a> 同 <a href="P3-L5-L6.html#tfidfrdd">P3</a>）</td><td>—</td></tr>
 <tr><td>Quiz 2 真卷 Q1(b)</td><td>回傳 struct 嘅 UDF：dict、StructType schema、udf()、flatten</td><td>12</td></tr></table></div>
 <div class="memo"><b>Code 題記住三樣</b>① 每個 element 變<b>多個</b>就用 <code>flatMap</code>，一個變一個用 <code>map</code> ② 數次數／加總用 <code>reduceByKey(add)</code>，要收集名單用 <code>groupByKey().mapValues(list)</code> ③ DataFrame：<code>groupBy().agg(F.alias())</code>、<code>orderBy(col().desc())</code>、UDF 一定要俾 return type。</div>
 
@@ -73,9 +75,42 @@
 
 <h2 id="ops">三、RDD 操作速查</h2>
 {{SEC:q1:ops}}
+<div class="concept" id="ops2">
+<h3>Pair RDD 再加四個：mapValues、flatMapValues、countByKey、countByValue</h3>
+<span class="lab">一句講完</span>
+<p>頭兩個係 <b>transformation</b>，只郁 value、key 唔變；後兩個係 <b>action</b>，即刻計，返回 Python <b>dict</b>（defaultdict），唔係 RDD。</p>
+<div class="tw"><table class="stack"><tr><th>Operator</th><th>類型</th><th>輸入 → 輸出</th></tr>
+<tr><td><code>mapValues(lambda x: [x, x*10])</code></td><td>Transformation</td><td>(a, 1) → <b>(a, [1, 10])</b>：一個 element 變一個</td></tr>
+<tr><td><code>flatMapValues(lambda x: [x, x*10])</code></td><td>Transformation</td><td>(a, 1) → <b>(a, 1)、(a, 10)</b>：list 攤平，每個 value 配返同一個 key</td></tr>
+<tr><td><code>countByKey()</code></td><td>Action → dict</td><td>數每個 <b>key</b> 出現幾多次</td></tr>
+<tr><td><code>countByValue()</code></td><td>Action → dict</td><td>數每個<b>成個 element</b>（成個 tuple）出現幾多次</td></tr></table></div>
+<span class="lab pic">圖解：mapValues vs flatMapValues（T4 4.1–4.2，mtcars）</span>
+<div class="grid2">
+<figure class="fig"><div class="mfh">mapValues(lambda x: [x, x*10])</div><div class="fb">('Mazda RX4', 21.0)</div><div class="fb hl2">→ ('Mazda RX4', [21.0, 210.0])<br>1 個 input → 1 個 output</div></figure>
+<figure class="fig"><div class="mfh">flatMapValues(lambda x: [x, x*10])</div><div class="fb">('Mazda RX4', 21.0)</div><div class="fb ac2">→ ('Mazda RX4', 21.0)<br>→ ('Mazda RX4', 210.0)<br>1 個 input → 2 個 output</div></figure></div>
+<span class="lab eg">例子：countByKey vs countByValue（T4 4.3）</span>
+<p><code>carData = [(Mazda, 2018), (Mazda, 2019), (Ferrari, 2019), (Porsche, 2019)]</code></p>
+<div class="tw"><table class="nostack"><tr><th>Call</th><th>結果</th></tr>
+<tr><td><code>carData.countByKey()</code></td><td>{Mazda: 2, Ferrari: 1, Porsche: 1}</td></tr>
+<tr><td><code>carData.countByValue()</code></td><td>{(Mazda, 2018): 1, (Mazda, 2019): 1, (Ferrari, 2019): 1, (Porsche, 2019): 1}</td></tr>
+<tr><td><code>carData.map(lambda x: x[1]).countByValue()</code></td><td>{2018: 1, 2019: 3}（呢個先係「每年幾多架」）</td></tr></table></div>
+<span class="lab eg">例子：汽車 = TF／DF 模板（T4 4.4）</span>
+<p><code>(2018, 'Mazda Ferrari')</code>、<code>(2019, 'Porsche Ford Mazda')</code>、<code>(2020, 'Ferrari Honda Tesla Mazda')</code>：</p>
+<ul><li><code>flatMapValues(lambda x: x).countByValue()</code> → 每個 (year, brand) 出現幾次 = <b>term frequency</b></li>
+<li><code>flatMapValues(lambda x: x).distinct().map(lambda x: (x[1], x[0])).countByKey()</code> → Mazda 3、Ferrari 2、其餘 1 = <b>document frequency</b></li>
+<li><code>count()</code> → 3 = 文件數</li></ul>
+<p>將「年份」換做「文件」、「牌子」換做「字」，就係 T5 TF-IDF 嘅 code。完整 drill（fill-in + 25 個輸出）喺 <a href="P3-L5-L6.html#tfidfrdd">P3 四、RDD 手計 TF-IDF</a>。</p>
+<span class="lab trap">易錯</span>
+<ul><li>Notebook 註解話 countByValue 係「每年出咗幾多架車」，係<b>誤導</b>：佢數成個 tuple，四個 tuple 各 1。</li>
+<li>Slide／notebook 寫 flatMapValues「3 input will have 1 output」，係講錯：每個 input 變 2 個 output，3 個 input 就 6 個 output。</li>
+<li>mapValues／flatMapValues 放喺 <b>多欄 Row</b> 上面（例如 mtcars 12 欄）：Spark 只當 <code>x[0]</code> 係 key、<code>x[1]</code> 係 value，其餘欄全部丟走。所以 mtcars 結果只有 (車款, [mpg, mpg×10])。</li>
+<li>countByKey／countByValue 係 action，後面唔可以再 <code>.map()</code>；要繼續用 RDD 就改用 <code>map((k, 1)).reduceByKey(add)</code>。</li></ul>
+</div>
+
 
 <h2 id="sql">四、Hive → Shark → Spark SQL、DataFrame</h2>
 <div class="key"><b>一分鐘重點</b><ul>
+<li>點解要 Hive：MapReduce 只有兩段，複雜 query（例如每個 category top-2）要串幾個 job，join／sort 全部手寫，太 low-level。</li>
 <li>Hive 將 SQL 變 <b>MapReduce</b>（慢）；Shark 用 <b>Spark</b> + memory（快）；Spark SQL 加 <b>DataFrame + Catalyst optimizer</b>。</li>
 <li>DataFrame = 有 schema 嘅分散式 table；schema 用 <code>StructType([StructField(name, type, nullable)])</code>。</li>
 <li>UDF = 自己寫嘅 Python function：<code>udf(f, ReturnType)</code>，return type 錯就出 null。</li></ul></div>
@@ -91,6 +126,70 @@
 <li><code>udf(function, schema)</code> 註冊。</li>
 <li><code>withColumn("新欄名", my_udf(col("a"), col("b")))</code>，column 次序要跟 function 參數。</li>
 <li>用 <code>col("struct.field").alias("新名")</code> 攤平。</li></ol>
+</div>
+<div class="concept" id="top2">
+<h3>同一題三種寫法：每個 category 嘅 top-2 URL（Exam Review p.42–47、L4 p.6–13）</h3>
+<span class="lab">題目</span>
+<p>兩個 table：<b>Visits</b>（User, URL, Time）同 <b>UrlInfo</b>（URL, Category, PageRank）。搵每個 category 最多人睇嘅 2 個 URL。</p>
+<div class="grid2">
+<div class="tw"><table class="nostack" style="font-size:13px"><tr><th>User</th><th>URL</th><th>Time</th></tr>
+<tr><td>Amy</td><td>amazon.com</td><td>8:00</td></tr><tr><td>Amy</td><td>facebook.com</td><td>10:00</td></tr><tr><td>Amy</td><td>twitter.com</td><td>10:05</td></tr><tr><td>Fred</td><td>amazon.com</td><td>12:00</td></tr><tr><td>Kenneth</td><td>espn.com</td><td>21:00</td></tr><tr><td>Janice</td><td>twitter.com</td><td>08:44</td></tr></table></div>
+<div class="tw"><table class="nostack" style="font-size:13px"><tr><th>URL</th><th>Category</th><th>PR</th></tr>
+<tr><td>amazon.com</td><td>Ecommerce</td><td>0.9</td></tr><tr><td>facebook.com</td><td>Social Network</td><td>0.8</td></tr><tr><td>twitter.com</td><td>Social Network</td><td>0.7</td></tr><tr><td>espn.com</td><td>Sports</td><td>0.6</td></tr></table></div></div>
+<span class="lab why">點解要串兩個 job</span>
+<p>MapReduce 每個 job 只有 Map 同 Reduce 兩段，<b>一次 shuffle 只可以按一種 key 分組</b>。呢題要先按 <b>URL</b> 分組（join + 數 visit），再按 <b>category</b> 分組（排名），所以要兩個 job，第一個 job 嘅輸出寫落 HDFS 再俾第二個 job 讀。</p>
+
+<h4>寫法 ①：兩階段 MapReduce pseudocode</h4>
+<figure class="fig"><div class="mflow">
+<div class="mfcol"><div class="mfh">Job 1 Map（兩個 mapper）</div><div class="fb">Mapper 1（Visits）：emit (URL, ("visit", 1))</div><div class="fb">Mapper 2（UrlInfo）：emit (URL, ("info", category))</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">Shuffle by URL</div><div class="fb hl2">amazon.com: [visit 1, visit 1, info Ecommerce]<br>facebook.com: [visit 1, info Social]<br>twitter.com: [visit 1, visit 1, info Social]<br>espn.com: [visit 1, info Sports]</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">Job 1 Reduce（join + count）</div><div class="fb ac2">(Ecommerce, (amazon.com, 2))<br>(Social Network, (facebook.com, 1))<br>(Social Network, (twitter.com, 2))<br>(Sports, (espn.com, 1))</div></div></div>
+<div class="mflow">
+<div class="mfcol"><div class="mfh">Job 2 Map</div><div class="fb">emit (category, (URL, count))</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">Shuffle by category</div><div class="fb hl2">Ecommerce: [(amazon.com, 2)]<br>Social Network: [(facebook.com, 1), (twitter.com, 2)]<br>Sports: [(espn.com, 1)]</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">Job 2 Reduce（sort + top 2）</div><div class="fb ac2">((Ecommerce, 1), (amazon.com, 2))<br>((Social Network, 1), (twitter.com, 2))<br>((Social Network, 2), (facebook.com, 1))<br>((Sports, 1), (espn.com, 1))</div></div></div>
+<figcaption>上面兩行 = 兩個 MapReduce job；已用 Python 模擬核對</figcaption></figure>
+<pre><code># ---------- Job 1：join Visits 同 UrlInfo，數每個 URL 嘅 visit ----------
+Mapper1(user, url, time):            emit(url, ("visit", 1))
+Mapper2(url, category, pagerank):    emit(url, ("info", category))
+Reducer1(url, values):
+    visit_count = 0; category = null
+    for v in values:
+        if v.type == "visit": visit_count += v.count
+        if v.type == "info":  category = v.category
+    if category != null and visit_count > 0:
+        emit(category, (url, visit_count))
+
+# ---------- Job 2：每個 category 排名，取頭 2 ----------
+Mapper3(category, (url, count)):     emit(category, (url, count))
+Reducer2(category, values):
+    L = sort(values, by count, descending)
+    for rank, (url, count) in enumerate(L[0:2], start=1):
+        emit((category, rank), (url, count))</code></pre>
+
+<h4>寫法 ②：點解話「MapReduce API too low-level」</h4>
+<p>上面兩個 job，join、select、projection、aggregate（count）、sort、distinct 全部要自己逐行寫。程式員其實只係想講「join 完 group by 再排名」。所以 Facebook 整咗 <b>Hive</b>：用 SQL 寫，Hive 自動 compile 成 MapReduce job（Facebook 超過 90% 嘅 MapReduce job 由 Hive 生成）。</p>
+
+<h4>寫法 ③：HiveQL 一句搞掂</h4>
+<pre><code>SELECT category, url, visit_count, rank FROM (
+    SELECT u.category, v.url, COUNT(*) AS visit_count,
+           RANK() OVER (PARTITION BY u.category
+                        ORDER BY COUNT(*) DESC, v.url ASC) AS rank
+    FROM Visits v JOIN URLInfo u ON v.url = u.url
+    GROUP BY u.category, v.url
+) ranked
+WHERE rank &lt;= 2
+ORDER BY category, rank;</code></pre>
+<div class="tw"><table class="nostack"><tr><th>SQL 部分</th><th>對應 MapReduce</th></tr>
+<tr><td><code>JOIN … ON v.url = u.url</code> + <code>GROUP BY</code> + <code>COUNT(*)</code></td><td>Job 1（按 URL shuffle，join + 數）</td></tr>
+<tr><td><code>RANK() OVER (PARTITION BY category ORDER BY … DESC)</code></td><td>Job 2（按 category shuffle，排序）</td></tr>
+<tr><td><code>WHERE rank &lt;= 2</code></td><td>Job 2 Reducer 嘅「取頭 2」</td></tr></table></div>
+<p>輸出同 MapReduce 版一樣：Ecommerce 1 amazon.com 2；Social Network 1 twitter.com 2、2 facebook.com 1；Sports 1 espn.com 1（已用 SQLite 跑過）。</p>
+<span class="lab trap">易錯</span>
+<ul><li>Reduce 1 要<b>分清兩種 value</b>（"visit" 同 "info"），所以 mapper 要加 tag；冇 tag 就唔知邊個係 category。</li>
+<li>Job 2 嘅 output key 係 <b>(category, rank)</b>，唔係 category。</li>
+<li><code>PARTITION BY</code> = 每個 category 各自排名；唔寫就變咗全部 URL 一齊排。</li>
+<li>Slide 嘅 UrlInfo 表有兩個筆誤：twitter.com 嘅 category 印咗 “facebook.com”（Mapper 2 例子係 Social Network）、espn.com PageRank 一處寫 0.9 一處寫 0.6。唔影響答案（呢題唔用 PageRank）。</li></ul>
 </div>
 {{SEC:q2:sparksql}}
 
@@ -182,6 +281,11 @@ df_audited = df_temp.select(
 <div class="mcq" data-set="A"><script type="application/json">{{MCQ:q1:L3}}</script></div>
 <div class="mcq" data-set="B"><script type="application/json">{{MCQ:q2:L4}}</script></div>
 <div class="mcq" data-set="C"><script type="application/json">[
+{"t":"L3","s":"<p><code>rdd = [('Mazda',2018), ('Mazda',2019), ('Ferrari',2019)]</code>. What does <code>rdd.countByValue()</code> return?</p>","o":["{2018: 1, 2019: 2}","{('Mazda',2018): 1, ('Mazda',2019): 1, ('Ferrari',2019): 1}","{'Mazda': 2, 'Ferrari': 1}","An RDD"],"a":1,"e":"countByValue 數<b>成個 element</b>（成個 tuple），唔係 value。{Mazda: 2, Ferrari: 1} 係 countByKey。兩個都係 action，返回 dict。"},
+{"t":"L3","s":"<p><code>rdd = [('a', 1), ('b', 2), ('c', 3)]</code>. How many elements does <code>rdd.flatMapValues(lambda x: [x, x*10])</code> have?</p>","o":["3","6","1","9"],"a":1,"e":"每個 element 變 2 個：(a,1)(a,10)(b,2)(b,20)(c,3)(c,30) = <b>6</b>。用 mapValues 就係 3 個，value 係 list。"},
+{"t":"L3","s":"<p>Which line gives the document frequency of each word from <code>(doc, [words])</code>?</p>","o":["flatMapValues(lambda x: x).countByValue()","flatMapValues(lambda x: x).distinct().map(lambda x: (x[1], x[0])).countByKey()","flatMapValues(lambda x: x).countByKey()","mapValues(len).countByKey()"],"a":1,"e":"distinct 去走同一份文件嘅重複字，再將 word 放 key 位 countByKey。A 係 TF；C 數嘅係每份文件有幾多個字。"},
+{"t":"L4","s":"<p>Finding the top-2 visited URLs per category needs two MapReduce jobs mainly because:</p>","o":["HDFS cannot store the join result","One job can only shuffle by one key: first by URL to join and count, then by category to rank","Mappers cannot read two tables","Reducers cannot sort"],"a":1,"e":"每個 job 只有一次 shuffle、一種 key。先按 URL（join + 數），再按 category（排名）。"},
+{"t":"L4","s":"<p>In HiveQL, which clause makes the ranking restart for every category?</p>","o":["GROUP BY u.category","PARTITION BY u.category inside RANK() OVER (...)","ORDER BY category","WHERE rank &lt;= 2"],"a":1,"e":"<code>RANK() OVER (PARTITION BY category ORDER BY COUNT(*) DESC)</code>：每個 category 各自由 1 開始排。"},
 {"t":"L3","s":"<pre><code>rdd.flatMap(map_to_pairs).groupByKey().mapValues(list)</code></pre><p>map_to_pairs returns a list of ((f1, f2), user). What is in the final RDD?</p>","o":["One record per user","One record per friend pair, with the list of users who have both as friends","A single number","A list of lists per user"],"a":1,"e":"flatMap 攤平所有 pair；groupByKey 按 pair group；list 將 iterable 轉 list → 每對朋友一筆，value = 共同朋友名單。"},
 {"t":"L3","s":"<p>Why must the friend pair be sorted inside the mapper of the mutual-friends job?</p>","o":["To make the output alphabetical only","So that (B, C) and (C, B) become the same key and are grouped together","Spark requires sorted keys","To reduce memory"],"a":1,"e":"唔排序就會有兩個唔同 key，shuffle 唔會 group 埋，答案會錯。"},
 {"t":"L4","s":"<p>Which code returns customers sorted by total spending, highest first?</p>","o":["df.groupBy('customer_id').sum('order_amount').orderBy('customer_id')","df.groupBy('customer_id').agg(sum('order_amount').alias('total_spent')).orderBy(col('total_spent').desc())","df.orderBy('order_amount').groupBy('customer_id')","df.select(sum('order_amount'))"],"a":1,"e":"先 groupBy 再 agg + alias，最後 orderBy desc。Revision Qs RQ2(a) 嘅答案。"},
@@ -200,6 +304,8 @@ df_audited = df_temp.select(
 <dt>Q：SparkSession 同 SparkContext 點分？</dt><dd>SparkContext（題目通常叫 <code>spark</code> 或者 <code>sc</code>）係 RDD 嘅入口；SparkSession 係 DataFrame／SQL 嘅入口，入面包住一個 SparkContext（<code>ss.sparkContext</code>）。2025s1 卷寫 <code>spark = ss.sparkContext</code>，所以嗰張卷 <code>spark.textFile</code> 係 RDD。</dd>
 <dt>Q：groupByKey 同 reduceByKey 點揀？</dt><dd>要「收集名單」用 groupByKey；要「加總／計數／搵最大」用 reduceByKey，因為佢會先喺每個 partition 合併，shuffle 少好多。</dd>
 <dt>Q：col 係咪改名？</dt><dd>唔係。<code>col("x")</code> 係「揀出 x 呢個 column」；改名用 <code>.alias()</code>；withColumn 第一個參數係新 column 嘅名。</dd>
+<dt>Q：countByKey 同 reduceByKey 有咩分別？</dt><dd>結果一樣係「每個 key 幾多次」，但 countByKey 係 <b>action</b>，即刻返回 Python dict 去 driver；<code>map(lambda x: (x[0], 1)).reduceByKey(add)</code> 係 transformation，結果仲係 RDD，可以再 join（T5 TF-IDF 就係咁做）。</dd>
+<dt>Q：Top-2 per category 考 pseudocode 要寫幾多？</dt><dd>兩個 job 各寫 Map 同 Reduce，寫清楚 emit 乜 key、乜 value；Job 1 mapper 要加 "visit"／"info" tag；Job 2 reducer sort desc 取頭 2，emit ((category, rank), (URL, count))。</dd>
 <dt>Q：唔識 list comprehension 點算？</dt><dd>用普通 for loop 加 append 一樣得分，例如 mutual friends 嘅雙重 loop。</dd>
 <dt>Q：UDF return type 寫錯會點？</dt><dd>唔會報錯，個 column 會變 null。所以 schema／return type 一定要同實際回傳嘅嘢夾。</dd>
 </dl>
