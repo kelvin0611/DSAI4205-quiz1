@@ -1,0 +1,1900 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>DSAI4205 Quiz 1 溫習包</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: one reading column with a sticky section nav. Code cells look like the lecture's numbered notebook cells.
+   Map / Shuffle / Reduce keep the same three colours in every diagram, table and tag. */
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --sunk:#E7EBF0; --ink:#15202B; --muted:#566273; --line:#D2D9E1;
+  --accent:#BF4A14; --accent-soft:#FAE6DA;
+  --map:#0B7472; --map-soft:#D9EFEE;
+  --shuf:#8F6200; --shuf-soft:#F6EBCB;
+  --red:#3D4BAA; --red-soft:#E2E6F8;
+  --ok:#17733A; --ok-soft:#DCF1E3; --bad:#B42318; --bad-soft:#FADFDB;
+  --code-bg:#E9EDF2; --code-ink:#17232F; --code-dim:#7B8796;
+  --f-display:"Archivo","Noto Sans TC",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Noto Sans TC",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1319; --surface:#151C24; --sunk:#1C2530; --ink:#E5EAF0; --muted:#97A3B2; --line:#2A3542;
+    --accent:#F2834A; --accent-soft:#3A2015;
+    --map:#4CC4BF; --map-soft:#0F2F2E;
+    --shuf:#E2B54A; --shuf-soft:#33290F;
+    --red:#97A3FF; --red-soft:#1C2247;
+    --ok:#62D18D; --ok-soft:#12301F; --bad:#FF8F84; --bad-soft:#3A1714;
+    --code-bg:#0A0F15; --code-ink:#DCE3EA; --code-dim:#6F7C8B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1319; --surface:#151C24; --sunk:#1C2530; --ink:#E5EAF0; --muted:#97A3B2; --line:#2A3542;
+  --accent:#F2834A; --accent-soft:#3A2015;
+  --map:#4CC4BF; --map-soft:#0F2F2E;
+  --shuf:#E2B54A; --shuf-soft:#33290F;
+  --red:#97A3FF; --red-soft:#1C2247;
+  --ok:#62D18D; --ok-soft:#12301F; --bad:#FF8F84; --bad-soft:#3A1714;
+  --code-bg:#0A0F15; --code-ink:#DCE3EA; --code-dim:#6F7C8B;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.72;-webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding-inline:20px;padding-block:0 80px}
+@media (max-width:480px){.wrap{padding-inline:16px}}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;line-height:1.2;margin:0}
+h2{font-size:clamp(1.55rem,1.2rem + 1.4vw,2.1rem);font-weight:800;font-stretch:88%;letter-spacing:-.01em}
+h3{font-size:1.22rem;font-weight:750;font-stretch:92%;margin-top:2.2rem}
+h4{font-size:1.02rem;font-weight:700;margin-top:1.4rem}
+p{margin:.7rem 0;max-width:68ch}
+ul,ol{margin:.6rem 0;padding-left:1.3rem;max-width:70ch}
+li{margin:.25rem 0}
+code{font-family:var(--f-mono);font-size:.9em;background:var(--code-bg);color:var(--code-ink);padding:.08em .35em;border-radius:4px}
+strong{font-weight:650}
+p code,li code,.exp code,.opt code{overflow-wrap:anywhere}
+
+/* nav */
+.topnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.topnav .in{max-width:940px;margin:0 auto;padding-inline:12px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.topnav .in::-webkit-scrollbar{display:none}
+.topnav a{flex:0 0 auto;font-family:var(--f-mono);font-size:13px;color:var(--muted);text-decoration:none;padding:12px 10px;border-bottom:2px solid transparent;white-space:nowrap}
+.topnav a:hover{color:var(--ink);border-bottom-color:var(--accent)}
+
+/* hero */
+.hero{padding-block:44px 8px;display:grid;gap:18px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.hero h1{font-size:clamp(2.2rem,1.4rem + 3.6vw,3.6rem);font-weight:850;font-stretch:80%;letter-spacing:-.02em}
+.hero h1 .k{color:var(--accent)}
+.hero .lede{font-size:1.06rem;color:var(--muted);max-width:62ch;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.fact{font-family:var(--f-mono);font-size:13px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px}
+.fact b{color:var(--accent);font-weight:600}
+
+section{padding-top:56px}
+.sec-head{display:grid;gap:6px;margin-bottom:12px}
+
+/* tables */
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{background:var(--sunk);font-weight:600;font-size:13px;letter-spacing:.02em;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td code{font-size:12.5px;white-space:nowrap}
+td.brk code{white-space:normal}
+.tbl.wide table{min-width:720px}
+.num{font-variant-numeric:tabular-nums}
+
+/* tags */
+.tag{display:inline-block;font-family:var(--f-mono);font-size:11.5px;font-weight:600;letter-spacing:.04em;padding:1px 8px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.map{background:var(--map-soft);color:var(--map)}
+.tag.shuf{background:var(--shuf-soft);color:var(--shuf)}
+.tag.red{background:var(--red-soft);color:var(--red)}
+.tag.acc{background:var(--accent-soft);color:var(--accent)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* code cells */
+pre.code{margin:12px 0;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px 12px 0;overflow-x:auto;font-family:var(--f-mono);font-size:13.5px;line-height:1.65;counter-reset:ln;white-space:pre}
+pre.code code{background:none;padding:0;font-size:inherit;color:inherit}
+pre.code .ln{display:block;counter-increment:ln;padding-left:52px;position:relative;min-height:1.65em}
+pre.code .ln::before{content:counter(ln);position:absolute;left:0;width:36px;text-align:right;color:var(--code-dim);font-size:12px}
+pre.code.plain .ln{padding-left:14px}
+pre.code.plain .ln::before{content:none}
+pre.code .c{color:var(--code-dim);font-style:italic}
+pre.code .hl{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 2px;font-weight:600}
+pre.code .given{color:var(--code-dim)}
+pre.code.sm{font-size:12.8px}
+.cap{font-size:13px;color:var(--muted);margin-top:-4px}
+
+/* callouts */
+.callout{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 16px;margin:16px 0}
+.callout > .lbl{font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:inline-block;margin-bottom:4px}
+.callout.warn{background:var(--bad-soft);border-color:transparent}
+.callout.warn > .lbl{color:var(--bad)}
+.callout.tip{background:var(--map-soft);border-color:transparent}
+.callout.tip > .lbl{color:var(--map)}
+.callout.key{background:var(--accent-soft);border-color:transparent}
+.callout.key > .lbl{color:var(--accent)}
+.callout p,.callout ul,.callout ol{margin:.35rem 0}
+
+/* question box (exam style) */
+.exam{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px 18px;margin:14px 0}
+.exam .src{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-bottom:6px}
+.exam p{margin:.4rem 0}
+
+/* figures */
+figure{margin:18px 0}
+figcaption{font-size:13.5px;color:var(--muted);margin-top:8px;max-width:72ch}
+.diawrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+svg.dia{display:block;width:100%;height:auto}
+svg.dia.w700{min-width:640px}
+svg.dia text{font-family:var(--f-body);fill:var(--ink);font-size:13px}
+svg.dia .mono{font-family:var(--f-mono);font-size:12.5px}
+svg.dia .small{font-size:11.5px;fill:var(--muted)}
+svg.dia .h{font-family:var(--f-display);font-weight:750;font-size:14.5px}
+svg.dia .box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+svg.dia .box2{fill:var(--sunk);stroke:var(--line);stroke-width:1}
+svg.dia .acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+svg.dia .fmap{fill:var(--map-soft);stroke:var(--map);stroke-width:1.2}
+svg.dia .fshuf{fill:var(--shuf-soft);stroke:var(--shuf);stroke-width:1.2}
+svg.dia .fred{fill:var(--red-soft);stroke:var(--red);stroke-width:1.2}
+svg.dia .fok{fill:var(--ok-soft);stroke:var(--ok);stroke-width:1.2}
+svg.dia .facc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2}
+svg.dia .arr{stroke:var(--ink);stroke-width:1.6;fill:none}
+svg.dia .arr.a{stroke:var(--accent)}
+svg.dia .dash{stroke:var(--muted);stroke-width:1.4;stroke-dasharray:5 5;fill:none}
+svg.dia .ah{fill:var(--ink)}
+svg.dia .ah.a{fill:var(--accent)}
+svg.dia .tacc{fill:var(--accent);font-weight:600}
+svg.dia .tmap{fill:var(--map);font-weight:600}
+svg.dia .tred{fill:var(--red);font-weight:600}
+svg.dia .tshuf{fill:var(--shuf);font-weight:600}
+
+/* MapReduce flow (html diagram) */
+.mrflow{display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1.25fr) 22px minmax(0,1.1fr) 22px minmax(0,1fr);gap:6px;align-items:stretch}
+.mrcol{border-radius:10px;padding:10px;min-width:0;border:1px solid var(--line);background:var(--surface)}
+.mrcol h5{margin:0 0 6px;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.mrcol.map{background:var(--map-soft);border-color:transparent}.mrcol.map h5{color:var(--map)}
+.mrcol.shuf{background:var(--shuf-soft);border-color:transparent}.mrcol.shuf h5{color:var(--shuf)}
+.mrcol.red{background:var(--red-soft);border-color:transparent}.mrcol.red h5{color:var(--red)}
+.mrcol .who{font-family:var(--f-body);font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400}
+.mrcol .row{font-family:var(--f-mono);font-size:12.3px;line-height:1.5;padding:4px 0;border-top:1px dashed var(--line);overflow-wrap:anywhere}
+.mrcol .row:first-of-type{border-top:0}
+.mrflow .arrow{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px}
+.strike{text-decoration:line-through;color:var(--bad)}
+@media (max-width:760px){
+  .mrflow{grid-template-columns:minmax(0,1fr)}
+  .mrflow .arrow{transform:rotate(90deg);height:18px}
+}
+
+/* map vs flatMap */
+.mf{display:grid;gap:10px}
+.mfrow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:560px){.mfrow{grid-template-columns:minmax(0,1fr)}}
+.mfrow .lab{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font-family:var(--f-mono);font-size:12.5px;padding:3px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
+.chip.outer{display:inline-flex;gap:4px;padding:4px;background:var(--shuf-soft);border-color:var(--shuf)}
+.chip.w{background:var(--map-soft);border-color:var(--map)}
+
+/* process flow */
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.flow span.st{font-size:13.5px;padding:6px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.flow span.ar{color:var(--muted)}
+
+/* MCQ */
+.qset{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:14px}
+.qset > .q,.stem,.opts{min-width:0}
+.scorebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;position:sticky;top:calc(env(safe-area-inset-top,0px) + 46px);z-index:10;background:var(--bg);padding:8px 0;border-bottom:1px solid var(--line)}
+.scorebar .s{font-family:var(--f-mono);font-size:13.5px}
+.scorebar .s b{color:var(--accent)}
+.btn{font:inherit;font-size:13.5px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.pri:hover{opacity:.9;color:var(--surface)}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.q header{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.qno{font-family:var(--f-display);font-weight:800;font-size:15px}
+.stem{margin:.2rem 0 .6rem}
+.stem p{margin:.3rem 0}
+.opts{display:grid;gap:6px}
+.opt{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start;text-align:left;font:inherit;font-size:15px;line-height:1.5;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt .L{font-family:var(--f-mono);font-weight:600;color:var(--muted)}
+.opt code{white-space:normal}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.right .L{color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt.wrong .L{color:var(--bad)}
+.exp{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--sunk);font-size:14.5px}
+.exp .v{font-weight:700}
+.exp .v.ok{color:var(--ok)} .exp .v.bad{color:var(--bad)}
+
+/* details / model answers */
+details{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:12px 0}
+details > summary{cursor:pointer;padding:10px 14px;font-weight:600;list-style:none;display:flex;gap:8px;align-items:center}
+details > summary::-webkit-details-marker{display:none}
+details > summary::before{content:"+";font-family:var(--f-mono);color:var(--accent);width:14px}
+details[open] > summary::before{content:"−"}
+details > .body{padding:2px 16px 14px}
+.practice{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:16px 18px;margin:18px 0}
+.practice > h3{margin-top:0}
+.practice .src{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+/* fill-in blanks */
+input.blank{font-family:var(--f-mono);font-size:13px;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:5px;padding:1px 4px;margin:0 1px;height:1.55em;vertical-align:baseline}
+input.blank.ok{border-color:var(--ok);background:var(--ok-soft)}
+input.blank.bad{border-color:var(--bad);background:var(--bad-soft)}
+input.blank.shown{border-style:dashed}
+.bn{display:inline-block;min-width:1.35em;text-align:center;font-size:10.5px;font-weight:600;color:var(--surface);background:var(--accent);border-radius:999px;margin-right:2px;line-height:1.5;vertical-align:1px}
+.fillbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fillmsg{font-size:13.5px;color:var(--muted)}
+
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.two{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.card h4{margin-top:0}
+.muted{color:var(--muted)}
+.sources li{font-size:14px}
+footer{margin-top:60px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+
+<nav class="topnav" aria-label="Sections">
+  <div class="in">
+    <a href="#format">考試格式</a>
+    <a href="#photo">相片兩題</a>
+    <a href="#mapreduce">MapReduce</a>
+    <a href="#spark">Spark 概念</a>
+    <a href="#ops">RDD 速查</a>
+    <a href="#l1l2">L1 · L2</a>
+    <a href="#mcq">模擬 MCQ</a>
+    <a href="#mrpractice">MapReduce 練習</a>
+    <a href="#sparkpractice">Spark 填充</a>
+    <a href="#concept">概念短答</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">DSAI4205 Big Data Analytics · Dr Ken FONG</div>
+  <h1>Quiz 1 <span class="k">溫習包</span></h1>
+  <p class="lede">由零開始：先睇相片兩題嘅答案同解釋，再睇 MapReduce 同 Spark 核心概念，最後做 59 條 MCQ、14 條 MapReduce 同 11 條 Spark 填充練習。所有 Spark 答案都用課堂 sample data 逐行核對過。</p>
+  <div class="facts">
+    <span class="fact">時間表：<b>Week 6 · 9 Oct</b></span>
+    <span class="fact">範圍：<b>L1–L3</b>（L4 Hive 唔考）</span>
+    <span class="fact">閉卷 · <b>1 小時</b></span>
+    <span class="fact">佔總成績 <b>5%</b></span>
+  </div>
+</header>
+
+<!-- ============ FORMAT ============ -->
+<section id="format">
+  <div class="sec-head"><span class="eyebrow">根據老師 10 月 2 日 lecture 錄音</span><h2>考試格式</h2></div>
+  <div class="tbl wide"><table>
+    <thead><tr><th>部分</th><th>題型</th><th>內容</th><th>點準備</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag acc">Section A</span></td><td>15 條 MCQ（單選 A/B/C/D）</td><td>L1–L3：Big Data、Parallelism + Dask、MapReduce + Spark。同每星期 lecture 嘅小問題差唔多</td><td>睇「Spark 概念」「L1 · L2」，做 <a href="#mcq">模擬 MCQ</a></td></tr>
+      <tr><td><span class="tag map">Q1(a)</span></td><td>MapReduce pseudocode</td><td>老師俾場景同 <code>function MAP(...)</code>、<code>function REDUCE(...)</code> header（input 唔可以改），你分開寫 mapper 同 reducer</td><td>背 <a href="#mapreduce">答題模板</a>，做 <a href="#mrpractice">MapReduce 練習</a></td></tr>
+      <tr><td><span class="tag map">Q1(b)</span></td><td>概念短答</td><td>老師冇透露題目，只講「問概念，用文字答」</td><td>背 <a href="#concept">概念短答</a> 8 題</td></tr>
+      <tr><td><span class="tag red">Q2</span></td><td>Spark 填充</td><td>一段完整 PySpark 程式，挖走大約 6 格（例如用 <code>map</code> 定 <code>flatMap</code>）。SparkSession 開頭幾行會俾你</td><td>熟讀 <a href="#photo">相片 2 + inverted index</a>，做 <a href="#sparkpractice">Spark 填充</a></td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">老師原話：總分「大約 60 分（if I remember well）」；嚴格一小時，夠鐘要停筆；考場分三間房，睇老師上載嘅 quiz venue PDF 搵自己間房。</p>
+
+  <div class="callout key">
+    <span class="lbl">時間唔夠就跟呢個次序</span>
+    <ol>
+      <li><b>相片 1（inverted index MapReduce）</b>：Q1(a) 會係同一個格式嘅新場景。記住 key 揀啱、reducer 要去重複。</li>
+      <li><b>Spark inverted index + word count</b>：Q2 填充好大機會由呢兩段改出嚟。逐行知道 RDD 變成咩樣。</li>
+      <li><b>Transformation vs Action、Narrow vs Wide、Lazy、Lineage</b>：MCQ 同 Q1(b) 最常考。</li>
+      <li><b>L1 6Vs、L2 scale up/out、sharding/replication、Dask chunks</b>：MCQ 送分位。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ PHOTOS ============ -->
+<section id="photo">
+  <div class="sec-head"><span class="eyebrow">你影嘅兩張相</span><h2>相片兩題：答案同解釋</h2></div>
+
+  <h3>相片 1 · In-class exercise（slide 67）：用 MapReduce 建 inverted index</h3>
+  <div class="exam">
+    <div class="src">同 DSAI4205 2025/26 Sem 1 期考 Q1(a)（10 分）一模一樣</div>
+    <p>To enable fast keyword search, build an <b>inverted index</b> that maps each word → list of document IDs where it appears. Please provide the pseudocode of <b>one MapReduce job</b>.</p>
+    <div class="tbl" style="margin:8px 0 0"><table>
+      <thead><tr><th>Example input</th><th>Desired output</th></tr></thead>
+      <tbody><tr><td class="brk"><code>D1 || the cat sat on the mat</code><br><code>D2 || a quick brown fox jumps</code><br><code>D3 || the quick brown fox</code><br><code>D4 || sat on the brown mat</code></td>
+      <td class="brk"><code>a: [D2]</code> <code>brown: [D2, D3, D4]</code> <code>cat: [D1]</code> <code>fox: [D2, D3]</code> <code>jumps: [D2]</code> <code>mat: [D1, D4]</code> <code>on: [D1, D4]</code> <code>quick: [D2, D3]</code> <code>sat: [D1, D4]</code> <code>the: [D1, D3, D4]</code></td></tr></tbody>
+    </table></div>
+  </div>
+
+  <h4>標準答案（老師喺相入面寫嘅版本）</h4>
+<pre class="code"><code>function MAP(doc_id, document_text):
+    words = trim(split(document_text, " "))      // 切成一粒粒字，順手去走前後空格
+    for each word in words:
+        emit(word, doc_id)                        // key = word, value = doc_id
+
+function REDUCE(word, doc_ids_list):              // 收到時已經 group 好，例如 ("the", [D1, D1, D3, D4])
+    doc_ids_list = doc_ids_list.removeDuplicates() // ★ 最多人漏：同一份文件可以出現同一個字兩次
+    emit(word, doc_ids_list)                      // ("the", [D1, D3, D4])</code></pre>
+
+  <figure>
+    <div class="mrflow" role="img" aria-label="Inverted index MapReduce data flow: input, map, shuffle and sort, reduce">
+      <div class="mrcol"><h5>Input <span class="who">(doc_id, text)</span></h5>
+        <div class="row">D1 || the cat sat on the mat</div>
+        <div class="row">D2 || a quick brown fox jumps</div>
+        <div class="row">D3 || the quick brown fox</div>
+        <div class="row">D4 || sat on the brown mat</div>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="mrcol map"><h5>Map <span class="who">你寫 · emit(word, doc_id)</span></h5>
+        <div class="row">(the,D1) (cat,D1) (sat,D1) (on,D1) (the,D1) (mat,D1)</div>
+        <div class="row">(a,D2) (quick,D2) (brown,D2) (fox,D2) (jumps,D2)</div>
+        <div class="row">(the,D3) (quick,D3) (brown,D3) (fox,D3)</div>
+        <div class="row">(sat,D4) (on,D4) (the,D4) (brown,D4) (mat,D4)</div>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="mrcol shuf"><h5>Shuffle &amp; Sort <span class="who">框架自動 · 按 key group</span></h5>
+        <div class="row">the → [D1, D1, D3, D4]</div>
+        <div class="row">brown → [D2, D3, D4]</div>
+        <div class="row">sat → [D1, D4]</div>
+        <div class="row">… 共 10 個 key</div>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="mrcol red"><h5>Reduce <span class="who">你寫 · 去重複再 emit</span></h5>
+        <div class="row">the → [D1, <span class="strike">D1</span>, D3, D4]</div>
+        <div class="row">brown → [D2, D3, D4]</div>
+        <div class="row">sat → [D1, D4]</div>
+        <div class="row">…</div>
+      </div>
+    </div>
+    <figcaption>圖 1：每個 mapper 處理一份文件；shuffle 將所有相同 key 嘅 pair 送去同一個 reducer。D1 有兩個 “the”，所以 shuffle 之後 list 入面有兩個 D1，reducer 要刪走一個。</figcaption>
+  </figure>
+
+  <div class="tbl"><table>
+    <thead><tr><th>階段</th><th>邊個做</th><th>Input</th><th>Output</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag map">MAP</span></td><td>你寫</td><td><code>(D1, "the cat sat on the mat")</code></td><td><code>(the,D1) (cat,D1) …</code> 每粒字一個 pair</td></tr>
+      <tr><td><span class="tag shuf">SHUFFLE</span></td><td>框架自動</td><td>所有 mapper 嘅 output</td><td><code>(the, [D1, D1, D3, D4])</code> 只係 group，<b>唔會</b>去重複</td></tr>
+      <tr><td><span class="tag red">REDUCE</span></td><td>你寫</td><td><code>(word, doc_ids_list)</code></td><td><code>(the, [D1, D3, D4])</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout warn">
+    <span class="lbl">易錯位（老師親口講）</span>
+    <ul>
+      <li><b>key 揀錯</b>：寫 <code>emit(doc_id, word)</code> 會令 shuffle 按 D1、D2 group，等於砌返原本份文件，冇用。要按「字」分組，key 就係 word。</li>
+      <li><b>喺 reducer 寫 group by</b>：grouping 係 shuffle 做嘅，reducer 收到嗰陣已經係 <code>(key, list of values)</code>。</li>
+      <li><b>漏 removeDuplicates</b>：「去年大部分同學 MAP 啱晒，REDUCE 就因為冇去重複而失分。」</li>
+      <li>冇寫 <code>trim</code> 都有分：只要講清楚「split 成字 → 每個字 emit(word, doc_id)」就攞 MAP 全部分數。</li>
+    </ul>
+  </div>
+  <p class="muted">另一個做法：喺 MAP 用 <code>for each word in set(words)</code>，每份文件每個字只 emit 一次，咁 reducer 就唔使去重複。兩種都啱，但考試寫老師版本最穩陣。</p>
+
+  <h3>相片 2 · Tutorial 3 TODO #2：Spark word count，按次數由大到細排</h3>
+  <div class="exam">
+    <div class="src">Tutorial 3 slide 2 · 老師喺 line 1–4 旁邊寫咗 “must be given”</div>
+    <p>Write a module to read the “wordCountEx.txt” file, split the word by space and do a word count and sort the result descending.</p>
+  </div>
+<pre class="code"><code><span class="given">from pyspark.sql import SparkSession</span>
+<span class="given">from operator import add</span>
+<span class="given">ss = SparkSession.builder.master("local[1]")\</span>
+<span class="given">     .appName("T03").getOrCreate()</span>
+
+spark = ss.sparkContext
+textRDD = spark.textFile('wordCountEx.txt')
+textRDD = textRDD.flatMap(lambda x: x.split())              # ① 句子 → 一粒粒字
+textRDD = textRDD.map(lambda x: (x.lower(), 1))             # ② 每粒字 → (細階字, 1)
+textRDD = textRDD.reduceByKey(add)                          # ③ 同一個字嘅 1 加埋
+textRDD = textRDD.sortBy(lambda x: x[1], ascending=False)   # ④ 按次數 x[1] 由大到細
+textRDD.collect()                                           # ⑤ action：先真正開始計</code></pre>
+  <p class="cap">Line 1–4 考試會俾你，唔使背。Line 8–12 係答案。</p>
+
+  <div class="tbl wide"><table>
+    <thead><tr><th>行</th><th>做咗咩</th><th>RDD 入面變成</th><th>lambda 入面嘅 x 係</th></tr></thead>
+    <tbody>
+      <tr><td class="num">7</td><td><code>textFile</code></td><td class="brk"><code>['The quick brown fox jumps over the lazy dog. This sentence is …']</code>（每行文字一個 string）</td><td>—</td></tr>
+      <tr><td class="num">8</td><td><code>flatMap(split)</code></td><td class="brk"><code>['The', 'quick', 'brown', …, 'learning!']</code></td><td>一行文字</td></tr>
+      <tr><td class="num">9</td><td><code>map((x.lower(), 1))</code></td><td class="brk"><code>[('the',1), ('quick',1), ('brown',1), …]</code></td><td>一粒字</td></tr>
+      <tr><td class="num">10</td><td><code>reduceByKey(add)</code></td><td class="brk"><code>[('the',3), ('quick',1), …, ('this',2), ('to',2), ('letter',2), …]</code></td><td><code>add</code> 每次收同一個 key 嘅兩個 value</td></tr>
+      <tr><td class="num">11</td><td><code>sortBy(x[1], ascending=False)</code></td><td class="brk"><code>[('the',3), ('this',2), ('to',2), ('letter',2), ('quick',1), …]</code></td><td>一個 <code>(word, count)</code> tuple；<code>x[1]</code> = count</td></tr>
+      <tr><td class="num">12</td><td><code>collect()</code></td><td>Python list（已經唔係 RDD）</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+
+  <figure>
+    <div class="card">
+      <div class="mf">
+        <div class="mfrow"><span class="lab">input RDD</span><div class="chips"><span class="chip">'hello world'</span><span class="chip">'hi'</span></div></div>
+        <div class="mfrow"><span class="lab">map(split) → 2 個</span><div class="chips"><span class="chip outer"><span class="chip w">'hello'</span><span class="chip w">'world'</span></span><span class="chip outer"><span class="chip w">'hi'</span></span></div></div>
+        <div class="mfrow"><span class="lab">flatMap(split) → 3 個</span><div class="chips"><span class="chip w">'hello'</span><span class="chip w">'world'</span><span class="chip w">'hi'</span></div></div>
+      </div>
+    </div>
+    <figcaption>圖 2：<code>map</code> 一個 input 出一個 output，所以 split 之後每行變咗一個 list（黃框 = 內層 <code>[ ]</code>）。<code>flatMap</code> 會拆走內層 <code>[ ]</code>，變成一條平嘅字 list。Line 8 要用 flatMap；去到 line 9 已經係一粒粒字，冇嘢要拆，所以用 map。</figcaption>
+  </figure>
+
+  <div class="callout tip">
+    <span class="lbl">記住三樣嘢</span>
+    <ul>
+      <li><code>from operator import add</code> 之後，<code>reduceByKey(add)</code> 同 <code>reduceByKey(lambda a, b: a + b)</code> 完全一樣。</li>
+      <li><code>sortBy(lambda x: x[1], ascending=False)</code>：按 value 排、由大到細。按 key 排就用 <code>sortByKey()</code>。</li>
+      <li><code>result = textRDD.collect()</code> 之後 <code>result</code> 係 Python list，<b>唔可以</b>再 <code>result.map(...)</code>。</li>
+    </ul>
+  </div>
+
+  <h3>最大機會變成 Q2 填充：Take-home inverted index（Spark 版）</h3>
+  <p>老師講：「我會俾你成個程式，然後遮住某啲部分，我記得遮咗 6 個位。」佢喺 lecture 逐行講咗呢段 solution，所以一定要識。</p>
+<pre class="code"><code>rdd = spark.textFile('documents.txt')
+rdd = rdd.map(lambda x: x.split('||')) \
+         .map(lambda parts: (parts[0].strip(), parts[1].strip()))
+rdd = rdd.flatMap(lambda pair: [(word.strip().lower(), pair[0]) for word in pair[1].split()])
+rdd = rdd.distinct()
+rdd = rdd.groupByKey().map(lambda x: (x[0], sorted(list(x[1])))).sortByKey()
+rdd.collect()</code></pre>
+  <div class="tbl wide"><table>
+    <thead><tr><th>步驟</th><th>結果</th><th>重點</th></tr></thead>
+    <tbody>
+      <tr><td><code>textFile</code></td><td class="brk"><code>['D1 || the cat sat on the mat  ', 'D2 || a quick brown fox jumps  ', …]</code></td><td>每行一個 string</td></tr>
+      <tr><td><code>map(split('||'))</code></td><td class="brk"><code>[['D1 ', ' the cat sat on the mat  '], …]</code></td><td><code>||</code> 左邊係 ID，右邊係內容</td></tr>
+      <tr><td><code>map((parts[0].strip(), parts[1].strip()))</code></td><td class="brk"><code>[('D1', 'the cat sat on the mat'), …]</code></td><td>變成 (doc_id, 句子)，strip 去空格</td></tr>
+      <tr><td><code>flatMap(…)</code></td><td class="brk"><code>[('the','D1'), ('cat','D1'), ('sat','D1'), ('on','D1'), ('the','D1'), …]</code> 共 20 個</td><td><code>pair[0]</code> = doc ID，<code>pair[1]</code> = 句子。用 flatMap 因為一句出好多個 pair</td></tr>
+      <tr><td><code>distinct()</code></td><td>剩 19 個（刪咗第二個 <code>('the','D1')</code>）</td><td>等於 MapReduce 版嘅 removeDuplicates</td></tr>
+      <tr><td><code>groupByKey()</code></td><td class="brk"><code>[('the', &lt;ResultIterable&gt;), …]</code></td><td>等於 shuffle；value 要 <code>list()</code> 先睇到</td></tr>
+      <tr><td><code>map((x[0], sorted(list(x[1]))))</code></td><td class="brk"><code>[('the', ['D1','D3','D4']), …]</code></td><td><code>sorted</code> 排 list 入面嘅 doc ID</td></tr>
+      <tr><td><code>sortByKey()</code></td><td class="brk"><code>[('a',['D2']), ('brown',['D2','D3','D4']), ('cat',['D1']), …]</code></td><td>外層按字母排</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>MapReduce 版</th><th>Spark 版</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag map">MAP</span> split，emit(word, doc_id)</td><td><code>flatMap(lambda pair: [(w, pair[0]) for w in pair[1].split()])</code></td></tr>
+      <tr><td><span class="tag shuf">SHUFFLE</span> 自動按 key group</td><td><code>groupByKey()</code></td></tr>
+      <tr><td><span class="tag red">REDUCE</span> removeDuplicates</td><td><code>distinct()</code>（放喺 groupByKey 之前）</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ MAPREDUCE ============ -->
+<section id="mapreduce">
+  <div class="sec-head"><span class="eyebrow">L3 Part 1–2</span><h2>MapReduce：概念同答題模板</h2></div>
+  <p>MapReduce 係 Google 喺 2004 年發明，第一個廣泛使用嘅分散式大數據框架。三大賣點：<b>簡單嘅程式模型</b>（只寫 map 同 reduce）、<b>用平價硬件大規模擴展</b>、<b>內置 fault tolerance</b>。數據模型：一個 file 就係一袋 <code>(key, value)</code> pair，input 同 output 都係 (key, value)，output 嘅 key 可有可無。</p>
+
+  <div class="tbl"><table>
+    <thead><tr><th>步驟</th><th>做咩</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag map">1 · Map</span></td><td>由每個 record／文件抽取資料，輸出 (key, value)</td></tr>
+      <tr><td><span class="tag shuf">2 · Shuffle &amp; Sort</span></td><td>將 record 喺唔同機器之間搬，按 key 分組</td></tr>
+      <tr><td><span class="tag red">3 · Reduce</span></td><td>aggregate、summarize、filter 或 transform</td></tr>
+      <tr><td><span class="tag">4 · Write</span></td><td>寫出結果。成個框架唔變，只係因應題目改 map 同 reduce function</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>課堂 word count 例子（slide 11）</h4>
+<pre class="code"><code>map(String key, String value):          // key: document name, value: document contents
+    for each word w in value:
+        emitIntermediate(w, 1)
+
+reduce(String key, Iterator values):    // key: a word, values: a list of counts
+    sum = 0
+    for each v in values:
+        sum += v
+    emit(key, sum)</code></pre>
+
+  <div class="callout key">
+    <span class="lbl">Q1(a) 答題模板（4 步）</span>
+    <ol>
+      <li><b>問自己：最後要「按咩分組」？</b>答案就係 key。題目講 “in each department” → key = department；“for each word” → key = word。</li>
+      <li><b>MAP</b>：parse input → 如有條件就喺呢度 filter → <code>emit(key, value)</code>。</li>
+      <li><b>Shuffle 唔使寫</b>：框架自動變成 <code>(key, [v1, v2, …])</code>。可以喺 comment 寫低 reducer 會收到乜，示範你明。</li>
+      <li><b>REDUCE</b>：<code>for each v in values</code> → 加總／揀最大／去重複 → <code>emit(key, result)</code>。</li>
+    </ol>
+    <p>考試要求「specify input and output (key, value) pairs」嘅話，喺每個 function 上面用 comment 寫低 Input 同 Output 嘅格式同例子。</p>
+  </div>
+
+  <div class="tbl wide"><table>
+    <thead><tr><th>題目要求</th><th><span class="tag map">MAP emit</span></th><th><span class="tag red">REDUCE 做咩</span></th></tr></thead>
+    <tbody>
+      <tr><td>數每個字出現幾多次（word count）</td><td><code>(word, 1)</code></td><td>sum</td></tr>
+      <tr><td>每個部門有幾多人符合條件</td><td><code>if 條件: (dept, 1)</code></td><td>sum</td></tr>
+      <tr><td>每個城市最高溫</td><td><code>(city, temp)</code></td><td>max</td></tr>
+      <tr><td>每套戲平均分</td><td><code>(movie, rating)</code></td><td>sum ÷ count</td></tr>
+      <tr><td>每個字出現喺邊幾份文件（inverted index）</td><td><code>(word, doc_id)</code></td><td>去重複，emit list</td></tr>
+      <tr><td>每個字出現喺幾多份文件（document frequency）</td><td><code>(word, doc_id)</code></td><td>去重複後數長度</td></tr>
+      <tr><td>去重複（distinct）</td><td><code>(value, null)</code></td><td>每個 key emit 一次</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>MapReduce 嘅問題（點解要有 Spark）</h3>
+  <ul>
+    <li>所有嘢都要用 mapper 同 reducer 表達，好 rigid（唔可以淨係有 mapper），複雜 query 要串好多個 MapReduce job。</li>
+    <li>所有中間結果都寫落 <b>disk</b>（為咗 fault tolerance）。</li>
+    <li>唔同 iteration／phase 之間只可以靠 shared storage 傳數據。</li>
+    <li>因為 replication 同 disk I/O，所以<b>慢</b>。理想係經 memory 傳。</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>MapReduce</th><th>Spark</th></tr></thead>
+    <tbody>
+      <tr><td>中間結果</td><td>寫落 disk（HDFS）</td><td>放 memory（RDD，可以 cache）</td></tr>
+      <tr><td>程式模型</td><td>得 map + reduce 兩步</td><td>好多 transformation：map、filter、join、groupByKey…</td></tr>
+      <tr><td>Fault tolerance</td><td>靠 replication + disk</td><td>靠 lineage 重算失咗嘅 partition</td></tr>
+      <tr><td>最適合</td><td>一次過嘅 batch job</td><td>iterative、互動分析、streaming</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ SPARK ============ -->
+<section id="spark">
+  <div class="sec-head"><span class="eyebrow">L3 Part 3–5</span><h2>Spark 核心概念</h2></div>
+  <p>Spark 係一個平行處理數據嘅框架，支援大規模處理、將數據放喺 memory、同埋喺 worker 之間分配資源。四個 feature：<b>Fast processing</b>（用 RDD）、<b>In-memory computing</b>、<b>Flexible</b>（Java、Scala、R、Python）、<b>All-in-one</b>（SQL、ML、可視化）。</p>
+
+  <div class="tbl wide"><table>
+    <thead><tr><th>Component</th><th>用途</th><th>考試關鍵字</th></tr></thead>
+    <tbody>
+      <tr><td><b>Spark Core</b></td><td>基礎引擎：memory management、fault tolerance、scheduling／distributing／monitoring jobs、同 storage 溝通</td><td>內含 RDD</td></tr>
+      <tr><td><b>Spark SQL</b></td><td>structured 同 semi-structured 數據</td><td>DataFrame API、Data Source API、CSV／JSON</td></tr>
+      <tr><td><b>Spark Streaming</b></td><td>batch 同 real-time streaming</td><td>將 live stream 切成每 X 秒一批（最細 0.5 秒，latency 約 1 秒），每批當 RDD 處理</td></tr>
+      <tr><td><b>MLlib</b></td><td>可擴展嘅機器學習</td><td>clustering、classification</td></tr>
+      <tr><td><b>GraphX</b></td><td>圖計算引擎</td><td>graph ETL、EDA、graph computation</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Spark 架構（master–worker）</h3>
+  <figure>
+    <div class="diawrap">
+      <svg class="dia w700" viewBox="0 0 700 300" role="img" aria-labelledby="arch-t">
+        <title id="arch-t">Spark architecture: driver program with SparkContext on the master node, cluster manager, and two worker nodes each with an executor, cache and tasks</title>
+        <defs>
+          <marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker>
+        </defs>
+        <rect x="10" y="50" width="210" height="200" rx="12" class="box"/>
+        <text x="24" y="74" class="h">Master Node</text>
+        <rect x="26" y="88" width="178" height="146" rx="10" class="box2"/>
+        <text x="40" y="112" class="h">Driver Program</text>
+        <text x="40" y="132" class="small">你寫嘅 Spark code</text>
+        <rect x="42" y="168" width="146" height="40" rx="20" class="acc"/>
+        <text x="115" y="193" text-anchor="middle" class="mono tacc">SparkContext</text>
+
+        <rect x="266" y="118" width="160" height="62" rx="10" class="box"/>
+        <text x="346" y="144" text-anchor="middle" class="h">Cluster Manager</text>
+        <text x="346" y="164" text-anchor="middle" class="small">將 job 拆成 tasks 分派</text>
+
+        <rect x="472" y="16" width="218" height="128" rx="12" class="box"/>
+        <text x="486" y="38" class="h">Worker Node</text>
+        <rect x="486" y="50" width="120" height="34" rx="6" class="fmap"/>
+        <text x="546" y="72" text-anchor="middle" class="tmap">Executor</text>
+        <rect x="614" y="50" width="62" height="34" rx="6" class="box2"/>
+        <text x="645" y="72" text-anchor="middle">Cache</text>
+        <rect x="486" y="94" width="90" height="34" rx="6" class="fshuf"/>
+        <text x="531" y="116" text-anchor="middle" class="tshuf">Task</text>
+        <rect x="586" y="94" width="90" height="34" rx="6" class="fshuf"/>
+        <text x="631" y="116" text-anchor="middle" class="tshuf">Task</text>
+
+        <rect x="472" y="158" width="218" height="128" rx="12" class="box"/>
+        <text x="486" y="180" class="h">Worker Node</text>
+        <rect x="486" y="192" width="120" height="34" rx="6" class="fmap"/>
+        <text x="546" y="214" text-anchor="middle" class="tmap">Executor</text>
+        <rect x="614" y="192" width="62" height="34" rx="6" class="box2"/>
+        <text x="645" y="214" text-anchor="middle">Cache</text>
+        <rect x="486" y="236" width="90" height="34" rx="6" class="fshuf"/>
+        <text x="531" y="258" text-anchor="middle" class="tshuf">Task</text>
+        <rect x="586" y="236" width="90" height="34" rx="6" class="fshuf"/>
+        <text x="631" y="258" text-anchor="middle" class="tshuf">Task</text>
+
+        <path d="M190 182 L262 160" class="arr" marker-end="url(#ah1)" marker-start="url(#ah1)"/>
+        <path d="M428 136 L468 92" class="arr" marker-end="url(#ah1)"/>
+        <path d="M428 164 L468 210" class="arr" marker-end="url(#ah1)"/>
+      </svg>
+    </div>
+    <figcaption>圖 3：Driver program 喺 master node 度行，佢建立 <b>SparkContext</b>（所有 Spark 功能嘅入口）。Cluster manager 將 job 拆成多個 task，分派去 worker node；worker 入面嘅 executor 執行 task，可以 cache 數據。</figcaption>
+  </figure>
+
+  <h3>RDD（Resilient Distributed Dataset）</h3>
+  <div class="two">
+    <div class="card"><h4>RDD 係乜</h4>
+      <ul>
+        <li>Spark 最基本嘅數據結構</li>
+        <li><b>Immutable</b>：改唔到，只可以由舊 RDD 整個新 RDD</li>
+        <li><b>Distributed / partitioned</b>：分成 partition，喺唔同機器平行處理</li>
+        <li>只可以用 <b>coarse-grained、deterministic</b> 嘅 transformation 建立（map、filter、join）</li>
+      </ul>
+    </div>
+    <div class="card"><h4>三個關鍵特性</h4>
+      <ul>
+        <li><b>Lazy evaluation</b>：唔即刻執行，只喺 memory 起一棵 operator tree，要結果先計</li>
+        <li><b>Lineage</b>：記錄由原始數據到結果嘅每一步</li>
+        <li><b>Fault recovery</b>：partition 失咗就用 lineage 重算；冇出事就冇額外成本</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Transformation vs Action（必考）</h3>
+  <div class="tbl wide"><table>
+    <thead><tr><th></th><th>Transformation（T）</th><th>Action（A）</th></tr></thead>
+    <tbody>
+      <tr><td>回傳</td><td>新 RDD（RDD1 → RDD2）</td><td>一個值或 Python list（RDD → output）</td></tr>
+      <tr><td>幾時執行</td><td>Lazy：只記入 logical plan／lineage</td><td>即刻觸發成條鏈執行</td></tr>
+      <tr><td>例子</td><td class="brk"><code>map</code> <code>flatMap</code> <code>filter</code> <code>distinct</code> <code>groupBy</code> <code>groupByKey</code> <code>reduceByKey</code> <code>mapValues</code> <code>sortBy</code> <code>sortByKey</code> <code>union</code> <code>intersection</code> <code>subtract</code> <code>cartesian</code> <code>join</code> <code>leftOuterJoin</code> <code>randomSplit</code></td><td class="brk"><code>collect</code> <code>count</code> <code>first</code> <code>take</code> <code>sum</code> <code>mean</code> <code>min</code> <code>max</code> <code>stdev</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn"><span class="lbl">陷阱</span>
+    <p><code>reduceByKey</code> 個名有 reduce，但佢回傳 RDD，所以係 <b>transformation</b>。Lecture slide 29 將 <code>parallelize</code> 都當 transformation（“four operations in two types”：parallelize、map、filter 係 T，collect 係 A）。</p>
+  </div>
+  <p><b>Lazy 嘅證明</b>：<code>spark.textFile('不存在.txt')</code> 唔會出錯，去到 <code>.collect()</code> 先報錯。<b>好處</b>：Spark 可以睇晒成條鏈先執行，合併同 pipeline 步驟、減少重複處理，慳時間同運算資源。</p>
+  <p><b>Slide 29–31 例子</b>：data = <code>[("A",1), ("B",2), ("A",3), ("B",5)]</code>，先 <code>map</code> 乘 2 再 <code>filter</code> key == 'A'，得 <code>[('A', 2), ('A', 6)]</code>。調轉做（先 filter 再 map）結果一樣但更快，因為 map 要處理嘅數據少咗。</p>
+
+  <h3>Narrow vs Wide transformation（老師上堂問過）</h3>
+  <figure>
+    <div class="diawrap">
+      <svg class="dia w700" viewBox="0 0 700 250" role="img" aria-labelledby="nw-t">
+        <title id="nw-t">Narrow transformation (filter) keeps each output partition fed by one input partition; wide transformation (sortBy) needs data from several partitions, which is a shuffle</title>
+        <defs>
+          <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah a"/></marker>
+        </defs>
+        <text x="16" y="24" class="h">Narrow：filter(key == 'A')</text>
+        <text x="16" y="80" class="small">P1</text><text x="16" y="156" class="small">P2</text>
+        <rect x="40" y="40" width="50" height="34" class="fmap"/><text x="65" y="62" text-anchor="middle" class="mono">A</text>
+        <rect x="90" y="40" width="50" height="34" class="fmap"/><text x="115" y="62" text-anchor="middle" class="mono">1</text>
+        <rect x="40" y="78" width="50" height="34" class="fmap"/><text x="65" y="100" text-anchor="middle" class="mono">B</text>
+        <rect x="90" y="78" width="50" height="34" class="fmap"/><text x="115" y="100" text-anchor="middle" class="mono">2</text>
+        <rect x="40" y="122" width="50" height="34" class="fshuf"/><text x="65" y="144" text-anchor="middle" class="mono">A</text>
+        <rect x="90" y="122" width="50" height="34" class="fshuf"/><text x="115" y="144" text-anchor="middle" class="mono">3</text>
+        <rect x="40" y="160" width="50" height="34" class="fshuf"/><text x="65" y="182" text-anchor="middle" class="mono">B</text>
+        <rect x="90" y="160" width="50" height="34" class="fshuf"/><text x="115" y="182" text-anchor="middle" class="mono">4</text>
+        <rect x="230" y="60" width="50" height="34" class="fmap"/><text x="255" y="82" text-anchor="middle" class="mono">A</text>
+        <rect x="280" y="60" width="50" height="34" class="fmap"/><text x="305" y="82" text-anchor="middle" class="mono">1</text>
+        <rect x="230" y="140" width="50" height="34" class="fshuf"/><text x="255" y="162" text-anchor="middle" class="mono">A</text>
+        <rect x="280" y="140" width="50" height="34" class="fshuf"/><text x="305" y="162" text-anchor="middle" class="mono">3</text>
+        <path d="M144 57 L226 75" class="arr a" marker-end="url(#ah2)"/>
+        <path d="M144 139 L226 155" class="arr a" marker-end="url(#ah2)"/>
+        <text x="16" y="226" class="small">每個 output partition 只靠一個 input partition → 唔使 shuffle</text>
+
+        <text x="370" y="24" class="h">Wide：sortBy(key)</text>
+        <rect x="380" y="40" width="50" height="34" class="fmap"/><text x="405" y="62" text-anchor="middle" class="mono">A</text>
+        <rect x="430" y="40" width="50" height="34" class="fmap"/><text x="455" y="62" text-anchor="middle" class="mono">1</text>
+        <rect x="380" y="78" width="50" height="34" class="fmap"/><text x="405" y="100" text-anchor="middle" class="mono">B</text>
+        <rect x="430" y="78" width="50" height="34" class="fmap"/><text x="455" y="100" text-anchor="middle" class="mono">2</text>
+        <rect x="380" y="122" width="50" height="34" class="fshuf"/><text x="405" y="144" text-anchor="middle" class="mono">A</text>
+        <rect x="430" y="122" width="50" height="34" class="fshuf"/><text x="455" y="144" text-anchor="middle" class="mono">3</text>
+        <rect x="380" y="160" width="50" height="34" class="fshuf"/><text x="405" y="182" text-anchor="middle" class="mono">B</text>
+        <rect x="430" y="160" width="50" height="34" class="fshuf"/><text x="455" y="182" text-anchor="middle" class="mono">4</text>
+        <rect x="580" y="40" width="50" height="34" class="fred"/><text x="605" y="62" text-anchor="middle" class="mono">A</text>
+        <rect x="630" y="40" width="50" height="34" class="fred"/><text x="655" y="62" text-anchor="middle" class="mono">1</text>
+        <rect x="580" y="78" width="50" height="34" class="fred"/><text x="605" y="100" text-anchor="middle" class="mono">A</text>
+        <rect x="630" y="78" width="50" height="34" class="fred"/><text x="655" y="100" text-anchor="middle" class="mono">3</text>
+        <rect x="580" y="122" width="50" height="34" class="fred"/><text x="605" y="144" text-anchor="middle" class="mono">B</text>
+        <rect x="630" y="122" width="50" height="34" class="fred"/><text x="655" y="144" text-anchor="middle" class="mono">2</text>
+        <rect x="580" y="160" width="50" height="34" class="fred"/><text x="605" y="182" text-anchor="middle" class="mono">B</text>
+        <rect x="630" y="160" width="50" height="34" class="fred"/><text x="655" y="182" text-anchor="middle" class="mono">4</text>
+        <path d="M484 57 L576 57" class="arr a" marker-end="url(#ah2)"/>
+        <path d="M484 95 L576 137" class="arr a" marker-end="url(#ah2)"/>
+        <path d="M484 139 L576 97" class="arr a" marker-end="url(#ah2)"/>
+        <path d="M484 177 L576 177" class="arr a" marker-end="url(#ah2)"/>
+        <text x="370" y="226" class="small">output partition 要攞唔同 partition 嘅數據 → shuffle（經網絡傳）</text>
+      </svg>
+    </div>
+    <figcaption>圖 4：綠色 = 原本 partition 1，黃色 = partition 2。filter 嘅箭咀冇交叉；sortBy 嘅箭咀交叉，代表數據要喺 partition 之間搬。</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>Narrow</th><th>Wide</th></tr></thead>
+    <tbody>
+      <tr><td>定義</td><td>一個 output partition 只由一個 input partition 計出</td><td>其他所有情況：要用多個 partition 嘅數據</td></tr>
+      <tr><td>Shuffle？</td><td>唔使，唔使問其他 worker 攞數據</td><td>要，數據經網絡傳 → latency 高、會開新 stage</td></tr>
+      <tr><td>例子</td><td><code>map</code> <code>flatMap</code> <code>filter</code> <code>mapValues</code> <code>union</code></td><td><code>groupByKey</code> <code>reduceByKey</code> <code>sortBy</code> <code>sortByKey</code> <code>distinct</code> <code>join</code> <code>groupBy</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Job、Stage、Task</h3>
+  <figure>
+    <div class="diawrap">
+      <svg class="dia w700" viewBox="0 0 700 250" role="img" aria-labelledby="jst-t">
+        <title id="jst-t">One job triggered by collect, split into stage 1 (textFile, flatMap, map; 4 tasks) and stage 2 (reduceByKey; 4 tasks) at the shuffle boundary</title>
+        <defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+        <rect x="6" y="28" width="688" height="214" rx="12" class="dash"/>
+        <text x="20" y="20" class="h">1 個 Job（由 action collect() 觸發）</text>
+        <rect x="20" y="44" width="372" height="186" rx="10" class="fmap"/>
+        <text x="34" y="66" class="h tmap">Stage 1：narrow，一口氣做完</text>
+        <rect x="34" y="82" width="96" height="32" rx="6" class="box"/><text x="82" y="103" text-anchor="middle" class="mono">textFile</text>
+        <rect x="154" y="82" width="96" height="32" rx="6" class="box"/><text x="202" y="103" text-anchor="middle" class="mono">flatMap</text>
+        <rect x="274" y="82" width="96" height="32" rx="6" class="box"/><text x="322" y="103" text-anchor="middle" class="mono">map</text>
+        <path d="M130 98 L150 98" class="arr" marker-end="url(#ah3)"/><path d="M250 98 L270 98" class="arr" marker-end="url(#ah3)"/>
+        <rect x="34" y="150" width="76" height="56" rx="6" class="box"/><text x="72" y="174" text-anchor="middle" class="mono">Task</text><text x="72" y="194" text-anchor="middle" class="small">P1</text>
+        <rect x="122" y="150" width="76" height="56" rx="6" class="box"/><text x="160" y="174" text-anchor="middle" class="mono">Task</text><text x="160" y="194" text-anchor="middle" class="small">P2</text>
+        <rect x="210" y="150" width="76" height="56" rx="6" class="box"/><text x="248" y="174" text-anchor="middle" class="mono">Task</text><text x="248" y="194" text-anchor="middle" class="small">P3</text>
+        <rect x="298" y="150" width="76" height="56" rx="6" class="box"/><text x="336" y="174" text-anchor="middle" class="mono">Task</text><text x="336" y="194" text-anchor="middle" class="small">P4</text>
+        <text x="34" y="140" class="small">4 個 partition → 4 個 task（每個 task 用一個 CPU core）</text>
+        <path d="M408 40 L408 236" class="dash"/>
+        <text x="416" y="56" class="tshuf small">shuffle</text>
+        <rect x="424" y="64" width="262" height="166" rx="10" class="fred"/>
+        <text x="438" y="86" class="h tred">Stage 2：shuffle 之後</text>
+        <rect x="438" y="100" width="124" height="32" rx="6" class="box"/><text x="500" y="121" text-anchor="middle" class="mono">reduceByKey</text>
+        <rect x="584" y="100" width="88" height="32" rx="6" class="facc"/><text x="628" y="121" text-anchor="middle" class="mono tacc">collect</text>
+        <path d="M562 116 L580 116" class="arr" marker-end="url(#ah3)"/>
+        <rect x="438" y="150" width="54" height="56" rx="6" class="box"/><text x="465" y="183" text-anchor="middle" class="mono">Task</text>
+        <rect x="498" y="150" width="54" height="56" rx="6" class="box"/><text x="525" y="183" text-anchor="middle" class="mono">Task</text>
+        <rect x="558" y="150" width="54" height="56" rx="6" class="box"/><text x="585" y="183" text-anchor="middle" class="mono">Task</text>
+        <rect x="618" y="150" width="54" height="56" rx="6" class="box"/><text x="645" y="183" text-anchor="middle" class="mono">Task</text>
+      </svg>
+    </div>
+    <figcaption>圖 5：word count 嘅執行計劃。<b>每個 action 開 1 個 job</b>；<b>有 shuffle 就開新 stage</b>；<b>每個 partition 一個 task</b>（2 個 partition 做 filter 就有 2 個 task）。Task 係送去 executor 嘅最細工作單位。</figcaption>
+  </figure>
+
+  <h3>其他要識嘅位</h3>
+  <div class="tbl wide"><table>
+    <thead><tr><th>主題</th><th>重點</th></tr></thead>
+    <tbody>
+      <tr><td><b>Partition 大細</b></td><td>大 partition：開 task 嘅 overhead 少；但可能用唔晒所有 core、難平均分工、用多啲 memory。細 partition：task 多，overhead 大。要取捨。</td></tr>
+      <tr><td><b>Granularity</b></td><td>Whole dataset（可能塞唔落 memory）、Row（彈性高但慢）、Partition（用 <code>sc.parallelize(data, 2)</code> 自己定 partition 數）。</td></tr>
+      <tr><td><b>Caching</b></td><td>同一個 RDD 會重用好多次（例如 <code>hk_weather</code> 用嚟計平均溫度、預測雨量、計相關性），就 <code>hk_weather.cache()</code>，用完 <code>unpersist()</code>。類似 Dask 嘅 <code>persist()</code>。</td></tr>
+      <tr><td><b>Join 同 partition</b></td><td>兩個 RDD partition 方法唔同 → join 要 all-to-all 網絡傳輸。如果用同一個 key、同一個 partitioner、同一個 partition 數 → 唔使搬。<code>partitionBy()</code> 只用喺 key-value RDD，預設 hash partitioner。</td></tr>
+      <tr><td><b>Worker 死咗</b></td><td>佢嘅 task 冇咗 → 用 lineage 由原始數據重算失咗嘅 partition → driver 將 task 分派去其他 worker，job 繼續。</td></tr>
+      <tr><td><b>Driver 死咗</b></td><td>成個 application 嘅 state 冇晒，<b>冇自動恢復</b>，要由頭再跑。</td></tr>
+      <tr><td><b>Lineage 例子</b></td><td>csv（read ratings.csv）→ Filter（rating &gt; 3）→ Aggregate（group by and count）。存喺 logical plan 入面。</td></tr>
+      <tr><td><b>Spark runtime（slide 41）</b></td><td><code>lines = textFile</code>（base RDD）→ <code>errors = filter</code> → <code>messages = map</code> → <code>messages.cache()</code> → <code>count()</code> 時先：讀 file、做 transformation、做 action、結果送返 driver。</td></tr>
+      <tr><td><b>應用</b></td><td>JPMorgan（偵測詐騙交易）、Alibaba（實時交易、瀏覽紀錄做推薦）、IQVIA（分析病人數據）、Netflix／Riot Games（推薦、減少 buffering）。</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ OPS ============ -->
+<section id="ops">
+  <div class="sec-head"><span class="eyebrow">L3 slide 46–62 嘅例子，結果照抄</span><h2>RDD 操作速查表</h2></div>
+  <div class="tbl wide"><table>
+    <thead><tr><th>操作</th><th>類型</th><th>例子</th><th>結果</th></tr></thead>
+    <tbody>
+      <tr><td><code>map(f)</code></td><td><span class="tag map">T · narrow</span></td><td><code>[1,2,3].map(addOne)</code></td><td><code>[2, 3, 4]</code></td></tr>
+      <tr><td><code>filter(f)</code></td><td><span class="tag map">T · narrow</span></td><td><code>[3,1,2,5,5].filter(lambda x: x &gt; 2)</code></td><td><code>[3, 5, 5]</code></td></tr>
+      <tr><td><code>distinct()</code></td><td><span class="tag red">T · wide</span></td><td><code>[3,1,2,5,5,5].distinct()</code></td><td><code>[3, 1, 2, 5]</code></td></tr>
+      <tr><td><code>flatMap(f)</code></td><td><span class="tag map">T · narrow</span></td><td><code>['hello world','hi',…].flatMap(lambda x: x.split(' '))</code></td><td><code>['hello','world','hi',…]</code></td></tr>
+      <tr><td><code>groupBy(f)</code></td><td><span class="tag red">T · wide</span></td><td><code>[1,1,2,3,5,8].groupBy(lambda x: x % 2)</code></td><td><code>[(1,[1,1,3,5]), (0,[2,8])]</code>（value 要 <code>list()</code>）</td></tr>
+      <tr><td><code>randomSplit(w)</code></td><td><span class="tag">T</span></td><td><code>range(10).randomSplit([0.6, 0.4])</code></td><td>例如 <code>[0,1,4,5,6,7,8,9]</code> 同 <code>[2,3]</code>，唔保證 6:4</td></tr>
+      <tr><td><code>union</code></td><td><span class="tag map">T · narrow</span></td><td><code>[1,1,2,3] ∪ [4,5,6,7] ∪ [21,22,23,25]</code></td><td><code>[1,1,2,3,4,5,6,7,21,22,23,25]</code>（保留重複）</td></tr>
+      <tr><td><code>intersection</code></td><td><span class="tag red">T · wide</span></td><td><code>[1,1,2,3] ∩ [3,4,5,7]</code></td><td><code>[3]</code>（去重複）</td></tr>
+      <tr><td><code>subtract</code></td><td><span class="tag red">T · wide</span></td><td><code>[1,1,2,3] − [3,4,5,7]</code></td><td><code>[1, 1, 2]</code>（保留重複）</td></tr>
+      <tr><td><code>cartesian</code></td><td><span class="tag">T</span></td><td><code>[1,1,2,3] × [3,4,5,7]</code></td><td>4 × 4 = 16 對：<code>(1,3), (1,4), …, (3,7)</code></td></tr>
+      <tr><td><code>first()</code></td><td><span class="tag acc">A</span></td><td><code>[21,1,2,3].first()</code></td><td><code>21</code></td></tr>
+      <tr><td><code>take(n)</code></td><td><span class="tag acc">A</span></td><td><code>[21,1,2,3].take(2)</code></td><td><code>[21, 1]</code></td></tr>
+      <tr><td><code>min / max</code></td><td><span class="tag acc">A</span></td><td><code>[10,1,2,9,3,4,5,6,7]</code></td><td><code>1</code> / <code>10</code></td></tr>
+      <tr><td><code>mean / sum / count</code></td><td><span class="tag acc">A</span></td><td><code>[1,2,3,4].mean()</code>、<code>.sum()</code>；<code>[2,3,4].count()</code></td><td><code>2.5</code>、<code>10</code>；<code>3</code></td></tr>
+      <tr><td><code>stdev()</code></td><td><span class="tag acc">A</span></td><td>標準差</td><td>（slide 55 張圖誤用咗 max，唔使理）</td></tr>
+      <tr><td>KV <code>filter</code> by key</td><td><span class="tag map">T · narrow</span></td><td><code>[(3,4),(3,6),(5,6),(1,2)].filter(lambda kv: kv[0] &lt; 5)</code></td><td><code>[(3,4), (3,6), (1,2)]</code></td></tr>
+      <tr><td>KV <code>filter</code> by value</td><td><span class="tag map">T · narrow</span></td><td>同上，<code>kv[1] &lt; 5</code></td><td><code>[(3,4), (1,2)]</code></td></tr>
+      <tr><td><code>mapValues(f)</code></td><td><span class="tag map">T · narrow</span></td><td><code>[(3,4),(3,1),(5,6),(1,2)].mapValues(lambda kv: kv**2)</code></td><td><code>[(3,16), (3,1), (5,36), (1,4)]</code></td></tr>
+      <tr><td><code>reduceByKey(add)</code></td><td><span class="tag red">T · wide</span></td><td><code>[(3,4),(3,1),(5,6),(1,2)]</code></td><td><code>[(3,5), (5,6), (1,2)]</code></td></tr>
+      <tr><td><code>groupByKey()</code></td><td><span class="tag red">T · wide</span></td><td><code>[(3,4),(3,1),(5,6)]</code></td><td><code>[(3,[4,1]), (5,[6])]</code>（ResultIterable）</td></tr>
+      <tr><td><code>join</code></td><td><span class="tag red">T · wide</span></td><td><code>[(1,2),(3,4),(3,6)] ⋈ [(3,7)]</code></td><td><code>[(3,(4,7)), (3,(6,7))]</code></td></tr>
+      <tr><td><code>leftOuterJoin</code></td><td><span class="tag red">T · wide</span></td><td>同上</td><td><code>[(1,(2,None)), (3,(4,7)), (3,(6,7))]</code></td></tr>
+      <tr><td><code>rightOuterJoin</code></td><td><span class="tag red">T · wide</span></td><td>同上</td><td><code>[(3,(4,7)), (3,(6,7))]</code></td></tr>
+      <tr><td><code>keys() / values()</code></td><td><span class="tag">T</span></td><td><code>[(1,2),(3,4),(3,6),(4,1),(5,6)]</code></td><td><code>.keys().take(2)</code> → <code>[1, 3]</code>；<code>.values().take(2)</code> → <code>[2, 4]</code></td></tr>
+      <tr><td><code>collect()</code></td><td><span class="tag acc">A</span></td><td>任何 RDD</td><td>Python list，之後唔可以再 <code>.map</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>lambda 入面嘅 x 係乜？（老師話每次都要問自己）</h3>
+  <div class="tbl wide"><table>
+    <thead><tr><th>寫法</th><th>x／參數代表</th></tr></thead>
+    <tbody>
+      <tr><td><code>spark.textFile(…).map(lambda x: …)</code></td><td>一行文字（string）</td></tr>
+      <tr><td><code>.flatMap(lambda x: x.split())</code> 之後嘅 <code>.map(lambda x: …)</code></td><td>一粒字</td></tr>
+      <tr><td>key-value RDD 嘅 <code>.map</code> / <code>.filter(lambda x: …)</code></td><td>成個 tuple：<code>x[0]</code> = key，<code>x[1]</code> = value。value 都係 tuple 嘅話用 <code>x[1][0]</code>、<code>x[1][1]</code></td></tr>
+      <tr><td><code>.mapValues(lambda v: …)</code></td><td>淨係 value，唔使 index</td></tr>
+      <tr><td><code>.reduceByKey(lambda a, b: …)</code></td><td>同一個 key 嘅兩個 value</td></tr>
+      <tr><td><code>.sortBy(lambda x: x[1])</code></td><td>一個 tuple，按 <code>x[1]</code> 排</td></tr>
+      <tr><td><code>.groupByKey()</code> 之後 <code>.map(lambda x: …)</code></td><td><code>x[0]</code> = key，<code>x[1]</code> = ResultIterable（要 <code>list()</code>）</td></tr>
+      <tr><td><code>groupBy(lambda x: x % 2)</code></td><td>每個元素；<code>x % 2</code> 嘅結果（0 或 1）會變成 key</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ L1 L2 ============ -->
+<section id="l1l2">
+  <div class="sec-head"><span class="eyebrow">MCQ 送分位</span><h2>L1 Big Data · L2 Parallelism 同 Dask</h2></div>
+
+  <h3>L1 · 乜嘢係 Big Data</h3>
+  <p>冇清晰定義，可以理解為：人類理解唔到咁複雜、要多部電腦一齊處理、塞唔落一部電腦嘅 memory、要比 brute force 更好嘅演算法、維度好多、變化好快。<b>點解而家先興</b>：收集數據平、儲存平、平行運算平（cloud、cluster、GPU）。</p>
+  <div class="tbl wide"><table>
+    <thead><tr><th>V</th><th>意思</th><th>題目見到呢啲字就係佢</th><th>課堂例子</th></tr></thead>
+    <tbody>
+      <tr><td><b>Volume</b></td><td>數據量</td><td>petabytes、terabytes per hour、海量</td><td>2022 年全球智能手機網絡訂戶約 64 億</td></tr>
+      <tr><td><b>Velocity</b></td><td>數據產生同處理得幾快</td><td>real-time、streaming、peak hours</td><td>Google 每日約 164 億次搜尋；按位置即時推優惠；醫療感應器即時監察</td></tr>
+      <tr><td><b>Variety</b></td><td>數據類型多</td><td>structured + semi-structured + unstructured、JSON、logs、text</td><td>一個 app 收集好多種數據</td></tr>
+      <tr><td><b>Veracity</b></td><td>質素同準確度（可信度）</td><td>noisy、typos、measurement error、inconsistent</td><td>人手打錯名／地址、唔同來源唔一致</td></tr>
+      <tr><td><b>Value</b></td><td>對企業有幾有用</td><td>business value、insight、savings</td><td>同 veracity 有關；處理得愈耐，價值愈低</td></tr>
+      <tr><td><b>Variability</b></td><td>數據（或意思）隨時間變幾快、變幾多</td><td>changes over time、multiple meanings</td><td>Netflix 用戶口味會變；一個字有多個意思</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl wide"><table>
+    <thead><tr><th></th><th>Big Data</th><th>Traditional Data</th></tr></thead>
+    <tbody>
+      <tr><td>Volume</td><td>海量，petabytes 或以上</td><td>可管理，來源穩定（例如 database）</td></tr>
+      <tr><td>Velocity</td><td>real time 或 near real time</td><td>處理速度較慢</td></tr>
+      <tr><td>Variety</td><td>structured、semi-structured、unstructured</td><td>structured，有預設格式</td></tr>
+      <tr><td>Processing</td><td>分散式平行處理（Hadoop、Spark）</td><td>單一 server 上嘅 RDBMS</td></tr>
+      <tr><td>Tools</td><td>Hadoop、Spark、NoSQL、ML libraries</td><td>SQL databases</td></tr>
+    </tbody>
+  </table></div>
+  <div class="two">
+    <div class="card"><h4>三個數據來源</h4>
+      <ul>
+        <li><b>Social</b>：posts、likes、stories、相片影片 → 了解消費者行為同情緒</li>
+        <li><b>Machine</b>：工業設備、機器上嘅 sensor、追蹤用戶行為嘅 web logs、IoT</li>
+        <li><b>Transactional</b>：發票、付款單、儲存紀錄、送貨單</li>
+      </ul>
+    </div>
+    <div class="card"><h4>Big Data 四層組件</h4>
+      <ul>
+        <li><b>Libraries</b>：MLlib、NetworkX、data visualization</li>
+        <li><b>Analytics &amp; algorithms</b>：similarity search、recommendation、link analysis</li>
+        <li><b>Distributed computing</b>：Dask、MapReduce、RDD（Spark）</li>
+        <li><b>Distributed storage</b>：HDFS、key-value stores</li>
+      </ul>
+    </div>
+  </div>
+  <h4>Data analytics process（循環）</h4>
+  <div class="flow"><span class="st">Ask a question<br><span class="muted">problem formulation</span></span><span class="ar">→</span><span class="st">Obtain data<br><span class="muted">acquisition &amp; cleaning</span></span><span class="ar">→</span><span class="st">Understand the data<br><span class="muted">EDA &amp; visualization</span></span><span class="ar">→</span><span class="st">Understand the world<br><span class="muted">prediction &amp; inference</span></span><span class="ar">→</span><span class="st">Reports, decisions, solutions</span></div>
+  <p>名句：“The purpose of computing is insight, not numbers.” 儲存 250 TB 本身冇商業價值，要變成 insight 先有用。AI 應用：ELIZA（1964–67，MIT，pattern matching）、IBM Deep Blue（1997 年贏國際象棋世界冠軍）、AlphaGo（2016 年贏李世石）、web search、推薦系統、graph analytics、chatbot、自動駕駛。</p>
+
+  <h3>L2 · Scale up vs Scale out</h3>
+  <figure>
+    <div class="diawrap">
+      <svg class="dia w700" viewBox="0 0 700 210" role="img" aria-labelledby="sc-t">
+        <title id="sc-t">Scale up replaces one machine with a bigger one; scale out adds more machines</title>
+        <defs><marker id="ah4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah a"/></marker></defs>
+        <text x="20" y="26" class="h">Scale up（垂直）</text>
+        <rect x="40" y="110" width="60" height="70" rx="6" class="box2"/><text x="70" y="150" text-anchor="middle" class="small">舊機</text>
+        <path d="M110 145 L160 120" class="arr a" marker-end="url(#ah4)"/>
+        <rect x="170" y="46" width="120" height="134" rx="8" class="facc"/>
+        <text x="230" y="104" text-anchor="middle" class="tacc">更快 CPU</text>
+        <text x="230" y="126" text-anchor="middle" class="tacc">更多 RAM</text>
+        <text x="20" y="202" class="small">升級硬件；有上限：時脈唔再每 18 個月翻倍</text>
+        <path d="M340 20 L340 190" class="dash"/>
+        <text x="370" y="26" class="h">Scale out（水平）</text>
+        <rect x="380" y="100" width="60" height="80" rx="6" class="fmap"/><text x="410" y="145" text-anchor="middle" class="small">Node 1</text>
+        <rect x="455" y="100" width="60" height="80" rx="6" class="fmap"/><text x="485" y="145" text-anchor="middle" class="small">Node 2</text>
+        <rect x="530" y="100" width="60" height="80" rx="6" class="fmap"/><text x="560" y="145" text-anchor="middle" class="small">Node 3</text>
+        <rect x="605" y="100" width="60" height="80" rx="6" class="fmap"/><text x="635" y="145" text-anchor="middle" class="small">Node 4</text>
+        <text x="380" y="80" class="small">加機器／worker 分擔工作</text>
+        <text x="370" y="202" class="small">Hadoop、Dask、Spark 都係 scale out</text>
+      </svg>
+    </div>
+  </figure>
+  <ul>
+    <li><b>Moore's law</b>：transistor 數量大約每 18–24 個月翻一倍。但因為 quantum tunneling 同散熱，<b>單個 CPU 唔可能再每 18 個月快一倍</b>。2005 年 Herb Sutter：“The Free Lunch Is Over”。Transistor 仍然增加，用嚟加多啲 core。</li>
+    <li><b>處理大數據三條路</b>：Data reduction（feature selection、dimensionality reduction、compression）；Efficient algorithm &amp; data structure（indexing、tree、hashmap、graph）；將工作分派畀多個 processor／worker。</li>
+    <li><b>Multi-core</b>：同一粒 chip 上有多個 core，用 shared memory（同一個地址喺所有 core 指向同一份數據），每個 core 有自己嘅 local state。</li>
+    <li><b>挑戰</b>：worker 加倍，throughput <b>唔會</b>加倍，因為協調有 overhead（5 人 team vs 30 人 team）。</li>
+    <li><b>Bulk operations / Data parallelism</b>：同一個指令、多份數據（same instructions, multiple data items），例如 <code>df[df['A'] &gt; 1]</code> 可以每個 core 處理唔同行。</li>
+  </ul>
+
+  <h3>L2 · Sharding vs Replication、HDFS</h3>
+  <div class="tbl wide"><table>
+    <thead><tr><th></th><th>Sharding／Partitioning</th><th>Replication</th></tr></thead>
+    <tbody>
+      <tr><td>做咩</td><td>將數據集切細，分佈喺多個 node</td><td>喺唔同 node 存同一份數據嘅多個副本</td></tr>
+      <tr><td>目的</td><td>平行處理</td><td>Fault tolerance（redundancy）、讀得快（scalability）</td></tr>
+      <tr><td>代價／細節</td><td>Vertical = 按 table／column 切；Horizontal = 同一個 table 嘅 row 分去唔同 node</td><td>要 synchronization 保持所有副本一致（consistency）</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Horizontal partition 啱做</b>：filtering <code>df[df['A'] &gt; 1]</code>、projection <code>df[['A','B']]</code>、apply。<b>唔啱</b>：<code>groupby('A').count()</code>，要先重新排數據，令相同 A 嘅 row 喺同一個 partition。</li>
+    <li><b>點樣分</b>：Range（一段 key 對應一個 core ID）或者 <b>Hashing</b>：n 個 core，key k 放去 <code>h(k) % n</code>。</li>
+    <li><b>HDFS</b>（最常用分散式檔案系統）：<b>fixed-size partitioning</b>、<b>3-way replication</b>、<b>write-once read-many</b>。</li>
+  </ul>
+  <figure>
+    <div class="diawrap">
+      <svg class="dia w700" viewBox="0 0 700 230" role="img" aria-labelledby="hd-t">
+        <title id="hd-t">HDFS splits an input file into blocks A to E and stores three copies of each block on different nodes</title>
+        <text x="20" y="22" class="h">Input file</text>
+        <rect x="30" y="34" width="56" height="30" rx="4" class="fmap"/><text x="58" y="54" text-anchor="middle" class="mono">A</text>
+        <rect x="30" y="68" width="56" height="30" rx="4" class="fshuf"/><text x="58" y="88" text-anchor="middle" class="mono">B</text>
+        <rect x="30" y="102" width="56" height="30" rx="4" class="fred"/><text x="58" y="122" text-anchor="middle" class="mono">C</text>
+        <rect x="30" y="136" width="56" height="30" rx="4" class="facc"/><text x="58" y="156" text-anchor="middle" class="mono">D</text>
+        <rect x="30" y="170" width="56" height="30" rx="4" class="fok"/><text x="58" y="190" text-anchor="middle" class="mono">E</text>
+        <path d="M110 34 L110 200" class="dash"/>
+        <g>
+          <rect x="140" y="34" width="90" height="146" rx="8" class="box"/>
+          <rect x="155" y="48" width="60" height="30" rx="4" class="fmap"/><text x="185" y="68" text-anchor="middle" class="mono">A</text>
+          <rect x="155" y="92" width="60" height="30" rx="4" class="fred"/><text x="185" y="112" text-anchor="middle" class="mono">C</text>
+          <rect x="155" y="136" width="60" height="30" rx="4" class="fok"/><text x="185" y="156" text-anchor="middle" class="mono">E</text>
+          <text x="185" y="202" text-anchor="middle" class="small">Node 1</text>
+        </g>
+        <g>
+          <rect x="250" y="34" width="90" height="146" rx="8" class="box"/>
+          <rect x="265" y="48" width="60" height="30" rx="4" class="fmap"/><text x="295" y="68" text-anchor="middle" class="mono">A</text>
+          <rect x="265" y="92" width="60" height="30" rx="4" class="fshuf"/><text x="295" y="112" text-anchor="middle" class="mono">B</text>
+          <rect x="265" y="136" width="60" height="30" rx="4" class="facc"/><text x="295" y="156" text-anchor="middle" class="mono">D</text>
+          <text x="295" y="202" text-anchor="middle" class="small">Node 2</text>
+        </g>
+        <g>
+          <rect x="360" y="34" width="90" height="146" rx="8" class="box"/>
+          <rect x="375" y="48" width="60" height="30" rx="4" class="fshuf"/><text x="405" y="68" text-anchor="middle" class="mono">B</text>
+          <rect x="375" y="92" width="60" height="30" rx="4" class="fred"/><text x="405" y="112" text-anchor="middle" class="mono">C</text>
+          <rect x="375" y="136" width="60" height="30" rx="4" class="fok"/><text x="405" y="156" text-anchor="middle" class="mono">E</text>
+          <text x="405" y="202" text-anchor="middle" class="small">Node 3</text>
+        </g>
+        <g>
+          <rect x="470" y="34" width="90" height="146" rx="8" class="box"/>
+          <rect x="485" y="48" width="60" height="30" rx="4" class="fmap"/><text x="515" y="68" text-anchor="middle" class="mono">A</text>
+          <rect x="485" y="92" width="60" height="30" rx="4" class="fred"/><text x="515" y="112" text-anchor="middle" class="mono">C</text>
+          <rect x="485" y="136" width="60" height="30" rx="4" class="facc"/><text x="515" y="156" text-anchor="middle" class="mono">D</text>
+          <text x="515" y="202" text-anchor="middle" class="small">Node 4</text>
+        </g>
+        <g>
+          <rect x="580" y="34" width="90" height="146" rx="8" class="box"/>
+          <rect x="595" y="48" width="60" height="30" rx="4" class="fshuf"/><text x="625" y="68" text-anchor="middle" class="mono">B</text>
+          <rect x="595" y="92" width="60" height="30" rx="4" class="facc"/><text x="625" y="112" text-anchor="middle" class="mono">D</text>
+          <rect x="595" y="136" width="60" height="30" rx="4" class="fok"/><text x="625" y="156" text-anchor="middle" class="mono">E</text>
+          <text x="625" y="202" text-anchor="middle" class="small">Node 5</text>
+        </g>
+        <text x="140" y="224" class="small">每個 block 有 3 個副本，放喺 3 個唔同 node：任何一個 node 死咗都唔會冇數據</text>
+      </svg>
+    </div>
+    <figcaption>圖 6：HDFS 3-way replication 示意（block 位置係示範，實際由 HDFS 決定）。</figcaption>
+  </figure>
+
+  <h3>L2 · Dask</h3>
+  <p>Dask 係 open-source Python library，令你可以平行運算，將 NumPy、Pandas 由一部機擴展到幾千 core 嘅 cluster。點解用：<b>familiar interface</b>（API 似 NumPy/Pandas，改少少 code）、<b>scalability</b>、<b>flexibility</b>（<code>dask.delayed</code>）、<b>diagnostic tools</b>（live dashboard 搵 bottleneck）。<b>第一條規則</b>：唔係乜都啱用；平行運算有 overhead，數據細就唔值。數據塞唔落 memory 或者要平行計先用。</p>
+  <div class="tbl wide"><table>
+    <thead><tr><th>Collection</th><th>層級</th><th>對應</th><th>建立方法</th></tr></thead>
+    <tbody>
+      <tr><td>Dask Array</td><td>High-level</td><td>numpy.array</td><td><code>dask.array.from_array</code></td></tr>
+      <tr><td>Dask DataFrame</td><td>High-level</td><td>pandas DataFrame</td><td><code>dask.dataframe.read_csv</code>、<code>dd.from_pandas(df, npartitions=10)</code></td></tr>
+      <tr><td>Dask Bag</td><td>High-level</td><td>Python list（unstructured）</td><td><code>dask.bag.from_sequence([1,2,3])</code></td></tr>
+      <tr><td>delayed</td><td>Low-level</td><td>將任何 function 變 lazy、平行執行（似 loop 入面 call function）</td><td><code>@dask.delayed</code>，之後 <code>.compute()</code></td></tr>
+      <tr><td>futures</td><td>Low-level</td><td>似 delayed 但可以即時並行執行（似背景 process）</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Scheduler</b>：將工作切成 segment → 送去唔同 worker → 協調；worker 計完將結果送返 scheduler。<code>Client(n_workers=2)</code> 喺自己部機開 2 個 worker。</li>
+    <li><b>Dask 係 lazy</b>：<code>dask_data.mean()</code> 只起 task graph（約 3.5 ms），<code>.compute()</code> 先真正計（約 30 ms），結果變返 NumPy。</li>
+    <li><b>Task graph</b>：每個 node = 一個 task，每條線 = task 之間嘅依賴。數據大嘅時候用 high-level graph（<code>.dask.visualize()</code>）。</li>
+    <li><b>chunks 參數係「每塊嘅形狀」，唔係塊數</b>。<code>chunks=1</code> 即係每塊一個元素。</li>
+    <li><b>Chunk size</b>：太細 → overhead 太大；太大 → 塞唔落 memory。建議 <b>100 MB 至 1 GB</b>。<code>rechunk</code> 好貴（rechunk(10,10) 要 7 分鐘）。</li>
+    <li><b>Dask DataFrame</b> = 好多個 pandas DataFrame（partitions），lazy 載入、多 core 平行處理，可以一次讀多個 file（<code>'data/*.csv'</code>）。Pandas 經驗法則：memory 要係數據 5–10 倍。</li>
+    <li><b>Dask DataFrame 啱做</b>：element-wise（<code>df.x + df.y</code>）、row filtering（<code>df[df.x &gt; 0]</code>）、aggregation（<code>df.x.max()</code>）、drop duplicates。<b>唔啱</b>：要 shuffle 或 re-index 嘅操作，例如 <code>set_index</code>。</li>
+  </ul>
+  <figure>
+    <div class="diawrap">
+      <svg class="dia w700" viewBox="0 0 700 230" role="img" aria-labelledby="dk-t">
+        <title id="dk-t">Block algorithm: a 4 by 4 array split into four 2 by 2 chunks; each chunk is summed (14, 22, 46, 54) and the partial sums are added to 136</title>
+        <defs><marker id="ah5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+        <g class="mono">
+          <rect x="20" y="30" width="40" height="40" class="fmap"/><text x="40" y="55" text-anchor="middle">1</text>
+          <rect x="60" y="30" width="40" height="40" class="fmap"/><text x="80" y="55" text-anchor="middle">2</text>
+          <rect x="20" y="70" width="40" height="40" class="fmap"/><text x="40" y="95" text-anchor="middle">5</text>
+          <rect x="60" y="70" width="40" height="40" class="fmap"/><text x="80" y="95" text-anchor="middle">6</text>
+          <rect x="100" y="30" width="40" height="40" class="fshuf"/><text x="120" y="55" text-anchor="middle">3</text>
+          <rect x="140" y="30" width="40" height="40" class="fshuf"/><text x="160" y="55" text-anchor="middle">4</text>
+          <rect x="100" y="70" width="40" height="40" class="fshuf"/><text x="120" y="95" text-anchor="middle">7</text>
+          <rect x="140" y="70" width="40" height="40" class="fshuf"/><text x="160" y="95" text-anchor="middle">8</text>
+          <rect x="20" y="110" width="40" height="40" class="fred"/><text x="40" y="135" text-anchor="middle">9</text>
+          <rect x="60" y="110" width="40" height="40" class="fred"/><text x="80" y="135" text-anchor="middle">10</text>
+          <rect x="20" y="150" width="40" height="40" class="fred"/><text x="40" y="175" text-anchor="middle">13</text>
+          <rect x="60" y="150" width="40" height="40" class="fred"/><text x="80" y="175" text-anchor="middle">14</text>
+          <rect x="100" y="110" width="40" height="40" class="facc"/><text x="120" y="135" text-anchor="middle">11</text>
+          <rect x="140" y="110" width="40" height="40" class="facc"/><text x="160" y="135" text-anchor="middle">12</text>
+          <rect x="100" y="150" width="40" height="40" class="facc"/><text x="120" y="175" text-anchor="middle">15</text>
+          <rect x="140" y="150" width="40" height="40" class="facc"/><text x="160" y="175" text-anchor="middle">16</text>
+        </g>
+        <text x="20" y="214" class="small">chunks=(2,2) → 4 塊</text>
+        <rect x="270" y="40" width="70" height="40" rx="6" class="fmap"/><text x="305" y="65" text-anchor="middle" class="mono">14</text>
+        <rect x="360" y="40" width="70" height="40" rx="6" class="fshuf"/><text x="395" y="65" text-anchor="middle" class="mono">22</text>
+        <rect x="270" y="140" width="70" height="40" rx="6" class="fred"/><text x="305" y="165" text-anchor="middle" class="mono">46</text>
+        <rect x="360" y="140" width="70" height="40" rx="6" class="facc"/><text x="395" y="165" text-anchor="middle" class="mono">54</text>
+        <path d="M190 70 L264 60" class="arr" marker-end="url(#ah5)"/>
+        <path d="M190 150 L264 160" class="arr" marker-end="url(#ah5)"/>
+        <text x="270" y="118" class="small">① 每塊各自 sum（可以平行）</text>
+        <rect x="540" y="85" width="110" height="50" rx="8" class="box"/><text x="595" y="117" text-anchor="middle" class="h">136</text>
+        <path d="M434 62 L534 100" class="arr" marker-end="url(#ah5)"/>
+        <path d="M434 158 L534 122" class="arr" marker-end="url(#ah5)"/>
+        <text x="520" y="160" class="small">② 合併部分結果</text>
+      </svg>
+    </div>
+    <figcaption>圖 7：Block algorithm。<code>da.from_array(data, chunks=(2,2)).sum()</code> 先計每塊（14、22、46、54），再加埋 = 136。<b>計 chunk 數</b>：<code>da.ones((10000, 12000), chunks=(5000, 4000))</code> → (10000 ÷ 5000) × (12000 ÷ 4000) = 2 × 3 = <b>6 塊</b>。</figcaption>
+  </figure>
+</section>
+
+<!-- ============ MCQ ============ -->
+<section id="mcq">
+  <div class="sec-head"><span class="eyebrow">Section A 模擬</span><h2>模擬 MCQ</h2></div>
+  <p>撳選項即刻見對錯同解釋。<b>Set A</b> 15 題，題數同分佈似真 quiz；<b>Set B</b> 17 題係加強練習（包括老師上堂問過嗰題）；<b>Set C</b> 27 題係同類型新題，L1–L3 都有。「睇 code 估 output」題嘅答案都對照過 lecture slide 同 sample data。</p>
+  <div class="qblock">
+    <div class="scorebar"><span class="s" id="score-A">Set A：已答 <b>0</b>/15 · 答啱 <b>0</b></span><button class="btn" type="button" data-reset="A">重新做 Set A</button></div>
+    <div class="qset" id="set-A"></div>
+  </div>
+  <div class="qblock" style="margin-top:28px">
+    <div class="scorebar"><span class="s" id="score-B">Set B：已答 <b>0</b>/17 · 答啱 <b>0</b></span><button class="btn" type="button" data-reset="B">重新做 Set B</button></div>
+    <div class="qset" id="set-B"></div>
+  </div>
+  <div class="qblock" style="margin-top:28px">
+    <div class="scorebar"><span class="s" id="score-C">Set C：已答 <b>0</b>/27 · 答啱 <b>0</b></span><button class="btn" type="button" data-reset="C">重新做 Set C</button></div>
+    <div class="qset" id="set-C"></div>
+  </div>
+</section>
+
+<!-- ============ MR PRACTICE ============ -->
+<section id="mrpractice">
+  <div class="sec-head"><span class="eyebrow">Q1(a) 模擬</span><h2>MapReduce 練習</h2></div>
+  <p>先自己喺紙上寫 MAP 同 REDUCE，再打開答案。題 1 係真 past paper；題 2 出自課程指定參考書 <i>Mining of Massive Datasets</i>（Leskovec, Rajaraman &amp; Ullman）第 2 章；其餘係常見教科書題型。</p>
+
+  <div class="practice">
+    <span class="src">Past paper · COMP4434 2023/24 Sem II · Q8（16 分）</span>
+    <h3>題 1：每個部門人工高過 25,000 嘅畢業生人數</h3>
+    <p>A large table is distributed across multiple files. Each row is <code>(student_name, department, salary)</code>, e.g. <code>(Bob, Computing, 30,000)</code>. Determine, <b>in each department</b>, the total number of graduated students whose salary is more than 25,000 in their first job. (1) Provide concise pseudo-code for the Map worker, specifying the input and output (key, value) pairs. (2) Same for the Reduce worker.</p>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>// (1) Map worker
+// Input : key = row id (or file offset), value = (student_name, department, salary)
+// Output: key = department, value = 1          e.g. (Computing, 1)
+function MAP(row_id, row):
+    (name, dept, salary) = parse(row)
+    if salary > 25000:
+        emit(dept, 1)
+
+// (2) Reduce worker
+// Input : key = department, value = list of 1s  e.g. (Computing, [1, 1])
+// Output: key = department, value = total count  e.g. (Computing, 2)
+function REDUCE(dept, counts):
+    total = 0
+    for each c in counts:
+        total = total + c
+    emit(dept, total)</code></pre>
+      <div class="tbl wide"><table>
+        <thead><tr><th>例子 input</th><th><span class="tag map">MAP</span></th><th><span class="tag shuf">SHUFFLE</span></th><th><span class="tag red">REDUCE</span></th></tr></thead>
+        <tbody><tr><td class="brk"><code>(Bob, Computing, 30000)</code><br><code>(Amy, Computing, 24000)</code><br><code>(Carl, DSAI, 28000)</code><br><code>(Dora, DSAI, 26000)</code><br><code>(Eve, Computing, 32000)</code><br><code>(Gus, DSAI, 40000)</code></td>
+        <td class="brk"><code>(Computing,1)</code> <code>(DSAI,1)</code> <code>(DSAI,1)</code> <code>(Computing,1)</code> <code>(DSAI,1)</code><br><span class="muted">Amy 被 filter 走</span></td>
+        <td class="brk"><code>Computing → [1,1]</code><br><code>DSAI → [1,1,1]</code></td>
+        <td class="brk"><code>(Computing, 2)</code><br><code>(DSAI, 3)</code></td></tr></tbody>
+      </table></div>
+      <ul>
+        <li>題目話 “in each department” → key = department。</li>
+        <li>喺 mapper filter：唔合格嘅 row 唔使 shuffle，傳少啲數據。</li>
+        <li>冇人合格嘅部門唔會出現喺結果。想佢顯示 0，可以喺 mapper 對唔合格嘅 row emit <code>(dept, 0)</code>。</li>
+      </ul>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Mining of Massive Datasets · Exercise 2.3.1</span>
+    <h3>題 2：一個好大嘅整數 file</h3>
+    <p>Design MapReduce algorithms to take a very large file of integers and produce as output: (a) the largest integer; (b) the average of all the integers; (c) the same set of integers, but with each integer appearing only once; (d) the count of the number of distinct integers.</p>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>// (a) Largest integer：全部用同一個 key，送去同一個 reducer
+function MAP(key, n):
+    emit("max", n)
+function REDUCE(k, numbers):
+    m = -infinity
+    for each n in numbers:
+        if n > m: m = n
+    emit("max", m)
+
+// (b) Average：value 要帶 (sum, count)
+function MAP(key, n):
+    emit("avg", (n, 1))
+function REDUCE(k, pairs):
+    total = 0; count = 0
+    for each (s, c) in pairs:
+        total = total + s
+        count = count + c
+    emit("avg", total / count)
+
+// (c) Distinct：數字本身做 key，shuffle 自動將重複嘅 group 埋一齊
+function MAP(key, n):
+    emit(n, null)
+function REDUCE(n, values):
+    emit(n, null)                 // 每個 key 只會 emit 一次
+
+// (d) Count distinct：要兩個 job
+// Job 1 = (c)；Job 2：
+function MAP(n, null):
+    emit("count", 1)
+function REDUCE(k, ones):
+    emit("count", sum(ones))</code></pre>
+      <ul>
+        <li>(a) 得一個 key → 只有一個 reducer 做嘢，會變 bottleneck。改良：每個 map task 先計自己嗰份嘅最大值，先 emit 一個數（書入面叫 combiner）。</li>
+        <li>(b) 如果 mapper 先自己計平均，一定要送 <code>(sum, count)</code>，唔可以送平均值：[1,2,3] 平均 2、[10] 平均 10，「平均嘅平均」= 6，但真平均 = 16 ÷ 4 = 4。</li>
+        <li>(d) 一個 MapReduce job 做唔晒，要串兩個 job，呢個正正係 L3 講 MapReduce「too rigid」嘅例子。</li>
+      </ul>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Inverted index 變奏（易出）</span>
+    <h3>題 3：Document frequency：每個字出現喺幾多份文件</h3>
+    <p>Same input as the inverted index (<code>D1 || the cat sat on the mat</code> …). Output each word with the <b>number of documents</b> that contain it, e.g. <code>the: 3</code>, <code>cat: 1</code>.</p>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(doc_id, document_text):
+    words = split(trim(document_text), " ")
+    for each word in words:
+        emit(word, doc_id)
+
+function REDUCE(word, doc_ids_list):          // e.g. ("the", [D1, D1, D3, D4])
+    unique_docs = removeDuplicates(doc_ids_list) // [D1, D3, D4]
+    emit(word, length(unique_docs))             // ("the", 3)</code></pre>
+      <p>結果：the 3、brown 3、quick 2、fox 2、sat 2、on 2、mat 2、cat 1、a 1、jumps 1。</p>
+      <div class="callout warn"><span class="lbl">陷阱</span><p>如果照 word count 咁 emit <code>(word, 1)</code> 再 sum，“the” 會得 4（D1 有兩個 the），咁係數「出現次數」，唔係「文件數」。</p></div>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">經典教科書題型（天氣數據）</span>
+    <h3>題 4：每個城市最高溫度</h3>
+    <p>Each input record is <code>(line_no, "date,city,temperature")</code>, e.g. <code>(1, "2025-07-01,HongKong,33")</code>. Output the maximum temperature of each city.</p>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(line_no, line):
+    (date, city, temp) = split(line, ",")
+    emit(city, temp)
+
+function REDUCE(city, temps):                  // e.g. ("HongKong", [33, 35])
+    max_t = -infinity
+    for each t in temps:
+        if t > max_t: max_t = t
+    emit(city, max_t)                          // ("HongKong", 35)</code></pre>
+      <p>延伸：「每個城市<b>每個月</b>最高溫」→ key 改成 <code>(city, month)</code>（composite key）。按咩分組，咩就係 key。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">推薦系統常見題型</span>
+    <h3>題 5：每套電影嘅平均評分</h3>
+    <p>Each row is <code>(user_id, movie_id, rating)</code>. Output <code>(movie_id, average rating)</code>.</p>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(row_id, row):
+    (user_id, movie_id, rating) = parse(row)
+    emit(movie_id, rating)                     // user_id 用唔著，唔使 emit
+
+function REDUCE(movie_id, ratings):            // e.g. ("m1", [4, 5, 3])
+    total = 0; n = 0
+    for each r in ratings:
+        total = total + r
+        n = n + 1
+    emit(movie_id, total / n)                  // ("m1", 4.0)</code></pre>
+      <p>例子：<code>(u1,m1,4) (u2,m1,5) (u1,m2,3) (u3,m2,2) (u3,m1,3) (u2,m3,5)</code> → m1 = 4.0、m2 = 2.5、m3 = 5.0。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">挑戰題 · Utrecht University MapReduce 練習 5</span>
+    <h3>題 6：Positional inverted index（記埋位置）</h3>
+    <p>Extend the inverted index so each word maps to the documents <b>and the positions</b> where it appears, e.g. <code>the: [(D1, [0, 4]), (D3, [0]), (D4, [2])]</code>.</p>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(doc_id, document_text):
+    words = split(trim(document_text), " ")
+    for i from 0 to length(words) - 1:
+        emit(words[i], (doc_id, i))            // value 係 (文件, 位置)
+
+function REDUCE(word, postings):               // e.g. ("the", [(D1,0), (D1,4), (D3,0), (D4,2)])
+    result = empty map
+    for each (doc, pos) in postings:
+        result[doc].append(pos)
+    emit(word, sorted list of (doc, positions))   // ("the", [(D1,[0,4]), (D3,[0]), (D4,[2])])</code></pre>
+      <p>呢題<b>唔可以</b>去重複：D1 兩個 “the” 位置唔同（0 同 4），兩個都要保留。</p>
+    </div></details>
+  </div>
+
+  <h3 style="margin-top:2.6rem">更多同類場景題（題 7–14）</h3>
+  <p>老師出題習慣：俾一個場景、input 例子同期望 output，再俾 <code>function MAP(...)</code> 同 <code>function REDUCE(...)</code> header（input 唔可以改）。以下 8 題全部跟呢個格式，大部分都係 inverted index 或者 past paper 嘅變奏。做嘅時候先問自己：<b>按咩分組？</b> 嗰樣就係 key。</p>
+
+  <div class="practice">
+    <span class="src">Inverted index 換名版</span>
+    <h3>題 7：每個科目有邊幾個學生</h3>
+    <p>A university stores each student's enrolled courses. Build an index that maps each <b>course → list of student IDs</b> (no duplicates, sorted).</p>
+    <div class="tbl"><table><thead><tr><th>Sample input</th><th>Desired output</th></tr></thead><tbody><tr>
+      <td class="brk"><code>S001 || DSAI4205 COMP1011 AMA1110</code><br><code>S002 || COMP1011 DSAI4205</code><br><code>S003 || AMA1110 DSAI4205 DSAI4205</code><br><code>S004 || COMP1011</code></td>
+      <td class="brk"><code>AMA1110: [S001, S003]</code><br><code>COMP1011: [S001, S002, S004]</code><br><code>DSAI4205: [S001, S002, S003]</code></td></tr></tbody></table></div>
+<pre class="code plain"><code><span class="given">function MAP(student_id, course_list):</span>
+<span class="given">function REDUCE(course, student_ids_list):</span></code></pre>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(student_id, course_list):
+    courses = split(trim(course_list), " ")
+    for each course in courses:
+        emit(course, student_id)                      // key = course
+
+function REDUCE(course, student_ids_list):            // ("DSAI4205", [S001, S002, S003, S003])
+    student_ids_list = removeDuplicates(student_ids_list)   // S003 寫咗兩次 DSAI4205
+    emit(course, sort(student_ids_list))              // ("DSAI4205", [S001, S002, S003])</code></pre>
+      <p>同 inverted index 一模一樣：「文件 → 字」變咗「學生 → 科目」。題目要「每個科目」，所以 key = course。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Word count + 條件</span>
+    <h3>題 8：數 hashtag</h3>
+    <p>Count how many times each <b>hashtag</b> (a word starting with <code>#</code>) appears in a large set of tweets. Treat hashtags case-insensitively.</p>
+    <div class="tbl"><table><thead><tr><th>Sample input</th><th>Desired output</th></tr></thead><tbody><tr>
+      <td class="brk"><code>T1 || Learning #Spark and #BigData today</code><br><code>T2 || #spark is faster than #MapReduce</code><br><code>T3 || Quiz tonight #BigData #DSAI4205 #spark</code></td>
+      <td class="brk"><code>#spark: 3</code><br><code>#bigdata: 2</code><br><code>#mapreduce: 1</code><br><code>#dsai4205: 1</code></td></tr></tbody></table></div>
+<pre class="code plain"><code><span class="given">function MAP(tweet_id, tweet_text):</span>
+<span class="given">function REDUCE(hashtag, counts):</span></code></pre>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(tweet_id, tweet_text):
+    words = split(trim(tweet_text), " ")
+    for each word in words:
+        if word starts with "#":                      // 條件喺 MAP 做
+            emit(lower(word), 1)                      // lower：#Spark 同 #spark 變同一個 key
+
+function REDUCE(hashtag, counts):                     // ("#spark", [1, 1, 1])
+    total = 0
+    for each c in counts:
+        total = total + c
+    emit(hashtag, total)                              // ("#spark", 3)</code></pre>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Document frequency 變奏</span>
+    <h3>題 9：每個網頁有幾多個唔同訪客</h3>
+    <p>A web server log records <code>time | IP address | URL</code> for every page view. For each URL, output the number of <b>unique visitors</b> (distinct IP addresses).</p>
+    <div class="tbl"><table><thead><tr><th>Sample input</th><th>Desired output</th></tr></thead><tbody><tr>
+      <td class="brk"><code>10:00 | 1.1.1.1 | /home</code><br><code>10:01 | 2.2.2.2 | /home</code><br><code>10:02 | 1.1.1.1 | /home</code><br><code>10:03 | 1.1.1.1 | /cart</code><br><code>10:05 | 3.3.3.3 | /cart</code><br><code>10:06 | 2.2.2.2 | /home</code><br><code>10:07 | 4.4.4.4 | /home</code></td>
+      <td class="brk"><code>/cart: 2</code><br><code>/home: 3</code></td></tr></tbody></table></div>
+<pre class="code plain"><code><span class="given">function MAP(line_no, log_line):</span>
+<span class="given">function REDUCE(url, ip_list):</span></code></pre>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(line_no, log_line):
+    (time, ip, url) = split(log_line, " | ")
+    emit(url, ip)                                     // key = url，value = ip
+
+function REDUCE(url, ip_list):                        // ("/home", [1.1.1.1, 2.2.2.2, 1.1.1.1, 2.2.2.2, 4.4.4.4])
+    unique_ips = removeDuplicates(ip_list)            // [1.1.1.1, 2.2.2.2, 4.4.4.4]
+    emit(url, length(unique_ips))                     // ("/home", 3)</code></pre>
+      <div class="callout warn"><span class="lbl">陷阱</span><p>emit <code>(url, 1)</code> 再 sum 會得 /home = 5，咁係「瀏覽次數」（page views），唔係「唔同訪客」。</p></div>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Google MapReduce 原論文例子：Reverse web-link graph</span>
+    <h3>題 10：反轉關係，搵出每個人嘅 followers</h3>
+    <p>Each line lists a user and the people that user <b>follows</b>. Output, for each person, the sorted list of their <b>followers</b>.</p>
+    <div class="tbl"><table><thead><tr><th>Sample input</th><th>Desired output</th></tr></thead><tbody><tr>
+      <td class="brk"><code>amy -> bob carl</code><br><code>bob -> carl</code><br><code>carl -> amy bob</code><br><code>dora -> carl</code></td>
+      <td class="brk"><code>amy: [carl]</code><br><code>bob: [amy, carl]</code><br><code>carl: [amy, bob, dora]</code></td></tr></tbody></table></div>
+<pre class="code plain"><code><span class="given">function MAP(user, following_list):</span>
+<span class="given">function REDUCE(person, followers_list):</span></code></pre>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(user, following_list):
+    for each f in split(trim(following_list), " "):
+        emit(f, user)                                 // 調轉：key = 被 follow 嗰個人
+
+function REDUCE(person, followers_list):              // ("carl", [amy, bob, dora])
+    emit(person, sort(followers_list))</code></pre>
+      <p>dora 冇人 follow，所以唔會出現喺 output（同 past paper 冇人合格嘅部門一樣）。網頁版：<code>emit(target_url, source_url)</code> 就搵到「邊啲網頁 link 去我」。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Value 係一對嘢</span>
+    <h3>題 11：每科最高分嘅學生</h3>
+    <p>Each row is <code>(student, course, score)</code>. For each course, output the student with the <b>highest score</b> and that score.</p>
+    <div class="tbl"><table><thead><tr><th>Sample input</th><th>Desired output</th></tr></thead><tbody><tr>
+      <td class="brk"><code>(amy, DSAI4205, 78)</code><br><code>(bob, DSAI4205, 91)</code><br><code>(carl, COMP1011, 85)</code><br><code>(dora, COMP1011, 62)</code><br><code>(eve, DSAI4205, 88)</code></td>
+      <td class="brk"><code>COMP1011: (carl, 85)</code><br><code>DSAI4205: (bob, 91)</code></td></tr></tbody></table></div>
+<pre class="code plain"><code><span class="given">function MAP(row_id, row):</span>
+<span class="given">function REDUCE(course, records):</span></code></pre>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(row_id, row):
+    (student, course, score) = parse(row)
+    emit(course, (student, score))                    // value 係 (學生, 分數)
+
+function REDUCE(course, records):                     // ("DSAI4205", [(amy,78), (bob,91), (eve,88)])
+    best_student = null
+    best_score = -infinity
+    for each (student, score) in records:
+        if score > best_score:
+            best_score = score
+            best_student = student
+    emit(course, (best_student, best_score))          // ("DSAI4205", (bob, 91))</code></pre>
+      <p>如果 MAP 淨係 emit <code>(course, score)</code>，reducer 只知道 91 分，唔知係邊個攞。需要嘅資料都要放入 value。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Past paper 變奏：filter + sum</span>
+    <h3>題 12：2025 年每個類別嘅總銷售額</h3>
+    <p>A large table of orders <code>(order_id, category, amount, year)</code> is spread across many files. Compute the <b>total sales amount of each category in 2025</b>.</p>
+    <div class="tbl"><table><thead><tr><th>Sample input</th><th>Desired output</th></tr></thead><tbody><tr>
+      <td class="brk"><code>(O1, Books, 120.5, 2025)</code><br><code>(O2, Games, 300, 2024)</code><br><code>(O3, Books, 80, 2025)</code><br><code>(O4, Games, 150, 2025)</code><br><code>(O5, Music, 40, 2025)</code><br><code>(O6, Books, 60, 2024)</code></td>
+      <td class="brk"><code>Books: 200.5</code><br><code>Games: 150</code><br><code>Music: 40</code></td></tr></tbody></table></div>
+<pre class="code plain"><code><span class="given">function MAP(row_id, row):</span>
+<span class="given">function REDUCE(category, amounts):</span></code></pre>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>// Input : (row_id, (order_id, category, amount, year))   Output: (category, amount)
+function MAP(row_id, row):
+    (order_id, category, amount, year) = parse(row)
+    if year == 2025:
+        emit(category, amount)
+
+// Input : (category, [amount, ...])   Output: (category, total)
+function REDUCE(category, amounts):                   // ("Books", [120.5, 80])
+    total = 0
+    for each a in amounts:
+        total = total + a
+    emit(category, total)                             // ("Books", 200.5)</code></pre>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Key 可以係計出嚟嘅嘢</span>
+    <h3>題 13：將 anagram（同字母異序詞）分組</h3>
+    <p>Given a large collection of words, group together words that are <b>anagrams</b> of each other (same letters, different order).</p>
+    <div class="tbl"><table><thead><tr><th>Sample input</th><th>Desired output</th></tr></thead><tbody><tr>
+      <td class="brk"><code>D1 || listen silent enlist google</code><br><code>D2 || tinsel banana inlets</code></td>
+      <td class="brk"><code>eilnst: [enlist, inlets, listen, silent, tinsel]</code><br><code>eggloo: [google]</code><br><code>aaabnn: [banana]</code></td></tr></tbody></table></div>
+<pre class="code plain"><code><span class="given">function MAP(doc_id, text):</span>
+<span class="given">function REDUCE(sorted_letters, words):</span></code></pre>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(doc_id, text):
+    for each word in split(trim(text), " "):
+        key = sortLetters(word)                       // "listen" → "eilnst"
+        emit(key, word)
+
+function REDUCE(sorted_letters, words):               // ("eilnst", [listen, silent, enlist, tinsel, inlets])
+    words = removeDuplicates(words)
+    emit(sorted_letters, sort(words))</code></pre>
+      <p>Key 唔一定係原本 input 入面嘅一欄，可以係你計出嚟嘅值。只要同一組嘅嘢計出同一個 key，shuffle 就會幫你放埋一齊。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Past paper 變奏：filter + average</span>
+    <h3>題 14：每個部門全職員工嘅平均人工</h3>
+    <p>Each row is <code>(name, department, type, salary)</code>, where type is <code>FT</code> (full-time) or <code>PT</code> (part-time). For each department, compute the <b>average salary of full-time staff</b>.</p>
+    <div class="tbl"><table><thead><tr><th>Sample input</th><th>Desired output</th></tr></thead><tbody><tr>
+      <td class="brk"><code>(Ann, IT, FT, 30000)</code><br><code>(Ben, IT, PT, 12000)</code><br><code>(Cat, HR, FT, 26000)</code><br><code>(Dan, IT, FT, 34000)</code><br><code>(Eva, HR, FT, 22000)</code></td>
+      <td class="brk"><code>HR: 24000</code><br><code>IT: 32000</code></td></tr></tbody></table></div>
+<pre class="code plain"><code><span class="given">function MAP(row_id, row):</span>
+<span class="given">function REDUCE(department, salaries):</span></code></pre>
+    <details><summary>睇答案</summary><div class="body">
+<pre class="code"><code>function MAP(row_id, row):
+    (name, dept, type, salary) = parse(row)
+    if type == "FT":
+        emit(dept, salary)
+
+function REDUCE(department, salaries):                // ("IT", [30000, 34000])
+    total = 0
+    n = 0
+    for each s in salaries:
+        total = total + s
+        n = n + 1
+    emit(department, total / n)                       // ("IT", 32000)</code></pre>
+      <p>Ben（PT）喺 MAP 已經被 filter 走，所以 IT 嘅平均係 (30000 + 34000) ÷ 2。</p>
+    </div></details>
+  </div>
+</section>
+
+<!-- ============ SPARK PRACTICE ============ -->
+<section id="sparkpractice">
+  <div class="sec-head"><span class="eyebrow">Q2 模擬</span><h2>Spark 填充練習</h2></div>
+  <p>喺橙色格打答案，撳「對答案」。大小寫要啱（例如 <code>flatMap</code> 唔係 <code>flatmap</code>），空格唔影響。每題都假設開頭已經有：</p>
+<pre class="code sm"><code><span class="given">from pyspark.sql import SparkSession</span>
+<span class="given">from operator import add</span>
+<span class="given">ss = SparkSession.builder.appName("Quiz").master("local[4]").getOrCreate()</span>
+<span class="given">spark = ss.sparkContext</span></code></pre>
+
+  <div class="practice fill" id="fill1">
+    <span class="src">最似 Q2 · Take-home inverted index（老師話會遮 6 個位）</span>
+    <h3>填充 1：Inverted index</h3>
+    <p><code>documents.txt</code> 每行好似 <code>D1 || the cat sat on the mat</code>。目標輸出 <code>[('a', ['D2']), ('brown', ['D2','D3','D4']), …]</code>。</p>
+<pre class="code"><code>rdd = spark.<span class="bn">1</span><input class="blank" id="f1-1" data-ans="textFile" aria-label="Blank 1" autocomplete="off" spellcheck="false">('documents.txt')
+rdd = rdd.map(lambda x: x.split(<span class="bn">2</span><input class="blank" id="f1-2" data-ans="'||'" aria-label="Blank 2" autocomplete="off" spellcheck="false">)) \
+         .map(lambda parts: (parts[0].strip(), parts[1].strip()))
+rdd = rdd.<span class="bn">3</span><input class="blank" id="f1-3" data-ans="flatMap" aria-label="Blank 3" autocomplete="off" spellcheck="false">(lambda pair: [(word.strip().lower(), <span class="bn">4</span><input class="blank" id="f1-4" data-ans="pair[0]" aria-label="Blank 4" autocomplete="off" spellcheck="false">) for word in pair[1].split()])
+rdd = rdd.<span class="bn">5</span><input class="blank" id="f1-5" data-ans="distinct" aria-label="Blank 5" autocomplete="off" spellcheck="false">()
+rdd = rdd.<span class="bn">6</span><input class="blank" id="f1-6" data-ans="groupByKey" aria-label="Blank 6" autocomplete="off" spellcheck="false">().map(lambda x: (x[0], sorted(list(x[1])))).<span class="bn">7</span><input class="blank" id="f1-7" data-ans="sortByKey" aria-label="Blank 7" autocomplete="off" spellcheck="false">()
+rdd.collect()</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>逐格解釋</summary><div class="body"><ol>
+      <li><code>textFile</code>：讀 file，每行一個元素。</li>
+      <li><code>'||'</code>：用 <code>||</code> 切開 doc ID 同句子。</li>
+      <li><code>flatMap</code>：一句變好多個 (word, doc_id)，要拆平。用 map 會變成每句一個 list。</li>
+      <li><code>pair[0]</code>：doc ID（<code>pair[1]</code> 係句子）。</li>
+      <li><code>distinct</code>：刪走重複嘅 <code>('the','D1')</code>。</li>
+      <li><code>groupByKey</code>：按字分組，value 係 ResultIterable，所以之後要 <code>list()</code>。</li>
+      <li><code>sortByKey</code>：按字母排。</li>
+    </ol></div></details>
+  </div>
+
+  <div class="practice fill" id="fill2">
+    <span class="src">Tutorial 3 TODO #2（相片 2）</span>
+    <h3>填充 2：Word count，由多到少</h3>
+<pre class="code"><code>textRDD = spark.textFile('wordCountEx.txt')
+textRDD = textRDD.<span class="bn">1</span><input class="blank" id="f2-1" data-ans="flatMap" aria-label="Blank 1" autocomplete="off" spellcheck="false">(lambda x: x.split())
+textRDD = textRDD.map(lambda x: (x.lower(), <span class="bn">2</span><input class="blank" id="f2-2" data-ans="1" aria-label="Blank 2" autocomplete="off" spellcheck="false">))
+textRDD = textRDD.<span class="bn">3</span><input class="blank" id="f2-3" data-ans="reduceByKey" aria-label="Blank 3" autocomplete="off" spellcheck="false">(add)
+textRDD = textRDD.sortBy(lambda x: <span class="bn">4</span><input class="blank" id="f2-4" data-ans="x[1]" aria-label="Blank 4" autocomplete="off" spellcheck="false">, ascending=<span class="bn">5</span><input class="blank" id="f2-5" data-ans="False" aria-label="Blank 5" autocomplete="off" spellcheck="false">)
+result = textRDD.<span class="bn">6</span><input class="blank" id="f2-6" data-ans="collect" aria-label="Blank 6" autocomplete="off" spellcheck="false">()     # [('the', 3), ('this', 2), ('to', 2), ('letter', 2), ...]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+  </div>
+
+  <div class="practice fill" id="fill3">
+    <span class="src">Past paper 題 1 嘅 Spark 版</span>
+    <h3>填充 3：每個部門人工 &gt; 25,000 嘅人數</h3>
+    <p><code>graduates.txt</code> 每行好似 <code>Bob,Computing,30000</code>。</p>
+<pre class="code"><code>rdd = spark.textFile('graduates.txt')
+rdd = rdd.map(lambda line: line.<span class="bn">1</span><input class="blank" id="f3-1" data-ans="split" aria-label="Blank 1" autocomplete="off" spellcheck="false">(','))          # ['Bob', 'Computing', '30000']
+rdd = rdd.<span class="bn">2</span><input class="blank" id="f3-2" data-ans="filter" aria-label="Blank 2" autocomplete="off" spellcheck="false">(lambda x: <span class="bn">3</span><input class="blank" id="f3-3" data-ans="int§float" aria-label="Blank 3" autocomplete="off" spellcheck="false">(x[2]) > 25000)
+rdd = rdd.map(lambda x: (<span class="bn">4</span><input class="blank" id="f3-4" data-ans="x[1]" aria-label="Blank 4" autocomplete="off" spellcheck="false">, 1))
+rdd = rdd.reduceByKey(<span class="bn">5</span><input class="blank" id="f3-5" data-ans="add§lambda a,b:a+b§lambda x,y:x+y" aria-label="Blank 5" autocomplete="off" spellcheck="false">)
+rdd.sortBy(lambda x: x[1], ascending=False).<span class="bn">6</span><input class="blank" id="f3-6" data-ans="collect" aria-label="Blank 6" autocomplete="off" spellcheck="false">()   # [('DSAI', 3), ('Computing', 2)]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li>split 完 <code>x[2]</code> 係 string <code>'30000'</code>，要 <code>int()</code> 先比較到大細。</li>
+      <li>部門係 <code>x[1]</code>，所以 pair 係 <code>(x[1], 1)</code>。</li>
+      <li>例子數據：Bob/Eve（Computing）、Carl/Dora/Gus（DSAI）合格；Amy 24000、Fay（Design）20000 唔合格。</li>
+    </ul></div></details>
+  </div>
+
+  <div class="practice fill" id="fill4">
+    <span class="src">Tutorial 3 TODO #3</span>
+    <h3>填充 4：DNA 長度 k 嘅連續 pattern</h3>
+    <p>例如 k = 5，<code>'gcctaagccta'</code> 嘅 pattern 係 gccta、cctaa、ctaag、taagc、aagcc、agcct、gccta。</p>
+<pre class="code"><code>def generatePattern(line, length):
+    return [(line[i:<span class="bn">1</span><input class="blank" id="f4-1" data-ans="i+length" aria-label="Blank 1" autocomplete="off" spellcheck="false">], 1) for i in range(len(line) - length + <span class="bn">2</span><input class="blank" id="f4-2" data-ans="1" aria-label="Blank 2" autocomplete="off" spellcheck="false">)]
+
+dnaRDD = spark.textFile('dna_small.txt')
+seqRDD = dnaRDD.<span class="bn">3</span><input class="blank" id="f4-3" data-ans="flatMap" aria-label="Blank 3" autocomplete="off" spellcheck="false">(lambda line: generatePattern(line, k)) \
+               .<span class="bn">4</span><input class="blank" id="f4-4" data-ans="reduceByKey" aria-label="Blank 4" autocomplete="off" spellcheck="false">(add) \
+               .sortBy(lambda x: x[1], ascending=False)
+seqRDD.collect()     # 'gcctaagccta' → [('gccta', 2), ('cctaa', 1), ('ctaag', 1), ...]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li>Slicing <code>line[i:i+length]</code> 唔包最後嗰個 index：i = 0 → 0 至 4 五個字母。</li>
+      <li>最後一個起點係 <code>len(line) - length</code>，所以 range 要 <code>+ 1</code>。11 個字母、k = 5 → 7 個 pattern。</li>
+      <li>generatePattern 每行回傳一個 list，所以要 flatMap 拆平。</li>
+    </ul></div></details>
+  </div>
+
+  <div class="practice fill" id="fill5">
+    <span class="src">挑戰題 · value 係 tuple</span>
+    <h3>填充 5：每套電影平均評分</h3>
+    <p><code>ratings.txt</code> 每行好似 <code>u1,m1,4</code>。</p>
+<pre class="code"><code>rdd = spark.textFile('ratings.txt').map(lambda l: l.split(','))    # ['u1', 'm1', '4']
+pairs = rdd.map(lambda x: (x[1], (float(x[2]), <span class="bn">1</span><input class="blank" id="f5-1" data-ans="1" aria-label="Blank 1" autocomplete="off" spellcheck="false">)))              # ('m1', (4.0, 1))
+sums = pairs.reduceByKey(lambda a, b: (a[0] + b[0], a[1] + <span class="bn">2</span><input class="blank" id="f5-2" data-ans="b[1]" aria-label="Blank 2" autocomplete="off" spellcheck="false">))     # ('m1', (12.0, 3))
+avg = sums.<span class="bn">3</span><input class="blank" id="f5-3" data-ans="mapValues" aria-label="Blank 3" autocomplete="off" spellcheck="false">(lambda v: v[0] / v[1])                       # ('m1', 4.0)
+avg.<span class="bn">4</span><input class="blank" id="f5-4" data-ans="sortByKey" aria-label="Blank 4" autocomplete="off" spellcheck="false">().collect()     # [('m1', 4.0), ('m2', 2.5), ('m3', 5.0)]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li>reduceByKey 嘅 <code>a</code>、<code>b</code> 都係 value，即係 <code>(sum, count)</code> tuple，所以分開加 <code>[0]</code> 同 <code>[1]</code>。</li>
+      <li><code>mapValues</code> 淨係改 value，key 保持唔變；lambda 收到嘅 <code>v</code> 已經係 <code>(sum, count)</code>。</li>
+      <li>另一個寫法：<code>rdd.map(lambda x: (x[1], float(x[2]))).groupByKey().mapValues(lambda vs: sum(vs) / len(vs))</code>。</li>
+    </ul></div></details>
+  </div>
+
+  <h3 style="margin-top:2.6rem">更多 Spark 填充（填充 6–11，對應 MapReduce 題 7–12）</h3>
+  <p>Past paper 嘅做法係同一個場景：Q1(a) 寫 MapReduce，Q1(b) 用 PySpark RDD 實現。以下每題都係上面 MapReduce 題嘅 Spark 版，可以對住一齊做。</p>
+
+  <div class="practice fill" id="fill6">
+    <span class="src">對應 MapReduce 題 7 · inverted index 換名版</span>
+    <h3>填充 6：每個科目嘅學生名單</h3>
+<pre class="code"><code>rdd = spark.textFile('enrol.txt')                          # 'S001 || DSAI4205 COMP1011 AMA1110'
+rdd = rdd.map(lambda x: x.split(<span class="bn">1</span><input class="blank" id="f6-1" data-ans="'||'" aria-label="Blank 1" autocomplete="off" spellcheck="false">)) \
+         .map(lambda p: (p[0].strip(), p[1].strip()))       # ('S001', 'DSAI4205 COMP1011 AMA1110')
+rdd = rdd.<span class="bn">2</span><input class="blank" id="f6-2" data-ans="flatMap" aria-label="Blank 2" autocomplete="off" spellcheck="false">(lambda p: [(c, <span class="bn">3</span><input class="blank" id="f6-3" data-ans="p[0]" aria-label="Blank 3" autocomplete="off" spellcheck="false">) for c in p[1].split()])   # ('DSAI4205', 'S001'), ...
+rdd = rdd.<span class="bn">4</span><input class="blank" id="f6-4" data-ans="distinct" aria-label="Blank 4" autocomplete="off" spellcheck="false">()                                      # 刪走 S003 重複嘅 DSAI4205
+rdd = rdd.<span class="bn">5</span><input class="blank" id="f6-5" data-ans="groupByKey" aria-label="Blank 5" autocomplete="off" spellcheck="false">().<span class="bn">6</span><input class="blank" id="f6-6" data-ans="mapValues" aria-label="Blank 6" autocomplete="off" spellcheck="false">(lambda v: sorted(list(v))).<span class="bn">7</span><input class="blank" id="f6-7" data-ans="sortByKey" aria-label="Blank 7" autocomplete="off" spellcheck="false">()
+rdd.collect()   # [('AMA1110', ['S001','S003']), ('COMP1011', ['S001','S002','S004']), ('DSAI4205', ['S001','S002','S003'])]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li>格 6 用 <code>mapValues</code>：lambda 收到嘅 <code>v</code> 淨係 value（ResultIterable），key 自動保留。用 map 就要寫 <code>lambda x: (x[0], sorted(list(x[1])))</code>。</li>
+      <li>9 個 (course, student) pair，distinct 之後剩 8 個。</li>
+    </ul></div></details>
+  </div>
+
+  <div class="practice fill" id="fill7">
+    <span class="src">對應 MapReduce 題 8</span>
+    <h3>填充 7：最多人用嘅兩個 hashtag</h3>
+<pre class="code"><code>rdd = spark.textFile('tweets.txt').map(lambda line: line.split('||')[1])   # ' Learning #Spark and #BigData today'
+tags = rdd.<span class="bn">1</span><input class="blank" id="f7-1" data-ans="flatMap" aria-label="Blank 1" autocomplete="off" spellcheck="false">(lambda x: x.split()).<span class="bn">2</span><input class="blank" id="f7-2" data-ans="filter" aria-label="Blank 2" autocomplete="off" spellcheck="false">(lambda w: w.<span class="bn">3</span><input class="blank" id="f7-3" data-ans="startswith" aria-label="Blank 3" autocomplete="off" spellcheck="false">('#'))
+counts = tags.map(lambda w: (w.<span class="bn">4</span><input class="blank" id="f7-4" data-ans="lower" aria-label="Blank 4" autocomplete="off" spellcheck="false">(), 1)).<span class="bn">5</span><input class="blank" id="f7-5" data-ans="reduceByKey" aria-label="Blank 5" autocomplete="off" spellcheck="false">(add)
+counts.sortBy(lambda x: x[1], ascending=<span class="bn">6</span><input class="blank" id="f7-6" data-ans="False" aria-label="Blank 6" autocomplete="off" spellcheck="false">).<span class="bn">7</span><input class="blank" id="f7-7" data-ans="take" aria-label="Blank 7" autocomplete="off" spellcheck="false">(2)   # [('#spark', 3), ('#bigdata', 2)]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li><code>take(2)</code> 係 action，攞頭 2 個；<code>first()</code> 只攞 1 個。</li>
+      <li>filter 嘅 lambda 一定要回傳 True／False：<code>w.startswith('#')</code>。</li>
+    </ul></div></details>
+  </div>
+
+  <div class="practice fill" id="fill8">
+    <span class="src">對應 MapReduce 題 10</span>
+    <h3>填充 8：反轉關係搵 followers</h3>
+<pre class="code"><code>rdd = spark.textFile('follows.txt').map(lambda line: line.split(<span class="bn">1</span><input class="blank" id="f8-1" data-ans="' -> '" aria-label="Blank 1" autocomplete="off" spellcheck="false">))   # ['amy', 'bob carl']
+pairs = rdd.<span class="bn">2</span><input class="blank" id="f8-2" data-ans="flatMap" aria-label="Blank 2" autocomplete="off" spellcheck="false">(lambda p: [(<span class="bn">3</span><input class="blank" id="f8-3" data-ans="f" aria-label="Blank 3" autocomplete="off" spellcheck="false">, <span class="bn">4</span><input class="blank" id="f8-4" data-ans="p[0]" aria-label="Blank 4" autocomplete="off" spellcheck="false">) for f in p[1].split()])   # ('bob', 'amy'), ('carl', 'amy'), ...
+followers = pairs.<span class="bn">5</span><input class="blank" id="f8-5" data-ans="groupByKey" aria-label="Blank 5" autocomplete="off" spellcheck="false">().mapValues(lambda v: sorted(v)).<span class="bn">6</span><input class="blank" id="f8-6" data-ans="sortByKey" aria-label="Blank 6" autocomplete="off" spellcheck="false">()
+followers.collect()   # [('amy', ['carl']), ('bob', ['amy', 'carl']), ('carl', ['amy', 'bob', 'dora'])]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li>格 1 要連空格 <code>' -> '</code>，否則 <code>'amy '</code> 會帶住尾後空格。</li>
+      <li>格 3、4 調轉次序：被 follow 嘅 <code>f</code> 做 key，<code>p[0]</code>（follow 人嗰個）做 value。</li>
+    </ul></div></details>
+  </div>
+
+  <div class="practice fill" id="fill9">
+    <span class="src">對應 MapReduce 題 11</span>
+    <h3>填充 9：每科最高分嘅學生</h3>
+<pre class="code"><code>rdd = spark.textFile('scores.txt').map(lambda line: line.split(','))     # ['amy', 'DSAI4205', '78']
+pairs = rdd.map(lambda x: (<span class="bn">1</span><input class="blank" id="f9-1" data-ans="x[1]" aria-label="Blank 1" autocomplete="off" spellcheck="false">, (<span class="bn">2</span><input class="blank" id="f9-2" data-ans="x[0]" aria-label="Blank 2" autocomplete="off" spellcheck="false">, <span class="bn">3</span><input class="blank" id="f9-3" data-ans="int§float" aria-label="Blank 3" autocomplete="off" spellcheck="false">(x[2]))))           # ('DSAI4205', ('amy', 78))
+best = pairs.<span class="bn">4</span><input class="blank" id="f9-4" data-ans="reduceByKey" aria-label="Blank 4" autocomplete="off" spellcheck="false">(lambda a, b: a if <span class="bn">5</span><input class="blank" id="f9-5" data-ans="a[1]" aria-label="Blank 5" autocomplete="off" spellcheck="false"> >= b[1] else b)
+best.<span class="bn">6</span><input class="blank" id="f9-6" data-ans="sortByKey" aria-label="Blank 6" autocomplete="off" spellcheck="false">().collect()   # [('COMP1011', ('carl', 85)), ('DSAI4205', ('bob', 91))]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li>reduceByKey 嘅 <code>a</code>、<code>b</code> 都係 <code>(學生, 分數)</code>，比較 <code>a[1]</code> 同 <code>b[1]</code>，留返分數高嗰個。</li>
+      <li>唔加 <code>int()</code> 會變成比較 string（<code>'9' &gt; '10'</code>），結果會錯。</li>
+    </ul></div></details>
+  </div>
+
+  <div class="practice fill" id="fill10">
+    <span class="src">對應 MapReduce 題 12</span>
+    <h3>填充 10：2025 年每個類別嘅總銷售額</h3>
+<pre class="code"><code>rdd = spark.textFile('sales.txt').map(lambda l: l.split(','))     # ['O1', 'Books', '120.5', '2025']
+rdd = rdd.<span class="bn">1</span><input class="blank" id="f10-1" data-ans="filter" aria-label="Blank 1" autocomplete="off" spellcheck="false">(lambda x: <span class="bn">2</span><input class="blank" id="f10-2" data-ans="x[3]" aria-label="Blank 2" autocomplete="off" spellcheck="false"> == <span class="bn">3</span><input class="blank" id="f10-3" data-ans="'2025'" aria-label="Blank 3" autocomplete="off" spellcheck="false">)
+rdd = rdd.map(lambda x: (<span class="bn">4</span><input class="blank" id="f10-4" data-ans="x[1]" aria-label="Blank 4" autocomplete="off" spellcheck="false">, <span class="bn">5</span><input class="blank" id="f10-5" data-ans="float" aria-label="Blank 5" autocomplete="off" spellcheck="false">(x[2])))
+total = rdd.reduceByKey(<span class="bn">6</span><input class="blank" id="f10-6" data-ans="add§lambda a,b:a+b§lambda x,y:x+y" aria-label="Blank 6" autocomplete="off" spellcheck="false">)
+total.sortBy(lambda x: x[1], ascending=False).collect()   # [('Books', 200.5), ('Games', 150.0), ('Music', 40.0)]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li>格 3 一定要有引號：split 出嚟嘅 <code>x[3]</code> 係 string <code>'2025'</code>。寫 <code>== 2025</code> 會一筆都冇（已用 sample data 試過，結果係 0 筆）。或者寫 <code>int(x[3]) == 2025</code>。</li>
+      <li>格 5 要 <code>float</code>：<code>int('120.5')</code> 會出錯。</li>
+    </ul></div></details>
+  </div>
+
+  <div class="practice fill" id="fill11">
+    <span class="src">對應 MapReduce 題 9</span>
+    <h3>填充 11：每個網頁嘅唔同訪客數</h3>
+<pre class="code"><code>rdd = spark.textFile('access.log').map(lambda l: l.split(' | '))     # ['10:00', '1.1.1.1', '/home']
+pairs = rdd.map(lambda x: (<span class="bn">1</span><input class="blank" id="f11-1" data-ans="x[2]" aria-label="Blank 1" autocomplete="off" spellcheck="false">, <span class="bn">2</span><input class="blank" id="f11-2" data-ans="x[1]" aria-label="Blank 2" autocomplete="off" spellcheck="false">)).<span class="bn">3</span><input class="blank" id="f11-3" data-ans="distinct" aria-label="Blank 3" autocomplete="off" spellcheck="false">()          # 每個 (url, ip) 只留一次
+uv = pairs.map(lambda x: (<span class="bn">4</span><input class="blank" id="f11-4" data-ans="x[0]" aria-label="Blank 4" autocomplete="off" spellcheck="false">, 1)).<span class="bn">5</span><input class="blank" id="f11-5" data-ans="reduceByKey" aria-label="Blank 5" autocomplete="off" spellcheck="false">(add)
+uv.<span class="bn">6</span><input class="blank" id="f11-6" data-ans="sortByKey" aria-label="Blank 6" autocomplete="off" spellcheck="false">().collect()   # [('/cart', 2), ('/home', 3)]</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li>漏咗 <code>distinct()</code> 會得 <code>('/home', 5)</code>，即係瀏覽次數。</li>
+      <li>先 distinct 再數，等於 MapReduce 版嘅「removeDuplicates 之後 length」。</li>
+    </ul></div></details>
+  </div>
+</section>
+
+<!-- ============ CONCEPT ============ -->
+<section id="concept">
+  <div class="sec-head"><span class="eyebrow">Q1(b) 模擬 · 用英文答</span><h2>概念短答</h2></div>
+  <p>老師冇講 Q1(b) 問乜，只講「問概念，寫文字」。以下 8 題係 L3 最核心嘅概念，答案寫成考試可以直接用嘅英文，2–4 句就夠。</p>
+
+  <details><summary>1. Transformation vs action；乜嘢係 lazy evaluation，有咩好處？</summary><div class="body">
+    <p>A <b>transformation</b> (e.g. map, filter, reduceByKey) creates a new RDD from an existing one. It is <b>lazy</b>: Spark only records it in the lineage / logical plan and does not execute it. An <b>action</b> (e.g. collect, count, take) returns a value to the driver and triggers the execution of all pending transformations. Lazy evaluation lets Spark see the whole chain first, so it can optimise it (merge and pipeline steps, skip unnecessary work), saving time and computing resources.</p>
+  </div></details>
+  <details><summary>2. Narrow vs wide transformation，各舉一例；點解 wide 貴啲？</summary><div class="body">
+    <p>In a <b>narrow</b> transformation, each output partition is computed from a single input partition (e.g. map, filter), so no data needs to move between workers. In a <b>wide</b> transformation, an output partition needs data from many input partitions (e.g. groupByKey, reduceByKey, sortBy, join), so data must be <b>shuffled across the network</b>. The shuffle adds network I/O and latency and starts a new stage, so wide transformations are more expensive.</p>
+  </div></details>
+  <details><summary>3. 點解 Spark 通常比 Hadoop MapReduce 快，尤其係 iterative job？</summary><div class="body">
+    <p>MapReduce writes all intermediate results to disk (with replication) and can only share data between jobs or iterations through shared storage, so every iteration pays disk I/O. Spark keeps RDDs <b>in memory</b> (and can cache RDDs that are reused), chains many transformations in one job, and gets fault tolerance from <b>lineage</b> instead of replicating intermediate data.</p>
+  </div></details>
+  <details><summary>4. RDD 點做到 fault tolerance？worker 死同 driver 死有咩分別？</summary><div class="body">
+    <p>RDDs are immutable and remember their <b>lineage</b>, the deterministic transformations used to build them from the original data. If a <b>worker</b> fails, its lost partitions are recomputed from the original data using the lineage, and the driver reassigns the tasks to other workers, so the job continues. If the <b>driver</b> fails, the application's state is lost; there is no automatic recovery, so the application must be restarted from the beginning.</p>
+  </div></details>
+  <details><summary>5. Inverted index MapReduce 入面，shuffle 做咗咩？點解 reducer 要去重複？</summary><div class="body">
+    <p>The shuffle phase collects all mapper outputs and <b>groups them by key</b>, sending all pairs with the same word to the same reducer as (word, [doc_ids]). It only groups; it does not remove duplicates. If a word appears twice in one document (e.g. “the” in D1), D1 appears twice in the list, so the reducer must remove duplicates before emitting the result.</p>
+  </div></details>
+  <details><summary>6. map() 同 flatMap() 有咩分別？</summary><div class="body">
+    <p><b>map()</b> produces exactly one output element for each input element, so splitting sentences gives one list per sentence (nested lists). <b>flatMap()</b> lets each input produce zero or more outputs and flattens them, so splitting sentences gives one flat RDD of words. Example: <code>['hello world', 'hi']</code> → map gives <code>[['hello','world'], ['hi']]</code>; flatMap gives <code>['hello','world','hi']</code>.</p>
+  </div></details>
+  <details><summary>7. Scale up vs scale out；點解大數據用 scale out？</summary><div class="body">
+    <p><b>Scale up</b> (vertical) upgrades one machine with a faster CPU or more memory; <b>scale out</b> (horizontal) adds more machines or workers and distributes the work. Single-CPU clock speeds can no longer keep doubling because of physical limits (heat, quantum tunnelling), and one machine's memory is limited, so big data systems such as Hadoop, Dask and Spark scale out. Coordination overhead means doubling the workers does not double the throughput.</p>
+  </div></details>
+  <details><summary>8. Sharding（partitioning）同 replication 有咩分別？</summary><div class="body">
+    <p><b>Sharding</b> splits a dataset into smaller subsets, horizontally (rows) or vertically (columns or tables), stored on different nodes so they can be processed in parallel. <b>Replication</b> stores multiple copies of the same data on different nodes for fault tolerance and faster reads (HDFS keeps 3 copies), at the cost of keeping the replicas consistent.</p>
+  </div></details>
+</section>
+
+<section id="sources">
+  <div class="sec-head"><h2>資料來源</h2></div>
+  <ul class="sources">
+    <li>你上載嘅 DSAI4205 L0–L3 notes、Tutorial 3 + Take Home Exercise Solution、10 月 2 日 lecture 錄音文字稿</li>
+    <li>Past papers：DSAI4205 2025/26 Sem 1 Q1；COMP4434 2023/24 Sem II Q8</li>
+    <li><a href="http://www.mmds.org/" target="_blank" rel="noopener">Leskovec, Rajaraman &amp; Ullman, <i>Mining of Massive Datasets</i></a>（課程參考書）第 2 章：<a href="http://infolab.stanford.edu/~ullman/mmds/ch2n.pdf" target="_blank" rel="noopener">Exercise 2.3.1</a></li>
+    <li><a href="https://ics-websites.science.uu.nl/docs/vakken/b3dar/oefeningen-MR.pdf" target="_blank" rel="noopener">Utrecht University · MapReduce exercises</a>（positional inverted index）</li>
+  </ul>
+  <footer>Spark 答案同 output 已用課堂 sample data 逐行核對。祝考試順利。</footer>
+</section>
+
+</main>
+
+<script>
+(function(){
+  /* ---------- MCQ data ---------- */
+  var A = [
+    {t:'L1', s:'<p>Netflix notices that users\' viewing preferences shift over time as new content is released and cultural trends change. Which characteristic of Big Data does this BEST describe?</p>',
+     o:['Volume','Velocity','Variability','Veracity'], a:2,
+     e:'<b>Variability</b> = 數據（或者佢嘅意思）隨時間變幾快、變幾多，例如用戶口味改變、一個字有多個意思。<b>Velocity</b> 係「產生同處理得幾快」（streaming），唔好撈亂。'},
+    {t:'L1', s:'<p>Customer records collected from several branches contain typos in names and conflicting addresses. Which V is mainly affected?</p>',
+     o:['Value','Veracity','Variety','Volume'], a:1,
+     e:'<b>Veracity</b> = quality and accuracy（trustworthiness）：measurement error、人手打錯字、唔同來源唔一致。Value 都同 veracity 有關，但題目講緊「準唔準」。'},
+    {t:'L1', s:'<p>Web logs that track user behaviour and readings from IoT sensors installed in machinery are examples of:</p>',
+     o:['Social data','Transactional data','Machine data','Semi-structured social media data'], a:2,
+     e:'三個來源：<b>social</b>（posts、likes、相片）、<b>machine</b>（設備、sensor、web logs、IoT）、<b>transactional</b>（發票、付款單、送貨單）。'},
+    {t:'L1', s:'<p>Compared with traditional data, which statement about Big Data is CORRECT?</p>',
+     o:['It is usually structured data with predefined formats','It is processed in parallel using distributed tools such as Hadoop and Spark','It relies on a single server running a relational DBMS','It is generated steadily and processed at a slower pace'], a:1,
+     e:'A、C、D 全部係 L1 slide 6 表入面 <b>traditional data</b> 嘅描述。'},
+    {t:'L2', s:'<p>A company upgrades its only server with a faster CPU and more RAM. This is an example of:</p>',
+     o:['Scale up (vertical scaling)','Scale out (horizontal scaling)','Sharding','Replication'], a:0,
+     e:'升級同一部機 = <b>scale up</b>。加多幾部機 = scale out。'},
+    {t:'L2', s:'<p>Why has the industry moved towards multi-core processors and clusters instead of relying on ever-faster single CPUs?</p>',
+     o:['Transistor counts stopped growing after 2005','Clock speeds can no longer keep doubling because of physical limits such as heat and quantum tunnelling','Multi-core processors have no coordination overhead','Single-core CPUs cannot run Python'], a:1,
+     e:'2005 年 Herb Sutter：“The Free Lunch Is Over”。Transistor 數量仍然增加（A 錯），只係用嚟加 core。C 錯：多 worker 有 coordination overhead（5 人 vs 30 人 team）。'},
+    {t:'L2', s:'<p>Data is sharded by hashing across <i>n</i> = 4 nodes (numbered 0–3). A record\'s key hashes to h(k) = 22. Which node stores it?</p>',
+     o:['Node 0','Node 1','Node 2','Node 3'], a:2,
+     e:'<code>h(k) % n</code> = 22 % 4 = <b>2</b>。'},
+    {t:'L2', s:'<p>Which of the following is NOT a feature of HDFS described in the lecture?</p>',
+     o:['Fixed-size partitioning','3-way replication','Write-once, read-many','Keeping intermediate results in memory for fast iterative jobs'], a:3,
+     e:'HDFS 三個特點：fixed-size partitioning、3-way replication、write-once read-many。D 係 <b>Spark RDD</b> 嘅賣點。'},
+    {t:'L2', s:'<pre class="code sm plain"><code>dask_data = da.ones((10000, 12000), chunks=(5000, 4000))</code></pre><p>How many chunks does <code>dask_data</code> have?</p>',
+     o:['2','3','6','5000 × 4000'], a:2,
+     e:'<code>chunks</code> 係「每塊嘅形狀」，唔係塊數。10000 ÷ 5000 = 2，12000 ÷ 4000 = 3 → 2 × 3 = <b>6</b>。'},
+    {t:'L2', s:'<p><code>mean_of_1 = dask_data.mean()</code> returns in about 3 ms, much faster than NumPy\'s <code>data.mean()</code>. Why?</p>',
+     o:['Dask always runs on the GPU','Dask reuses a cached result from an earlier run','Dask only averages a random sample','Dask is lazy: it only builds a task graph, and the work happens when .compute() is called'], a:3,
+     e:'Dask 係 <b>lazy</b>：<code>.mean()</code> 只起 task graph，<code>.compute()</code> 先真正計（約 30 ms）。'},
+    {t:'L3', s:'<p>Which is the correct order of the steps in a MapReduce job?</p>',
+     o:['Map → Shuffle &amp; Sort → Reduce → Write','Shuffle &amp; Sort → Map → Reduce → Write','Map → Reduce → Shuffle &amp; Sort → Write','Reduce → Map → Shuffle &amp; Sort → Write'], a:0,
+     e:'Map 抽取 (key, value) → Shuffle &amp; Sort 按 key 分組 → Reduce 匯總 → Write 結果。'},
+    {t:'L3', s:'<p>In the inverted-index MapReduce job, a reducer receives <code>("the", [D1, D1, D3, D4])</code>. Which component grouped these values under the key "the"?</p>',
+     o:['The mapper','The reducer itself','The shuffle &amp; sort phase, done automatically by the framework','The Spark driver'], a:2,
+     e:'老師強調：grouping 係 <b>shuffle</b> 做，reducer 收到時已經 group 好。Shuffle 只會按 key 分組，唔會去重複，所以 reducer 仲要 removeDuplicates。'},
+    {t:'L3', s:'<p>Which of the following is an ACTION?</p>',
+     o:['reduceByKey()','flatMap()','sortBy()','count()'], a:3,
+     e:'<code>reduceByKey</code> 雖然有 reduce 字，但回傳 RDD，所以係 transformation。Action 回傳值並觸發計算：collect、count、first、take、sum、mean…'},
+    {t:'L3', s:'<p>Which transformation is NARROW?</p>',
+     o:['filter()','groupByKey()','sortBy()','reduceByKey()'], a:0,
+     e:'filter 每個 output partition 只靠一個 input partition，唔使 shuffle。其餘三個都要按 key 搬數據 → wide。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>rdd = spark.parallelize(["hello world", "hi"])\nrdd.map(lambda x: x.split(\' \')).collect()</code></pre><p>What is returned?</p>',
+     o:["['hello', 'world', 'hi']","[['hello', 'world'], ['hi']]",'3',"['hello world', 'hi']"], a:1,
+     e:'map 一個 input 一個 output，每個 output 係一個 list → 有內層 <code>[ ]</code>。用 flatMap 先會得 A。'}
+  ];
+  var B = [
+    {t:'L3', s:'<pre class="code sm plain"><code>result = rdd.collect()\nresult2 = result.map(lambda x: x * 2)</code></pre><p>What happens on line 2?</p>',
+     o:['A new RDD is created lazily','Spark recomputes the RDD and doubles it','result2 holds the doubled values','An error: collect() returned a Python list, which has no .map()'], a:3,
+     e:'老師上堂特登講：collect 之後「成個故事完咗」，result 係 Python list，唔再係 RDD。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>rdd = spark.textFile(\'not_exist.txt\')   # file does not exist\nwords = rdd.flatMap(lambda x: x.split())\nwords.collect()</code></pre><p>On which line does Spark report the missing-file error?</p>',
+     o:['Line 1','Line 2','Line 3','Never'], a:2,
+     e:'Lazy evaluation：transformation 唔會執行，去到 action（collect）先真正讀 file，所以先報錯。'},
+    {t:'L3', s:'<p>A worker node crashes and one partition of an RDD is lost. How does Spark recover?</p>',
+     o:['It restarts the whole application from the beginning','It recomputes the lost partition from the original data using the lineage, and reassigns the tasks to other workers','It reads a 3-way replica of the RDD partition from another node','It cannot recover'], a:1,
+     e:'RDD 靠 <b>lineage</b> 重算，唔係靠 replication（C 係 HDFS 嘅做法）。A 係 driver 死咗先會發生。'},
+    {t:'L3', s:'<p>What happens if the <b>driver program</b> fails?</p>',
+     o:['Lineage is used to recompute the driver','The cluster manager promotes a worker to be the new driver','The application\'s state is lost; there is no automatic recovery, so it must be restarted','Nothing, because only workers hold data'], a:2,
+     e:'Driver 死咗：所有 job 資料同 state 冇晒，冇自動恢復，要由頭跑過。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>from operator import add\nkvRDD = spark.parallelize([(3,4), (3,1), (5,6), (1,2)])\nkvRDD.reduceByKey(add).collect()</code></pre>',
+     o:['[(3, 5), (5, 6), (1, 2)]','[(3, [4, 1]), (5, [6]), (1, [2])]','[(3, 4), (5, 6), (1, 2)]','13'], a:0,
+     e:'key 3 有 4 同 1 → 4 + 1 = 5；其他 key 只有一個 value。B 係 groupByKey 嘅結果。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>kvRDD1 = spark.parallelize([(1,2), (3,4), (3,6)])\nkvRDD2 = spark.parallelize([(3,7)])\nkvRDD1.leftOuterJoin(kvRDD2).collect()</code></pre>',
+     o:['[(3, (4, 7)), (3, (6, 7))]','[(1, (2, None)), (3, (4, 7)), (3, (6, 7))]','[(1, (2, None)), (3, (4, 6, 7))]','[(3, (None, 7))]'], a:1,
+     e:'Left outer join 保留左邊所有 key；key 1 喺右邊冇 match → <code>None</code>。A 係 inner join（同 rightOuterJoin）嘅結果。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>rddData1 = spark.parallelize([1, 1, 2, 3])\nrddData2 = spark.parallelize([3, 4, 5, 7])\nsorted(rddData1.subtract(rddData2).collect())</code></pre>',
+     o:['[1, 2]','[1, 1, 2]','[3]','[4, 5, 7]'], a:1,
+     e:'subtract = 喺 self 但唔喺 other，<b>保留重複</b>。C 係 intersection 嘅結果。'},
+    {t:'L3', s:'<p>An RDD has 4 partitions. The code runs <code>textFile → flatMap → map → reduceByKey → collect()</code>. Which statement is correct?</p>',
+     o:['4 jobs and 1 stage','1 job, 1 stage and 1 task','1 job and 2 stages; the first stage runs 4 tasks (one per partition)','2 jobs, because there are two narrow transformations'], a:2,
+     e:'得一個 action（collect）→ 1 job；reduceByKey 要 shuffle → 開新 stage → 2 stages；每個 partition 一個 task → 4 tasks。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>rdd_data3 = spark.parallelize(range(10), 1)\nres = rdd_data3.randomSplit([0.6, 0.4])</code></pre><p>The two parts have 8 and 2 elements. Why not 6 and 4?</p>',
+     o:['It is a bug in Spark','randomSplit always puts even numbers first','The weights are probabilities: each element draws its own random number, so an exact 60/40 split is not guaranteed','The weights must add up to 10'], a:2,
+     e:'每個元素擲一次「骰仔」，落喺 0–0.6 就去第一組。想每次結果一樣就加 <code>seed=1234</code>。'},
+    {t:'L3', s:'<p>Which Spark component chops a live data stream into small batches (as low as 0.5 s) and processes each batch as RDDs?</p>',
+     o:['Spark SQL','MLlib','GraphX','Spark Streaming'], a:3,
+     e:'Spark Streaming：batch 最細 0.5 秒，latency 約 1 秒。'},
+    {t:'L3', s:'<p><code>hk_weather</code> is used to compute the average temperature, a rainfall prediction and a correlation. What avoids recomputing it each time?</p>',
+     o:['hk_weather.cache()','hk_weather.collect()','hk_weather.distinct()','Rewrite it as a MapReduce job'], a:0,
+     e:'重複用嘅 RDD 就 <code>cache()</code>（類似 Dask 嘅 persist），用完 <code>unpersist()</code>。'},
+    {t:'L2', s:'<p>For which operation is a Dask DataFrame NOT a good fit?</p>',
+     o:['Element-wise df.x + df.y','Row filtering df[df.x > 0]','Aggregation df.x.max()','Setting a new index with df.set_index(df.x), which needs shuffling'], a:3,
+     e:'Dask 唔擅長要 shuffle 或 re-index 嘅操作（例如 set_index）。A、B、C 同 drop duplicates 都啱用。'},
+    {t:'L3', s:'<p><i>(老師上堂問過)</i> What is the fundamental difference between narrow and wide transformations?</p>',
+     o:['Narrow: each output partition depends on one input partition, so no shuffle; wide: needs data from other partitions, so data is shuffled across the network','Narrow transformations run on the GPU','Wide transformations are actions','Narrow transformations only work on key-value RDDs'], a:0,
+     e:'老師答案係呢個：narrow 唔使向其他 worker 攞數據；wide（join、groupBy）要將數據送去其他 worker，所以有網絡 latency。'},
+    {t:'L3', s:'<p>What is the main reason MapReduce is slow for iterative algorithms?</p>',
+     o:['It can only be programmed in Java','Intermediate results are written to disk (with replication) and iterations can only share data through shared storage','It has no fault tolerance','It cannot run on inexpensive hardware'], a:1,
+     e:'MapReduce 為咗 fault tolerance 將中間結果寫落 disk；C、D 啱啱相反（佢有內置 fault tolerance，又可以用平價硬件）。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>rdd = spark.parallelize(["a b", "c d e"])\nrdd.flatMap(lambda x: x.split()).count()</code></pre>',
+     o:['2','5','[2, 3]','Error'], a:1,
+     e:'flatMap 拆平之後有 a、b、c、d、e 五個元素。用 map 嘅話 count 係 2。'},
+    {t:'L3', s:'<p>In Spark\'s architecture, where is the SparkContext created?</p>',
+     o:['In each executor','In the cluster manager','In the driver program running on the master node','In HDFS'], a:2,
+     e:'Driver program 喺 master node 行，佢建立 SparkContext（所有 Spark 功能嘅入口）。'},
+    {t:'L2', s:'<p>A Dask array is split into extremely small chunks (e.g. <code>chunks=1</code>). What is the likely result?</p>',
+     o:['Faster, because there is more parallelism','The data no longer fits in memory','Slow, because of too much scheduling overhead (recommended chunk size is 100 MB–1 GB)','Dask raises an error'], a:2,
+     e:'Chunk 太細 → overhead 太大；太大 → 塞唔落 memory。建議 100 MB 至 1 GB。'}
+  ];
+
+  var C = [
+    {t:'L1', s:'<p>Which of the following is NOT one of the three primary sources of big data in the lecture?</p>',
+     o:['Social data','Machine data','Transactional data','Archived paper records'], a:3,
+     e:'三個來源：<b>social</b>（posts、likes、相片）、<b>machine</b>（sensor、web logs、IoT）、<b>transactional</b>（發票、付款單、送貨單）。'},
+    {t:'L1', s:'<p>In the data analytics process, asking “What are the biases, anomalies, or other issues with the data?” belongs to which step?</p>',
+     o:['Problem formulation','Data acquisition and cleaning','Exploratory data analysis (EDA) and visualization','Prediction and inference'], a:2,
+     e:'EDA 問：數據點組織、入面有咩、有冇偏差同異常、點樣 transform 先方便分析。'},
+    {t:'L1', s:'<p>“Is our data representative of the population we want to study?” belongs to which step?</p>',
+     o:['Problem formulation','Data acquisition and cleaning','Exploratory data analysis','Prediction and inference'], a:1,
+     e:'Data acquisition and cleaning 問：有咩數據、要咩數據、點樣 sample 更多、數據係咪有代表性。'},
+    {t:'L1', s:'<p>Netflix stores structured logs (timestamps, user IDs), semi-structured JSON metadata and unstructured review text. Which V does this illustrate?</p>',
+     o:['Variety','Velocity','Veracity','Value'], a:0,
+     e:'structured + semi-structured + unstructured = 數據類型多 = <b>Variety</b>。'},
+    {t:'L1', s:'<p>“The longer it takes for data to be turned into meaningful information, the less ___ it has for a business.”</p>',
+     o:['Volume','Value','Velocity','Variability'], a:1,
+     e:'L1 slide 17：Value 同處理時間有關，愈遲變成資訊，商業價值愈低。'},
+    {t:'L2', s:'<p>“The same instructions applied to multiple data items” describes:</p>',
+     o:['Replication','Vertical partitioning','Scale up','Data parallelism'], a:3,
+     e:'Data parallelism = same instructions, multiple data items，例如 <code>df[df[\'A\'] &gt; 1]</code> 可以每個 core 處理唔同嘅 row。'},
+    {t:'L2', s:'<p>The rows of a DataFrame are randomly spread across two CPU cores. Which operation can NOT be computed correctly by each core working only on its own rows?</p>',
+     o:["Filtering df[df['A'] > 1]","Projection df[['A', 'B']]","df['A'].apply(add_one)","df.groupby('A').count()"], a:3,
+     e:'groupby 要所有相同 A 值嘅 row 喺同一個 partition，所以要先重新排數據（rearrange / shuffle）。其餘三個逐行做就得。'},
+    {t:'L2', s:'<p>Storing different tables and columns on different nodes is called:</p>',
+     o:['Horizontal partitioning','Vertical partitioning','Replication','Hashing'], a:1,
+     e:'Vertical = 按 table／column 切；Horizontal = 同一個 table 嘅 row 分去唔同 node。'},
+    {t:'L2', s:'<pre class="code sm plain"><code>dask_data = da.ones((10000, 12000), chunks=(1000, 2000))</code></pre><p>How many chunks are there?</p>',
+     o:['6','12','60','2,000,000'], a:2,
+     e:'10000 ÷ 1000 = 10，12000 ÷ 2000 = 6 → 10 × 6 = <b>60</b>。chunks 係每塊嘅形狀。'},
+    {t:'L2', s:'<p>Which Dask collection is the parallel counterpart of a Python list for unstructured data?</p>',
+     o:['Dask Array','Dask DataFrame','Dask Bag','dask.delayed'], a:2,
+     e:'Array ↔ NumPy、DataFrame ↔ pandas、<b>Bag ↔ list</b>（<code>dask.bag.from_sequence([1,2,3])</code>）。delayed 係 low-level collection。'},
+    {t:'L2', s:'<p>What does decorating a function with <code>@dask.delayed</code> do?</p>',
+     o:['Makes calls lazy: they build a task graph and nothing runs until .compute() is called','Runs the function immediately on all cores','Converts the result into a NumPy array','Caches every result to disk'], a:0,
+     e:'delayed 令任何 Python function 變 lazy；<code>c = add(inc(x), double(x))</code> 只係一個 Delayed object，<code>c.compute()</code> 先執行，冇依賴嘅 task 可以平行做。'},
+    {t:'L2', s:'<p>A Dask DataFrame is made up of:</p>',
+     o:['One large NumPy array','Spark RDDs','Many pandas DataFrames (partitions) processed in parallel','A single pandas DataFrame stored on disk'], a:2,
+     e:'Dask DataFrame = 好多個 pandas DataFrame（partitions），lazy 載入、多 core 平行處理。'},
+    {t:'L2', s:'<p>Rule of thumb from the lecture: to work comfortably in pandas, main memory should be about ___ the size of the dataset.</p>',
+     o:['The same as','2 times','5–10 times','100 times'], a:2,
+     e:'Pandas 要 5–10 倍 memory，數據太大就會 out of memory，呢個時候先用 Dask。'},
+    {t:'L3', s:'<p>In “Resilient Distributed Dataset”, what does <i>resilient</i> refer to?</p>',
+     o:['Each partition is stored three times','The RDD can be modified in place','Spark jobs never fail','Lost partitions can be recomputed from the lineage'], a:3,
+     e:'RDD 記住 lineage，partition 失咗就重算 → fault tolerant。RDD 係 immutable（B 錯），亦唔係靠 3 份副本（A 係 HDFS）。'},
+    {t:'L3', s:'<p>Which describes MapReduce\'s data model?</p>',
+     o:['A file is a bag of (key, value) pairs; both the input and the output are bags of (key, value) pairs','A file is a relational table with a fixed schema','A file is an RDD','A file is a NumPy array'], a:0,
+     e:'L3 slide 7：file = a bag of (key, value) pairs；output 嘅 key 可有可無。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>spark.parallelize([(1, 2), (3, 4)]).mapValues(lambda v: v * 10).collect()</code></pre>',
+     o:['[(10, 20), (30, 40)]','[(1, 20), (3, 40)]','[20, 40]','[(1, 2, 10), (3, 4, 10)]'], a:1,
+     e:'mapValues 只改 value，key 唔郁。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>kvRDD = spark.parallelize([(3,4), (3,6), (5,6), (1,2)])\nkvRDD.filter(lambda kv: kv[1] > 4).collect()</code></pre>',
+     o:['[(3, 6), (5, 6)]','[(5, 6)]','[(3, 4), (3, 6), (5, 6)]','[6, 6]'], a:0,
+     e:'<code>kv[1]</code> 係 value：6 同 6 大過 4。filter 保留成個 tuple。B 係用咗 <code>kv[0] &gt; 4</code> 嘅結果。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>spark.parallelize([1, 2, 3]).union(spark.parallelize([3, 4])).collect()</code></pre>',
+     o:['[1, 2, 3, 3, 4]','[1, 2, 3, 4]','[3]','[1, 2]'], a:0,
+     e:'union = concatenation，<b>保留重複</b>。B 似 union 再 distinct；C 係 intersection；D 係 subtract。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>res = spark.parallelize([1, 2, 3, 4, 5, 6]).groupBy(lambda x: x % 3).collect()\nsorted([(k, sorted(v)) for k, v in res])</code></pre>',
+     o:['[(0, [3, 6]), (1, [1, 4]), (2, [2, 5])]','[(0, [1, 2, 3]), (1, [4, 5, 6])]','[(3, [3, 6])]','[(1, [1, 2, 3, 4, 5, 6])]'], a:0,
+     e:'<code>x % 3</code> 嘅結果（0、1、2）變成 key：3、6 → 0；1、4 → 1；2、5 → 2。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>rdd = spark.parallelize([(\'a\', 1), (\'b\', 1), (\'a\', 1)])\nsorted(rdd.groupByKey().map(lambda x: (x[0], len(x[1]))).collect())</code></pre>',
+     o:["[('a', [1, 1]), ('b', [1])]","[('a', 1), ('b', 1)]",'3',"[('a', 2), ('b', 1)]"], a:3,
+     e:'groupByKey 之後 <code>x[0]</code> = key，<code>x[1]</code> = 所有 value（ResultIterable），<code>len</code> 就係個數。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>rdd = spark.textFile(\'log.txt\').filter(lambda l: \'ERROR\' in l)\nn = rdd.count()\nrows = rdd.collect()</code></pre><p>How many Spark jobs are created (no caching)?</p>',
+     o:['0','1','2','3'], a:2,
+     e:'每個 action 開一個 job：count 同 collect → 2 個 job。冇 cache 嘅話 file 會讀兩次，所以重用嘅 RDD 應該先 <code>rdd.cache()</code>。'},
+    {t:'L3', s:'<p>In the Spark architecture, what does the cluster manager do?</p>',
+     o:['Writes the user\'s Spark code','Stores the RDD lineage on disk','Splits a job into tasks and distributes them over the worker nodes','Creates the SparkContext'], a:2,
+     e:'Driver program 建 SparkContext（D）；cluster manager 將 job 拆成 task 分派去 worker；worker 嘅 executor 執行 task。'},
+    {t:'L3', s:'<p>In the inverted-index job, a student writes the mapper as <code>emit(doc_id, word)</code>. What goes wrong?</p>',
+     o:['Nothing, the output is the same','The shuffle groups by document ID, so each reducer just rebuilds a document instead of a word → document list','The mapper crashes because keys must be words','The reducer automatically removes all duplicates'], a:1,
+     e:'Shuffle 只會按 key 分組。key 揀錯，分組就錯。題目要「每個字」，key 一定要係 word。'},
+    {t:'L3', s:'<p>In the lecture\'s word count example, what does the reducer for the key “repeat” receive, and what does it output?</p>',
+     o:["Receives ('repeat', 8); outputs ('repeat', 8)","Receives ('repeat', [1, 1, 1, 1, 1, 1, 1, 1]); outputs ('repeat', 8)",'Receives the whole document; outputs the number of words',"Receives ('repeat', 1) eight separate times and outputs each one"], a:1,
+     e:'Shuffle 將 8 個 <code>(repeat, 1)</code> 合成 <code>(repeat, [1,1,1,1,1,1,1,1])</code>，reducer 加總 → 8。'},
+    {t:'L3', s:'<pre class="code sm plain"><code>rdd = spark.parallelize([(\'a\', 3), (\'b\', 5), (\'a\', 7)])\nsorted(rdd.reduceByKey(max).collect())</code></pre>',
+     o:["[('a', 7), ('b', 5)]","[('a', 10), ('b', 5)]","[('a', 3), ('b', 5)]",'[7]'], a:0,
+     e:'reduceByKey 可以用任何兩個 value 變一個嘅 function：<code>max(3, 7)</code> = 7。用 add 先會係 B。'},
+    {t:'L3', s:'<p>Which is a disadvantage of choosing very LARGE partitions?</p>',
+     o:['More overhead from starting many tasks','The data can no longer be cached','It always forces a shuffle','It may not expose enough parallelism to use all cores, it is harder to balance the work, and it uses more memory'], a:3,
+     e:'大 partition：task 少、overhead 少（A 係細 partition 嘅問題），但可能用唔晒 core、難平均分工、用多 memory。'},
+    {t:'L3', s:'<p>Two key-value RDDs are partitioned using the same key, the same hash partitioner and the same number of partitions. Joining them:</p>',
+     o:['Requires all-to-all network communication','Is impossible in Spark','Can be done without moving rows across machines, because matching keys are already on the same node','Converts them into DataFrames first'], a:2,
+     e:'Partition 方法一樣 → 相同 key 已經喺同一部機，唔使 all-to-all 傳。<code>partitionBy()</code> 只用喺 key-value RDD，預設 hash partitioner。'}
+  ];
+
+  var sets = {A:A, B:B, C:C};
+  var L = ['A','B','C','D'];
+  function render(key){
+    var host = document.getElementById('set-' + key);
+    host.innerHTML = '';
+    sets[key].forEach(function(q, i){
+      var art = document.createElement('article');
+      art.className = 'q';
+      art.id = 'q-' + key + (i+1);
+      var h = '<header><span class="qno">' + key + (i+1) + '</span><span class="tag">' + q.t + '</span></header>' +
+              '<div class="stem">' + q.s + '</div><div class="opts" role="group" aria-label="Options">';
+      q.o.forEach(function(op, j){
+        h += '<button type="button" class="opt" data-j="' + j + '"><span class="L">' + L[j] + '</span><span>' + op + '</span></button>';
+      });
+      h += '</div><div class="exp" hidden></div>';
+      art.innerHTML = h;
+      art.querySelectorAll('.opt').forEach(function(btn){
+        btn.addEventListener('click', function(){ answer(key, i, art, +btn.dataset.j); });
+      });
+      host.appendChild(art);
+    });
+    state[key] = {done:0, right:0};
+    updateScore(key);
+  }
+  var state = {};
+  function answer(key, i, art, j){
+    if (art.dataset.answered) return;
+    art.dataset.answered = '1';
+    var q = sets[key][i];
+    var btns = art.querySelectorAll('.opt');
+    btns.forEach(function(b){ b.disabled = true; });
+    btns[q.a].classList.add('right');
+    var ok = j === q.a;
+    if (!ok) btns[j].classList.add('wrong');
+    state[key].done++; if (ok) state[key].right++;
+    var exp = art.querySelector('.exp');
+    exp.innerHTML = '<span class="v ' + (ok ? 'ok">答啱。' : 'bad">答錯，正確答案係 ' + L[q.a] + '。') + '</span> ' + q.e;
+    exp.hidden = false;
+    updateScore(key);
+  }
+  function updateScore(key){
+    var n = sets[key].length, s = state[key];
+    document.getElementById('score-' + key).innerHTML = 'Set ' + key + '：已答 <b>' + s.done + '</b>/' + n + ' · 答啱 <b>' + s.right + '</b>';
+  }
+  render('A'); render('B'); render('C');
+  document.querySelectorAll('[data-reset]').forEach(function(b){
+    b.addEventListener('click', function(){ render(b.dataset.reset); numberCode(document.getElementById('set-' + b.dataset.reset)); });
+  });
+
+  /* ---------- code cells: line numbers + comment colour ---------- */
+  function numberCode(root){
+    root.querySelectorAll('pre.code').forEach(function(pre){
+      if (pre.dataset.done) return;
+      pre.dataset.done = '1';
+      var code = pre.querySelector('code') || pre;
+      var lines = code.innerHTML.replace(/\n$/, '').split('\n');
+      code.innerHTML = lines.map(function(l){
+        l = l.replace(/(^|[\s)])(#\s.*|\/\/.*)$/, function(m, p, c){ return p + '<span class="c">' + c + '</span>'; });
+        return '<span class="ln">' + (l === '' ? ' ' : l) + '</span>';
+      }).join('');
+    });
+  }
+  numberCode(document);
+
+  /* ---------- fill-in blanks ---------- */
+  function norm(s){ return s.replace(/[“”"]/g, "'").replace(/[‘’]/g, "'").replace(/\s+/g, ''); }
+  document.querySelectorAll('input.blank').forEach(function(inp){
+    var alts = inp.dataset.ans.split('§');
+    var w = Math.max.apply(null, alts.map(function(a){ return a.length; }));
+    inp.style.width = (Math.max(w, 3) + 2) + 'ch';
+    inp.addEventListener('input', function(){ inp.classList.remove('ok','bad','shown'); });
+  });
+  document.querySelectorAll('.fill').forEach(function(box){
+    var inputs = box.querySelectorAll('input.blank');
+    var msg = box.querySelector('.fillmsg');
+    box.querySelector('[data-check]').addEventListener('click', function(){
+      var right = 0;
+      inputs.forEach(function(inp){
+        var v = norm(inp.value);
+        var ok = inp.dataset.ans.split('§').some(function(a){ return norm(a) === v; });
+        inp.classList.remove('ok','bad','shown');
+        inp.classList.add(ok ? 'ok' : 'bad');
+        if (ok) right++;
+      });
+      msg.textContent = '答啱 ' + right + ' / ' + inputs.length + (right === inputs.length ? '，全對！' : '：紅色格再諗下，或者撳「顯示答案」。');
+    });
+    box.querySelector('[data-show]').addEventListener('click', function(){
+      inputs.forEach(function(inp){ inp.value = inp.dataset.ans.split('§')[0]; inp.classList.remove('ok','bad'); inp.classList.add('shown'); });
+      msg.textContent = '已填入答案（虛線格）。';
+    });
+    box.querySelector('[data-clear]').addEventListener('click', function(){
+      inputs.forEach(function(inp){ inp.value = ''; inp.classList.remove('ok','bad','shown'); });
+      msg.textContent = '';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

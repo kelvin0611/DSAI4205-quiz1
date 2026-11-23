@@ -1,0 +1,682 @@
+<!DOCTYPE html><html lang="zh-HK"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>P4 · L7 Link Analysis（PageRank）</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css"><style>
+:root{color-scheme:light;--bg:#F2F4F7;--card:#FFFFFF;--ink:#15202B;--mut:#566273;--line:#D2D9E1;--acc:#BF4A14;--acc2:#0B7472;--soft:#D9EFEE;--ok:#17733A;--okbg:#DCF1E3;--bad:#B42318;--badbg:#FADFDB;--code:#E9EDF2;--warn:#8F6200;--warnbg:#F6EBCB}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang HK","Noto Sans HK","Microsoft JhengHei",sans-serif}
+nav.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;padding:8px 12px;scrollbar-width:none}
+nav.top::-webkit-scrollbar{display:none}
+nav.top a{flex:none;text-decoration:none;color:var(--mut);font-size:14px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+nav.top a.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{max-width:860px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:26px;line-height:1.3;margin:12px 0 4px}h2{font-size:21px;margin:40px 0 10px;padding-top:8px;border-top:2px solid var(--ink)}
+h3{font-size:17px;margin:26px 0 8px}h4{font-size:15px;margin:18px 0 6px;color:var(--acc2)}
+.sub{color:var(--mut);margin:0 0 16px}
+p,li{overflow-wrap:anywhere}
+a{color:var(--acc2)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:var(--code);padding:1px 5px;border-radius:4px}
+pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;font-size:13.5px;line-height:1.55;margin:10px 0}
+pre code{background:none;padding:0;font-size:inherit}
+.tw{overflow-x:auto;margin:10px 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--soft);font-weight:600}
+td.c,th.c{text-align:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0}
+.toc{columns:2;column-gap:20px;font-size:14.5px;padding-left:18px}@media(max-width:560px){.toc{columns:1}}
+.tag{display:inline-block;white-space:nowrap;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mut);margin-right:4px;vertical-align:middle}
+.t-must{background:var(--badbg);color:var(--bad);border-color:transparent}
+.t-likely{background:var(--warnbg);color:var(--warn);border-color:transparent}
+.t-know{background:var(--okbg);color:var(--ok);border-color:transparent}
+.tip,.warn,.memo{border-radius:0;padding:10px 14px;margin:12px 0;border-left:4px solid}
+.tip{background:var(--soft);border-color:var(--acc2)}.warn{background:var(--warnbg);border-color:var(--warn)}.memo{background:var(--okbg);border-color:var(--ok)}
+.tip b:first-child,.warn b:first-child,.memo b:first-child{display:block;margin-bottom:2px}
+details.ans{border:1px dashed var(--acc);border-radius:10px;margin:10px 0;background:var(--card)}
+details.ans>summary{cursor:pointer;padding:8px 14px;color:var(--acc);font-weight:600;list-style:none}
+details.ans>summary::-webkit-details-marker{display:none}
+details.ans>summary::before{content:"▸ "}details.ans[open]>summary::before{content:"▾ "}
+details.ans>div{padding:0 14px 12px}
+.q{font-weight:600;margin-top:18px}
+.faq dt{font-weight:600;margin-top:14px}.faq dd{margin:4px 0 0 0;padding-left:12px;border-left:2px solid var(--line)}
+svg{max-width:100%;height:auto;display:block;margin:10px auto}
+svg text{fill:var(--ink);font-family:inherit}
+svg .ln{stroke:var(--ink);fill:none;stroke-width:1.4}
+svg .bx{fill:var(--card);stroke:var(--ink);stroke-width:1.2}
+svg .hl{fill:var(--soft);stroke:var(--acc2);stroke-width:1.4}
+svg .ac{fill:var(--badbg);stroke:var(--acc);stroke-width:1.4}
+.done{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mut);margin:6px 0 0}
+.done input{width:18px;height:18px}
+.mcq{margin:18px 0}
+.mcq .bar{position:sticky;top:46px;z-index:5;background:var(--bg);display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.mcq .bar button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:3px 10px;cursor:pointer}
+.mq{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
+.mq .stem{margin-bottom:8px}.mq .stem p{margin:4px 0}
+.mq .num{font-size:12px;color:var(--mut)}
+.opt{display:flex;gap:8px;width:100%;text-align:left;font:inherit;font-size:15px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;cursor:pointer}
+.opt>span:first-child{font-weight:700;color:var(--mut);flex:none}.opt>span:last-child{overflow-wrap:anywhere}
+.opt.right{background:var(--okbg);border-color:var(--ok)}.opt.wrong{background:var(--badbg);border-color:var(--bad)}
+.opt:disabled{cursor:default;opacity:1}
+.exp{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--soft);font-size:14.5px;overflow-wrap:anywhere}
+.exp .v{font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+.prog{display:flex;flex-direction:column;gap:6px}.prog .row{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;border-bottom:1px solid var(--line);padding:4px 0}
+.mflow{display:flex;gap:10px;align-items:stretch;margin:10px 0}.mfcol{flex:1;min-width:0}.mfh{font-weight:700;font-size:14px;margin-bottom:6px}.fb{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 9px;margin-bottom:6px;font-size:13px;line-height:1.5;font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}.fb b{font-family:inherit}.hl2{background:var(--soft);border-color:var(--acc2)}.ac2{background:var(--badbg);border-color:var(--acc)}.mfarr{align-self:center;color:var(--mut);font-size:20px}.mfarr::before{content:"→"}@media(max-width:640px){.mflow{flex-direction:column}.mfarr{text-align:center}.mfarr::before{content:"↓"}}
+
+:root{--surface:var(--card);--muted:var(--mut);--accent:var(--acc);--accent-soft:var(--badbg);--map:var(--acc2);--map-soft:var(--soft);--shuf:var(--warn);--shuf-soft:var(--warnbg);--red:#3D4BAA;--red-soft:#E2E6F8;--ok-soft:var(--okbg);--bad-soft:var(--badbg);--code-bg:var(--code);--code-ink:var(--ink);--code-dim:var(--mut);--f-mono:ui-monospace,Menlo,monospace}
+
+.fmap{fill:var(--map-soft);stroke:var(--map);stroke-width:1.2}.fshuf{fill:var(--shuf-soft);stroke:var(--shuf);stroke-width:1.2}.fred{fill:var(--red-soft);stroke:var(--red);stroke-width:1.2}.facc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2}.tacc{fill:var(--accent);font-weight:600}
+svg .arr{stroke:var(--ink);stroke-width:1.6;fill:none}.ah{fill:var(--ink)}.dash{stroke:var(--muted);stroke-width:1.4;stroke-dasharray:5 5;fill:none}
+svg .small{font-size:11.5px;fill:var(--muted)}svg.dia{width:100%;height:auto}.mono{font-family:var(--f-mono);font-size:12.5px}
+.diawrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}.w700{min-width:640px}
+span.hl{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 2px;font-weight:600}
+.dp table{width:auto}.num{font-variant-numeric:tabular-nums}td.brk code{white-space:normal}
+.practice{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px 16px;margin:16px 0}
+.practice .src{font-family:var(--f-mono);font-size:12px;color:var(--mut);display:block}
+.practice h4{margin-top:6px}
+input.blank{font-family:var(--f-mono);font-size:13px;background:var(--card);color:var(--ink);border:1px solid var(--acc);border-radius:5px;padding:1px 4px;margin:0 1px;max-width:100%}
+input.blank.ok{border-color:var(--ok);background:var(--okbg)}input.blank.bad{border-color:var(--bad);background:var(--badbg)}input.blank.shown{border-style:dashed}
+.bn{display:inline-block;min-width:1.35em;text-align:center;font-size:10.5px;font-weight:600;color:var(--card);background:var(--acc);border-radius:999px;margin-right:2px}
+.fillbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.btn{font:inherit;font-size:13.5px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--card)}
+.fillmsg{font-size:13.5px;color:var(--mut)}
+
+
+.key{background:#FAE6DA;border-left:4px solid var(--acc);padding:12px 16px;margin:14px 0}
+.key>b:first-child{display:block;color:var(--acc);margin-bottom:4px}
+.key ul{margin:4px 0;padding-left:20px}
+.fx{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 12px;margin:12px 0;overflow-x:auto;text-align:center}
+.concept{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 16px 12px;margin:18px 0}
+.concept>h3{margin-top:14px}
+.lab{display:inline-block;font-size:12.5px;font-weight:700;color:#fff;background:var(--acc2);border-radius:6px;padding:1px 8px;margin:14px 0 4px}
+.lab.why{background:#3D4BAA}.lab.pic{background:#8F6200}.lab.eg{background:var(--acc)}.lab.trap{background:var(--bad)}
+figure.fig{margin:14px 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+figure.fig figcaption{font-size:13.5px;color:var(--mut);text-align:center;margin-top:6px}
+.scroll{overflow-x:auto}
+ol.steps{padding-left:0;list-style:none;counter-reset:s}
+ol.steps>li{counter-increment:s;position:relative;padding:8px 10px 8px 42px;margin:8px 0;background:var(--card);border:1px solid var(--line);border-radius:10px}
+ol.steps>li::before{content:counter(s);position:absolute;left:10px;top:8px;width:22px;height:22px;border-radius:50%;background:var(--acc2);color:#fff;font-size:13px;font-weight:700;text-align:center;line-height:22px}
+.katex-display{margin:.4em 0;overflow-x:auto;overflow-y:hidden;padding:4px 0}
+@media(max-width:600px){table.stack thead{display:none}table.stack tr:first-child:has(th){display:none}table.stack,table.stack tbody,table.stack tr,table.stack td{display:block;width:100%}
+table.stack tr{border:1px solid var(--line);border-radius:10px;margin:0 0 10px;background:var(--card);padding:4px 0}
+table.stack td{border:0;border-bottom:1px dashed var(--line);padding:6px 12px}table.stack td:last-child{border-bottom:0}
+table.stack td::before{content:attr(data-label);display:block;font-size:12px;font-weight:700;color:var(--acc2)}}
+
+footer{color:var(--mut);font-size:13px;text-align:center;margin-top:50px}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.fact{font-family:var(--f-mono);font-size:13px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px}
+.fact b{color:var(--accent);font-weight:600}
+.tag.map{background:var(--map-soft);color:var(--map)}
+.tag.shuf{background:var(--shuf-soft);color:var(--shuf)}
+.tag.red{background:var(--red-soft);color:var(--red)}
+.tag.acc{background:var(--accent-soft);color:var(--accent)}
+pre.code .given{color:var(--code-dim)}
+pre.code.sm{font-size:12.8px}
+.cap{font-size:13px;color:var(--muted);margin-top:-4px}
+svg.dia{display:block;width:100%;height:auto}
+svg.dia.w700{min-width:640px}
+svg.dia text{font-family:var(--f-body);fill:var(--ink);font-size:13px}
+svg.dia .mono{font-family:var(--f-mono);font-size:12.5px}
+svg.dia .small{font-size:11.5px;fill:var(--muted)}
+svg.dia .h{font-family:var(--f-display);font-weight:750;font-size:14.5px}
+svg.dia .box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+svg.dia .box2{fill:var(--sunk);stroke:var(--line);stroke-width:1}
+svg.dia .acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+svg.dia .fmap{fill:var(--map-soft);stroke:var(--map);stroke-width:1.2}
+svg.dia .fshuf{fill:var(--shuf-soft);stroke:var(--shuf);stroke-width:1.2}
+svg.dia .fred{fill:var(--red-soft);stroke:var(--red);stroke-width:1.2}
+svg.dia .fok{fill:var(--ok-soft);stroke:var(--ok);stroke-width:1.2}
+svg.dia .facc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2}
+svg.dia .arr{stroke:var(--ink);stroke-width:1.6;fill:none}
+svg.dia .arr.a{stroke:var(--accent)}
+svg.dia .dash{stroke:var(--muted);stroke-width:1.4;stroke-dasharray:5 5;fill:none}
+svg.dia .ah{fill:var(--ink)}
+svg.dia .ah.a{fill:var(--accent)}
+svg.dia .tacc{fill:var(--accent);font-weight:600}
+svg.dia .tmap{fill:var(--map);font-weight:600}
+svg.dia .tred{fill:var(--red);font-weight:600}
+svg.dia .tshuf{fill:var(--shuf);font-weight:600}
+.mrflow{display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1.25fr) 22px minmax(0,1.1fr) 22px minmax(0,1fr);gap:6px;align-items:stretch}
+.mrcol{border-radius:10px;padding:10px;min-width:0;border:1px solid var(--line);background:var(--surface)}
+.mrcol h5{margin:0 0 6px;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.mrcol.map{background:var(--map-soft);border-color:transparent}
+.mrcol.map h5{color:var(--map)}
+.mrcol.shuf{background:var(--shuf-soft);border-color:transparent}
+.mrcol.shuf h5{color:var(--shuf)}
+.mrcol.red{background:var(--red-soft);border-color:transparent}
+.mrcol.red h5{color:var(--red)}
+.mrcol .who{font-family:var(--f-body);font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400}
+.mrcol .row{font-family:var(--f-mono);font-size:12.3px;line-height:1.5;padding:4px 0;border-top:1px dashed var(--line);overflow-wrap:anywhere}
+.mrcol .row:first-of-type{border-top:0}
+.mrflow .arrow{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px}
+.strike{text-decoration:line-through;color:var(--bad)}
+.mrflow{grid-template-columns:minmax(0,1fr)}
+.mrflow .arrow{transform:rotate(90deg);height:18px}
+.mf{display:grid;gap:10px}
+.mfrow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center}
+.mfrow{grid-template-columns:minmax(0,1fr)}
+.mfrow .lab{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font-family:var(--f-mono);font-size:12.5px;padding:3px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
+.chip.outer{display:inline-flex;gap:4px;padding:4px;background:var(--shuf-soft);border-color:var(--shuf)}
+.chip.w{background:var(--map-soft);border-color:var(--map)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.flow span.st{font-size:13.5px;padding:6px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.flow span.ar{color:var(--muted)}
+.qno{font-family:var(--f-display);font-weight:800;font-size:15px}
+.muted{color:var(--muted)}
+.lbl{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:inline-block;margin-bottom:4px}
+:root{--sunk:var(--code);--f-body:inherit}
+</style></head><body data-page="P4-L7.html"><nav class="top"><a href="index.html">總覽</a><a href="P1-L1-L2.html">P1 L1–2</a><a href="P2-L3-L4.html">P2 L3–4</a><a href="P3-L5-L6.html">P3 L5–6</a><a href="P4-L7.html" class=on>P4 PageRank</a><a href="P5-L8.html">P5 Graph</a><a href="mock2.html">模擬卷 2</a></nav><main><h1>P4 · L7 Link Analysis（PageRank）</h1>
+<p class="sub">必考，每次 18–25 分 · 對應 L7_Link Analysis.pdf、2025s1 Q3、2026s2 Q3、Revision Qs</p>
+<ul class="toc">
+<li><a href="#exam">一、點考</a></li><li><a href="#notes">二、筆記：由零講起</a></li>
+<li><a href="#demo">三、完整示範：2025s1 Q3</a></li><li><a href="#drill">四、計數 drill</a></li>
+<li><a href="#code">五、PySpark PageRank code</a></li><li><a href="#mcq">六、MCQ</a></li>
+<li><a href="#short">七、短答題</a></li><li><a href="#faq">八、常見疑問</a></li></ul>
+
+<h2 id="exam">一、點考</h2>
+<table class="stack"><tr><th>卷</th><th>題目</th><th>分數</th></tr>
+<tr><td>2025s1 Q3</td><td>5 頁 graph：(a) stochastic matrix (b) iteration 1、2 + 排序 (c) 用 RDD 寫 power iteration</td><td>25</td></tr>
+<tr><td>2026s2 Q3 ／ Revision Qs</td><td>(a) 兩個問題 + 例子 + 解決方法 (b) 4 頁 graph：matrix + 2 個 iteration + 排序</td><td>18</td></tr>
+<tr><td>COMP4434 舊卷</td><td>寫每頁嘅 PageRank equation + 2 個 iteration（damping 0.85）</td><td>參考</td></tr></table>
+<p>每次嘅題目都係同一個套路，只係換 graph。跟住下面五步做，就唔會漏分：</p>
+<ol class="steps">
+<li><b>數 out-degree</b>：每頁有幾多條箭咀<b>射出去</b>，寫喺 node 旁邊。</li>
+<li><b>砌 matrix M</b>：column = 由邊頁出發，row = 去邊頁，每格填 \(1/d_i\)。檢查每個 column 加埋 = 1。</li>
+<li><b>寫每頁嘅 equation</b>：由 M 嘅每一個 row 讀出嚟，再加 teleport \((1-\beta)/N\)。</li>
+<li><b>計 iteration 1、2</b>：iteration 1 用 \(r^{(0)} = 1/N\)；iteration 2 用 iteration 1 嘅結果。每次都檢查總和 = 1。</li>
+<li><b>排序</b>：由大到細，打和寫等號。</li></ol>
+
+<h2 id="notes">二、筆記：由零講起</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>PageRank 將 <b>link 當成投票</b>：多啲重要嘅頁 link 你，你就重要。</li>
+<li>每頁將自己嘅分數<b>平均分</b>俾佢 link 去嘅頁：\(r_j = \sum_{i \to j} r_i / d_i\)。</li>
+<li>寫成 matrix：\(r = M r\)。M 嘅 <b>column = from，row = to</b>。用 <b>power iteration</b> 一路乘 M 直到唔變。</li>
+<li>兩大問題：<b>dead end</b>（冇 out-link，分數漏走）同 <b>spider trap</b>（入得去出唔返，吸晒分數）。</li>
+<li>解決：<b>random teleport</b>，每步有 \(1-\beta\) 機率隨機跳：\(r_j = \sum \beta\, r_i/d_i + (1-\beta)/N\)。</li></ul></div>
+
+<div class="concept">
+<h3>1. Web 係一個 graph：link 就係投票</h3>
+<span class="lab">一句講完</span>
+<p>網頁係 <b>node</b>，hyperlink 係有方向嘅 <b>edge</b>（箭咀）。一頁被越多<b>重要</b>嘅頁 link，就越重要。</p>
+<span class="lab why">點解要咁做</span>
+<p>搜尋「IBM」會有成千上萬頁 match 到隻字：IBM 官網、Wikipedia、spam 頁……單靠內容分唔到邊頁可信。但係人哋願唔願意 link 你，就反映咗你有幾可信。所以 Google 用 link 結構嚟排名。</p>
+<ul><li>睇 <b>in-link</b>（人哋 link 你），唔係 out-link。Out-link 係你自己寫嘅，好易作弊。</li>
+<li>唔係每票一樣重：<b>重要嘅頁投嘅票更重</b>；而且一頁 link 得越多頁，每票就越輕（佢嘅分數要攤分）。</li></ul>
+<span class="lab pic">圖解</span>
+<figure class="fig"><svg viewBox="0 0 360 230" role="img" aria-label="links as votes" style="max-width:360px">
+<defs><marker id="v1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g class="ln"><line x1="80" y1="55" x2="230" y2="102" marker-end="url(#v1)" stroke-width="4"/><line x1="74" y1="170" x2="232" y2="122" marker-end="url(#v1)" stroke-width="1.4"/><line x1="74" y1="176" x2="150" y2="200" marker-end="url(#v1)" stroke-width="1.4"/><line x1="72" y1="184" x2="110" y2="218" marker-end="url(#v1)" stroke-width="1.4"/></g>
+<circle class="ac" cx="55" cy="48" r="26"/><text x="55" y="54" text-anchor="middle" font-weight="700">B</text><text x="55" y="92" text-anchor="middle" font-size="12">重要頁</text>
+<circle class="bx" cx="60" cy="175" r="14"/><text x="60" y="180" text-anchor="middle" font-size="13">C</text>
+<circle class="hl" cx="260" cy="110" r="28"/><text x="260" y="116" text-anchor="middle" font-weight="700">A</text>
+<text x="120" y="30" font-size="12">B 只 link A：一票好重</text>
+<text x="170" y="185" font-size="12">C link 3 頁：</text><text x="170" y="200" font-size="12">每票得 1/3</text>
+</svg><figcaption>線越粗 = 嗰票越重：重要嘅 B 專一 link A，比 C 嘅票重好多</figcaption></figure>
+<span class="lab trap">易錯</span>
+<p>「in-link 多就一定排第一」係錯嘅。PageRank 睇嘅係 <b>link 你嗰啲頁有幾重要、佢哋 link 咗幾多頁</b>，唔係單純數 link。</p>
+</div>
+
+<div class="concept">
+<h3>2. Flow formulation：每頁將分數平均分出去</h3>
+<span class="lab">一句講完</span>
+<p>頁 j 嘅分數 = 所有 link 去 j 嘅頁，各自將分數平均分出嚟、分俾 j 嗰份加埋。</p>
+<div class="fx">$$r_j = \sum_{i \to j} \frac{r_i}{d_i}$$</div>
+<p>\(r_i\) 係頁 i 嘅分數，\(d_i\) 係頁 i 嘅 <b>out-degree</b>（射出幾多條箭咀）。</p>
+<span class="lab why">點解要除 \(d_i\)</span>
+<p>想像每頁手上有一定數量嘅「水」（分數），佢會平均倒落每條 out-link。i 有 3 條 out-link，每條就分到 \(r_i/3\)。咁樣全部水嘅總量唔會變（加埋永遠 = 1），只係喺頁之間流動。所以叫 <b>flow</b>（流量）formulation。</p>
+<span class="lab pic">圖解：y、a、m 三頁</span>
+<figure class="fig"><svg viewBox="0 0 340 230" role="img" aria-label="y a m flow" style="max-width:340px">
+<defs><marker id="v2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g class="ln"><path d="M150 40 C 120 0, 200 0, 172 38" marker-end="url(#v2)"/><line x1="148" y1="65" x2="78" y2="165" marker-end="url(#v2)"/><line x1="88" y1="170" x2="155" y2="72" marker-end="url(#v2)"/><line x1="92" y1="190" x2="240" y2="190" marker-end="url(#v2)"/><line x1="240" y1="180" x2="95" y2="180" marker-end="url(#v2)" stroke-dasharray="0"/></g>
+<circle class="hl" cx="160" cy="55" r="20"/><text x="160" y="61" text-anchor="middle" font-weight="700">y</text>
+<circle class="hl" cx="75" cy="185" r="20"/><text x="75" y="191" text-anchor="middle" font-weight="700">a</text>
+<circle class="hl" cx="262" cy="185" r="20"/><text x="262" y="191" text-anchor="middle" font-weight="700">m</text>
+<text x="200" y="20" font-size="12">y → y：r_y/2</text><text x="70" y="110" font-size="12">y → a：r_y/2</text><text x="128" y="125" font-size="12">a → y：r_a/2</text>
+<text x="140" y="213" font-size="12">a → m：r_a/2</text><text x="150" y="172" font-size="12">m → a：r_m</text>
+</svg><figcaption>y 有 2 條 out-link（自己、a），a 有 2 條（y、m），m 有 1 條（a）</figcaption></figure>
+<span class="lab eg">例子：逐步解方程</span>
+<p>由圖逐頁寫「邊個流入嚟」：</p>
+<div class="fx">$$\begin{aligned} r_y &= \tfrac{r_y}{2} + \tfrac{r_a}{2} \\ r_a &= \tfrac{r_y}{2} + r_m \\ r_m &= \tfrac{r_a}{2} \end{aligned}$$</div>
+<p>三條方程其實得兩條係獨立嘅（任何答案乘一個數都仲啱），所以要加多一條：</p>
+<div class="fx">$$r_y + r_a + r_m = 1$$</div>
+<ol class="steps"><li>由第三條：\(r_a = 2 r_m\)。</li>
+<li>代入第一條：\(r_y/2 = r_a/2\)，即 \(r_y = r_a = 2r_m\)。</li>
+<li>代入總和：\(2r_m + 2r_m + r_m = 5r_m = 1\)，所以 \(r_m = 1/5\)。</li>
+<li>答案：\(r_y = 2/5,\ r_a = 2/5,\ r_m = 1/5\)。</li></ol>
+<span class="lab trap">易錯</span>
+<p>Gaussian elimination 只適合細 graph。真正嘅 web 有幾十億頁，解方程要 \(O(N^3)\)，冇可能，所以實際上用下面嘅 <b>power iteration</b>。考試計數題都係用 iteration。</p>
+</div>
+
+<div class="concept">
+<h3>3. Stochastic adjacency matrix M</h3>
+<span class="lab">一句講完</span>
+<p>將 flow 方程寫成 matrix：\(r = M\,r\)。M 嘅每一格係「由 column 嗰頁流去 row 嗰頁嘅比例」。</p>
+<div class="fx">$$M_{ji} = \begin{cases} \dfrac{1}{d_i} & \text{if } i \to j \\[4pt] 0 & \text{otherwise} \end{cases}$$</div>
+<span class="lab why">點解 column 係 from</span>
+<p>咁樣 \(M r\) 第 j 行就係 \(\sum_i M_{ji} r_i\)：把所有頁流去 j 嘅份量加埋，正正就係 flow 方程。每頁將自己嘅分數全部分晒出去，所以<b>每個 column 加埋 = 1</b>，呢個叫 <b>column stochastic</b>。</p>
+<span class="lab pic">圖解：由 graph 填 matrix</span>
+<div class="grid2">
+<figure class="fig"><svg viewBox="0 0 220 170" role="img" aria-label="y column" style="max-width:220px">
+<defs><marker id="v3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#BF4A14"/></marker><marker id="v3b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<path d="M100 32 C 75 -5, 150 -5, 122 30" fill="none" stroke="#BF4A14" stroke-width="2.2" marker-end="url(#v3)"/>
+<line x1="98" y1="58" x2="55" y2="122" stroke="#BF4A14" stroke-width="2.2" marker-end="url(#v3)"/>
+<g class="ln"><line x1="62" y1="125" x2="104" y2="62" marker-end="url(#v3b)"/><line x1="58" y1="150" x2="160" y2="150" marker-end="url(#v3b)"/><line x1="160" y1="140" x2="62" y2="140" marker-end="url(#v3b)"/></g>
+<circle class="ac" cx="110" cy="45" r="17"/><text x="110" y="50" text-anchor="middle" font-weight="700">y</text>
+<circle class="hl" cx="45" cy="145" r="17"/><text x="45" y="150" text-anchor="middle">a</text>
+<circle class="hl" cx="178" cy="145" r="17"/><text x="178" y="150" text-anchor="middle">m</text>
+</svg><figcaption>y 射出 2 條（橙色）：去 y、去 a</figcaption></figure>
+<div><table><tr><th>to ＼ from</th><th class="c" style="background:#FAE6DA">y</th><th class="c">a</th><th class="c">m</th></tr>
+<tr><th>y</th><td class="c" style="background:#FAE6DA"><b>½</b></td><td class="c">½</td><td class="c">0</td></tr>
+<tr><th>a</th><td class="c" style="background:#FAE6DA"><b>½</b></td><td class="c">0</td><td class="c">1</td></tr>
+<tr><th>m</th><td class="c" style="background:#FAE6DA"><b>0</b></td><td class="c">½</td><td class="c">0</td></tr>
+<tr><th>Σ</th><td class="c">1</td><td class="c">1</td><td class="c">1</td></tr></table>
+<p style="font-size:14px">橙色 column = y 嘅分數點樣分：一半留俾自己，一半俾 a。</p></div></div>
+<span class="lab eg">填表步驟</span>
+<ol class="steps"><li>揀一頁，例如 y，數佢嘅 out-degree：\(d_y = 2\)。</li>
+<li>喺 <b>y 嗰個 column</b>，佢指去嘅每一頁（y、a）嗰行填 \(1/2\)，其他填 0。</li>
+<li>每頁都做一次，填晒成個表。</li>
+<li>檢查每個 column 加埋 = 1。唔係 1 就一定填錯（dead end 嗰個 column 係 0，下面會講）。</li></ol>
+<span class="lab trap">易錯</span>
+<p>最常見錯誤係將 <b>row 當 from</b>，成個 matrix 轉置咗，之後全部計錯。記法：「<b>由 column 行落 row</b>」。寫完一定要做 column 加總檢查。</p>
+</div>
+
+<div class="concept">
+<h3>4. Power iteration：一路乘 M 直到唔變</h3>
+<span class="lab">一句講完</span>
+<p>由每頁分數一樣（1/N）開始，不斷計 \(r \leftarrow M r\)，直到分數唔再變，就係 PageRank。</p>
+<span class="lab pic">流程圖</span>
+<figure class="fig"><svg viewBox="0 0 300 330" role="img" aria-label="power iteration flow" style="max-width:300px">
+<defs><marker id="v4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<rect class="hl" x="60" y="10" width="180" height="40" rx="8"/><text x="150" y="35" text-anchor="middle">r⁽⁰⁾ = [1/N, …, 1/N]</text>
+<line class="ln" x1="150" y1="50" x2="150" y2="72" marker-end="url(#v4)"/>
+<rect class="bx" x="60" y="75" width="180" height="40" rx="8"/><text x="150" y="100" text-anchor="middle">r⁽ᵗ⁺¹⁾ = M · r⁽ᵗ⁾</text>
+<line class="ln" x1="150" y1="115" x2="150" y2="137" marker-end="url(#v4)"/>
+<rect class="bx" x="60" y="140" width="180" height="40" rx="8"/><text x="150" y="165" text-anchor="middle">檢查：總和 = 1？</text>
+<line class="ln" x1="150" y1="180" x2="150" y2="202" marker-end="url(#v4)"/>
+<polygon class="ac" points="150,205 245,240 150,275 55,240"/><text x="150" y="245" text-anchor="middle" font-size="13">同上次差好細？</text>
+<line class="ln" x1="150" y1="275" x2="150" y2="297" marker-end="url(#v4)"/><text x="160" y="292" font-size="12">係</text>
+<rect class="hl" x="90" y="300" width="120" height="28" rx="8"/><text x="150" y="319" text-anchor="middle" font-size="13">r 就係 PageRank</text>
+<path class="ln" d="M245 240 L 280 240 L 280 95 L 243 95" marker-end="url(#v4)"/><text x="252" y="232" font-size="12">唔係</text>
+</svg><figcaption>考試通常只叫你計 2 個 iteration，唔使去到收斂</figcaption></figure>
+<span class="lab eg">例子：y、a、m（冇 teleport）</span>
+<table><tr><th>頁</th><th class="c">r⁽⁰⁾</th><th class="c">r⁽¹⁾</th><th class="c">r⁽²⁾</th><th class="c">r⁽³⁾</th><th class="c">…最後</th></tr>
+<tr><th>y</th><td class="c">1/3</td><td class="c">1/3</td><td class="c">5/12</td><td class="c">3/8</td><td class="c">2/5</td></tr>
+<tr><th>a</th><td class="c">1/3</td><td class="c">1/2</td><td class="c">1/3</td><td class="c">11/24</td><td class="c">2/5</td></tr>
+<tr><th>m</th><td class="c">1/3</td><td class="c">1/6</td><td class="c">1/4</td><td class="c">1/6</td><td class="c">1/5</td></tr></table>
+<p>以 \(r^{(1)}\) 為例：\(r_y = \tfrac12 \cdot \tfrac13 + \tfrac12 \cdot \tfrac13 = \tfrac13\)；\(r_a = \tfrac12 \cdot \tfrac13 + 1 \cdot \tfrac13 = \tfrac12\)；\(r_m = \tfrac12 \cdot \tfrac13 = \tfrac16\)。最後收斂去 2/5、2/5、1/5，同解方程一樣。</p>
+<span class="lab why">Random walk 解釋</span>
+<p>想像有個 random surfer：每一步喺而家呢頁隨機揀一條 out-link 撳落去。\(r_j\) 就係「行咗好耐之後，佢喺頁 j 嘅機率」。行到夠耐，機率分佈唔再變，呢個叫 <b>stationary distribution</b>。所以 PageRank 一定加埋 = 1。</p>
+</div>
+
+<div class="concept">
+<h3>5. 三個問題：唔收斂、dead end、spider trap</h3>
+<span class="lab">一句講完</span>
+<p>Power iteration 唔係永遠得到我哋想要嘅答案：可能<b>唔收斂</b>、分數可能<b>漏走</b>（dead end），或者被<b>一組頁吸晒</b>（spider trap）。</p>
+<span class="lab pic">圖解</span>
+<div class="grid2">
+<figure class="fig"><svg viewBox="0 0 220 150" role="img" aria-label="dead end" style="max-width:220px">
+<defs><marker id="v5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<line class="ln" x1="58" y1="50" x2="145" y2="50" marker-end="url(#v5)"/>
+<circle class="hl" cx="40" cy="50" r="18"/><text x="40" y="56" text-anchor="middle">A</text>
+<circle class="ac" cx="165" cy="50" r="18"/><text x="165" y="56" text-anchor="middle">B</text>
+<path d="M165 72 L165 100" stroke="#B42318" stroke-width="2" stroke-dasharray="4 3"/><text x="165" y="118" text-anchor="middle" font-size="12">💧 分數漏走</text>
+<text x="110" y="142" text-anchor="middle" font-size="12">B 冇 out-link：dead end</text>
+</svg><figcaption>[1, 0] → [0, 1] → [0, 0]：全部消失</figcaption></figure>
+<figure class="fig"><svg viewBox="0 0 220 150" role="img" aria-label="spider trap" style="max-width:220px">
+<defs><marker id="v6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<line class="ln" x1="58" y1="70" x2="145" y2="70" marker-end="url(#v6)"/>
+<path class="ln" d="M155 52 C 135 10, 200 10, 178 52" marker-end="url(#v6)"/>
+<circle class="hl" cx="40" cy="70" r="18"/><text x="40" y="76" text-anchor="middle">A</text>
+<circle class="ac" cx="165" cy="70" r="22"/><text x="165" y="76" text-anchor="middle">m</text>
+<text x="110" y="120" text-anchor="middle" font-size="12">m 只 link 自己：spider trap</text>
+</svg><figcaption>入得去出唔返：m 最後吸晒所有分數</figcaption></figure></div>
+<table class="stack"><tr><th>問題</th><th>點樣發生</th><th>例子</th><th>後果</th></tr>
+<tr><td>唔收斂</td><td>分數喺幾頁之間來回跳</td><td>A ⇄ B：[1, 0] → [0, 1] → [1, 0] …</td><td>永遠唔停</td></tr>
+<tr><td><b>Dead end</b></td><td>有頁冇 out-link</td><td>A → B，B 冇 link</td><td>分數<b>漏走</b>，總和越嚟越細；M 嘅 column 唔再加埋 = 1</td></tr>
+<tr><td><b>Spider trap</b></td><td>一組頁嘅 out-link 全部留喺組入面</td><td>m → m</td><td>個 trap <b>吸晒</b>分數，其他頁變 0</td></tr></table>
+<span class="lab eg">例子：lecture 嘅 y、a、m 變體</span>
+<table><tr><th>情況</th><th>y</th><th>a</th><th>m</th><th>結果</th></tr>
+<tr><td>m 冇 out-link（dead end）</td><td class="c">1/3 → 1/3 → 1/4 → 5/24 …</td><td class="c">1/3 → 1/6 → 1/6 → 1/8 …</td><td class="c">1/3 → 1/6 → 1/12 → 1/12 …</td><td>全部 → 0</td></tr>
+<tr><td>m → m（spider trap）</td><td class="c">1/3 → 1/3 → 1/4 → 5/24 …</td><td class="c">1/3 → 1/6 → 1/6 → 1/8 …</td><td class="c">1/3 → 1/2 → 7/12 → 2/3 …</td><td>m → 1</td></tr></table>
+<span class="lab trap">易錯</span>
+<p>考試問「list two problems」要答 <b>dead end</b> 同 <b>spider trap</b>，每個要有一句定義 + 一個例子。唔好只寫名。</p>
+</div>
+
+<div class="concept">
+<h3>6. 解決方法：random teleport</h3>
+<span class="lab">一句講完</span>
+<p>Random surfer 每一步：機率 \(\beta\) 跟 link 行，機率 \(1-\beta\) 隨機跳去任何一頁。</p>
+<div class="fx">$$r_j = \sum_{i \to j} \beta\,\frac{r_i}{d_i} + \frac{1-\beta}{N}$$</div>
+<p>\(\beta\) 通常 0.8 至 0.9，考試用 0.8。所以每頁每次都有一份「保底」\((1-\beta)/N\)。</p>
+<span class="lab pic">圖解</span>
+<figure class="fig"><svg viewBox="0 0 330 190" role="img" aria-label="teleport" style="max-width:330px">
+<defs><marker id="v7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker><marker id="v7b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#BF4A14"/></marker></defs>
+<g class="ln"><line x1="78" y1="90" x2="160" y2="40" marker-end="url(#v7)" stroke-width="2.2"/><line x1="78" y1="100" x2="160" y2="150" marker-end="url(#v7)" stroke-width="2.2"/></g>
+<g fill="none" stroke="#BF4A14" stroke-dasharray="5 4" stroke-width="1.4"><line x1="78" y1="95" x2="255" y2="95" marker-end="url(#v7b)"/><path d="M60 118 C 70 170, 260 175, 270 115" marker-end="url(#v7b)"/></g>
+<circle class="hl" cx="60" cy="95" r="20"/><text x="60" y="101" text-anchor="middle" font-weight="700">i</text>
+<circle class="bx" cx="180" cy="30" r="16"/><text x="180" y="35" text-anchor="middle" font-size="13">j</text>
+<circle class="bx" cx="180" cy="155" r="16"/><text x="180" y="160" text-anchor="middle" font-size="13">k</text>
+<circle class="bx" cx="275" cy="95" r="16"/><text x="275" y="100" text-anchor="middle" font-size="13">任何頁</text>
+<text x="85" y="40" font-size="12">β：跟 link</text><text x="190" y="85" font-size="12" fill="#BF4A14">1−β：隨機跳</text>
+</svg><figcaption>實線：跟 link 行（機率 β，平均分俾 out-link）；虛線：teleport（機率 1−β，平均分俾全部 N 頁）</figcaption></figure>
+<span class="lab why">點解解決到兩個問題</span>
+<table class="stack"><tr><th>問題</th><th>Teleport 點幫</th></tr>
+<tr><td>Spider trap</td><td>數學上冇錯，但答案唔係我哋想要。有 teleport，surfer 每步都有 \(1-\beta\) 機率跳走，幾步之內就會離開個 trap，trap 唔會吸晒分數。</td></tr>
+<tr><td>Dead end</td><td>係數學問題：M 唔係 column stochastic。規定去到 dead end 就<b>一定 teleport</b>，即係將嗰個 column 改成全部 \(1/N\)，咁 M 就重新 column stochastic。</td></tr></table>
+<h4>Google matrix</h4>
+<div class="fx">$$A = \beta M + (1-\beta)\left[\frac{1}{N}\right]_{N\times N}, \qquad r = A\,r$$</div>
+<span class="lab eg">例子（lecture slide 41）</span>
+<p>y → y, a；a → y, m；m → m（spider trap），\(\beta = 0.8\)，N = 3。每格 = \(0.8 \times M_{ji} + 0.2 \times \tfrac13\)：</p>
+<table><tr><th></th><th class="c">y</th><th class="c">a</th><th class="c">m</th></tr>
+<tr><th>y</th><td class="c">0.8·½ + 0.2·⅓ = 7/15</td><td class="c">7/15</td><td class="c">1/15</td></tr>
+<tr><th>a</th><td class="c">7/15</td><td class="c">1/15</td><td class="c">1/15</td></tr>
+<tr><th>m</th><td class="c">1/15</td><td class="c">7/15</td><td class="c">0.8·1 + 0.2·⅓ = 13/15</td></tr></table>
+<p>Power iteration：[⅓, ⅓, ⅓] → [0.33, 0.20, 0.47] → [0.28, 0.20, 0.52] → … → [7/33, 5/33, 21/33]。m 仍然最高（佢始終係 trap），但 y、a 唔再變 0。</p>
+<span class="lab trap">易錯</span>
+<ul><li>Teleport 項係 \((1-\beta)/N\)，唔係 \(\beta/N\)，亦唔係 \(1-\beta\)。β = 0.8、N = 4 就係 0.05；N = 5 就係 0.04。</li>
+<li>題目叫「stochastic adjacency matrix」只要 M（冇 teleport）；叫「Google matrix」先要寫 A。</li></ul>
+</div>
+
+<div class="concept">
+<h3>7. 大型 graph 點計：sparse formulation</h3>
+<span class="lab">一句講完</span>
+<p>唔好砌 Google matrix A，只用 sparse 嘅 M 計，再將漏咗嘅分數平均補返。</p>
+<span class="lab why">點解</span>
+<p>A 每一格都唔係 0（每格都有 teleport 份），N = 10 億頁就要 \(10^{18}\) 格，冇可能放落 memory。M 只係記住 link，好 sparse。</p>
+<div class="fx">$$r' = \beta M r, \qquad S = \sum_j r'_j, \qquad r_j^{\text{new}} = r'_j + \frac{1-S}{N}$$</div>
+<p>冇 dead end 時 \(1 - S = 1 - \beta\)，即係同直接加 \((1-\beta)/N\) 一樣；有 dead end 就漏多啲，用 \(1-S\) 一次過補返。</p>
+</div>
+
+<div class="concept">
+<h3>8. MapReduce 版本</h3>
+<span class="lab">一句講完</span>
+<p>每個 iteration 係一個 MapReduce job：Map 將每頁分數分俾 out-link，Reduce 將收到嘅加埋再加 teleport。</p>
+<span class="lab pic">圖解（lecture slide 49：A → B,C,D；B → A,D；C → A；D → B,C；每頁初始 1/4）</span>
+<div class="mflow">
+<div class="mfcol"><div class="mfh">① Map：每頁分分數</div>
+<div class="fb">A (1/4, 3 條) → (B, 1/12) (C, 1/12) (D, 1/12)</div>
+<div class="fb">B (1/4, 2 條) → (A, 1/8) (D, 1/8)</div>
+<div class="fb">C (1/4, 1 條) → (A, 1/4)</div>
+<div class="fb">D (1/4, 2 條) → (B, 1/8) (C, 1/8)</div></div>
+<div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">② Shuffle：按頁 group</div>
+<div class="fb hl2">A ← [1/8, 1/4]<br>B ← [1/12, 1/8]<br>C ← [1/12, 1/8]<br>D ← [1/12, 1/8]</div></div>
+<div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">③ Reduce：加埋</div>
+<div class="fb ac2">A = 3/8<br>B = 5/24<br>C = 5/24<br>D = 5/24<br>（有 teleport 就 ×β 再加 (1−β)/N）</div></div></div>
+<pre><code>Map(key = page, value = PR(page)):
+    for each dst in Adj[page]:
+        emit(dst, PR(page) / len(Adj[page]))
+
+Reduce(key = page, values = contributions):
+    emit(page, β · sum(values) + (1 − β) / N)</code></pre>
+</div>
+
+<h2 id="demo">三、完整示範：2025s1 Q3（25 分）</h2>
+<p>Graph：1 → 2, 4, 5；2 → 3, 5；3 → 5；4 → 2, 3；5 → 2。\(\beta = 0.8\)，N = 5，\(r^{(0)} = 0.2\)。</p>
+<figure class="fig"><svg viewBox="0 0 340 260" role="img" aria-label="2025s1 graph" style="max-width:340px">
+<defs><marker id="v8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g class="ln">
+<line x1="155" y1="45" x2="62" y2="112" marker-end="url(#v8)"/><line x1="170" y1="50" x2="170" y2="105" marker-end="url(#v8)"/><line x1="185" y1="45" x2="275" y2="108" marker-end="url(#v8)"/>
+<line x1="68" y1="130" x2="146" y2="130" marker-end="url(#v8)"/><line x1="62" y1="145" x2="150" y2="210" marker-end="url(#v8)"/>
+<line x1="170" y1="150" x2="170" y2="203" marker-end="url(#v8)"/><line x1="192" y1="122" x2="266" y2="118" marker-end="url(#v8)"/><line x1="268" y1="132" x2="194" y2="136" marker-end="url(#v8)"/>
+<line x1="190" y1="215" x2="272" y2="148" marker-end="url(#v8)"/></g>
+<circle class="hl" cx="170" cy="30" r="20"/><text x="170" y="36" text-anchor="middle">1</text>
+<circle class="hl" cx="48" cy="130" r="20"/><text x="48" y="136" text-anchor="middle">4</text>
+<circle class="hl" cx="170" cy="130" r="20"/><text x="170" y="136" text-anchor="middle">2</text>
+<circle class="hl" cx="290" cy="125" r="20"/><text x="290" y="131" text-anchor="middle">5</text>
+<circle class="hl" cx="170" cy="225" r="20"/><text x="170" y="231" text-anchor="middle">3</text>
+<text x="200" y="22" font-size="12">d=3</text><text x="10" y="165" font-size="12">d=2</text><text x="120" y="168" font-size="12">d=2</text><text x="300" y="160" font-size="12">d=1</text><text x="200" y="252" font-size="12">d=1</text>
+</svg><figcaption>2025s1 Q3 嘅 graph，旁邊寫咗每頁嘅 out-degree</figcaption></figure>
+<details class="ans"><summary>(a) Stochastic matrix（5 分）</summary><div>
+<p>Step 1：out-degree \(d_1 = 3,\ d_2 = 2,\ d_3 = 1,\ d_4 = 2,\ d_5 = 1\)。</p>
+<p>Step 2：逐個 column 填。例如 column 1：1 指去 2、4、5，所以 row 2、4、5 填 1/3。</p>
+<table><tr><th>to ＼ from</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th></tr>
+<tr><th>1</th><td class="c">0</td><td class="c">0</td><td class="c">0</td><td class="c">0</td><td class="c">0</td></tr>
+<tr><th>2</th><td class="c">1/3</td><td class="c">0</td><td class="c">0</td><td class="c">1/2</td><td class="c">1</td></tr>
+<tr><th>3</th><td class="c">0</td><td class="c">1/2</td><td class="c">0</td><td class="c">1/2</td><td class="c">0</td></tr>
+<tr><th>4</th><td class="c">1/3</td><td class="c">0</td><td class="c">0</td><td class="c">0</td><td class="c">0</td></tr>
+<tr><th>5</th><td class="c">1/3</td><td class="c">1/2</td><td class="c">1</td><td class="c">0</td><td class="c">0</td></tr>
+<tr><th>Σ</th><td class="c">1</td><td class="c">1</td><td class="c">1</td><td class="c">1</td><td class="c">1</td></tr></table>
+<p>Step 3：檢查每個 column 加埋 = 1 ✓。Row 1 全部 0，因為冇頁 link 去 1。</p>
+</div></details>
+<details class="ans"><summary>(b) Iteration 1、2 同排序（10 分）</summary><div>
+<p><b>Step 1：teleport 項</b> \(\dfrac{1-\beta}{N} = \dfrac{0.2}{5} = 0.04\)</p>
+<p><b>Step 2：由 M 每一行寫 equation</b></p>
+<div class="fx">$$\begin{aligned} r_1 &= 0.8(0) + 0.04 \\ r_2 &= 0.8\left(\tfrac{r_1}{3} + \tfrac{r_4}{2} + r_5\right) + 0.04 \\ r_3 &= 0.8\left(\tfrac{r_2}{2} + \tfrac{r_4}{2}\right) + 0.04 \\ r_4 &= 0.8\left(\tfrac{r_1}{3}\right) + 0.04 \\ r_5 &= 0.8\left(\tfrac{r_1}{3} + \tfrac{r_2}{2} + r_3\right) + 0.04 \end{aligned}$$</div>
+<p><b>Step 3：Iteration 1</b>（全部代 0.2）</p>
+<table><tr><th>頁</th><th>計法</th><th class="c">r⁽¹⁾</th></tr>
+<tr><td>1</td><td>0 + 0.04</td><td class="c">0.0400</td></tr>
+<tr><td>2</td><td>0.8(0.0667 + 0.1 + 0.2) + 0.04</td><td class="c">0.3333</td></tr>
+<tr><td>3</td><td>0.8(0.1 + 0.1) + 0.04</td><td class="c">0.2000</td></tr>
+<tr><td>4</td><td>0.8(0.0667) + 0.04</td><td class="c">0.0933</td></tr>
+<tr><td>5</td><td>0.8(0.0667 + 0.1 + 0.2) + 0.04</td><td class="c">0.3333</td></tr>
+<tr><th>Σ</th><td></td><td class="c">1.0000 ✓</td></tr></table>
+<p><b>Step 4：Iteration 2</b>（代 iteration 1 嘅數）</p>
+<table><tr><th>頁</th><th>計法</th><th class="c">r⁽²⁾</th></tr>
+<tr><td>1</td><td>0 + 0.04</td><td class="c">0.0400</td></tr>
+<tr><td>2</td><td>0.8(0.04/3 + 0.0933/2 + 0.3333) + 0.04 = 0.8(0.3933) + 0.04</td><td class="c">0.3547</td></tr>
+<tr><td>3</td><td>0.8(0.3333/2 + 0.0933/2) + 0.04 = 0.8(0.2133) + 0.04</td><td class="c">0.2107</td></tr>
+<tr><td>4</td><td>0.8(0.04/3) + 0.04</td><td class="c">0.0507</td></tr>
+<tr><td>5</td><td>0.8(0.04/3 + 0.3333/2 + 0.2) + 0.04 = 0.8(0.38) + 0.04</td><td class="c">0.3440</td></tr>
+<tr><th>Σ</th><td></td><td class="c">1.0000 ✓</td></tr></table>
+<p><b>Step 5：排序</b>　2 (0.3547) &gt; 5 (0.3440) &gt; 3 (0.2107) &gt; 4 (0.0507) &gt; 1 (0.0400)（已用 numpy 核對）</p>
+<div class="warn"><b>易錯</b>Iteration 2 一定用 iteration 1 嘅結果，唔好再用 0.2。頁 1 冇 in-link，所以永遠只係 0.04。</div>
+</div></details>
+<p>(c) RDD code 喺 <a href="#code">第五部分</a>。</p>
+<h2 id="drill">四、計數 drill</h2>
+<p class="q">Drill 1 · 冇 teleport 嘅 power iteration（lecture slide 24）</p>
+<p>A → B, C, D；B → A, D；C → A；D → B, C。β = 1（即係冇 teleport），用分數計兩步。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>r(0) = [1/4, 1/4, 1/4, 1/4]
+r_A = r_B/2 + r_C        r_B = r_A/3 + r_D/2
+r_C = r_A/3 + r_D/2      r_D = r_A/3 + r_B/2
+
+r(1): A = 1/8 + 1/4 = 3/8
+      B = C = D = 1/12 + 1/8 = 5/24
+r(2): A = 5/48 + 5/24 = 15/48 = 5/16
+      B = C = D = 1/8 + 5/48 = 11/48</code></pre>
+<p>同 lecture 一樣（3/8 → 15/48）。對比 Revision Q 有 teleport 版：0.35 → 0.31。Teleport 令數值向 1/N 拉近。</p>
+</div></details>
+
+<p class="q">Drill 2 · Spider trap（Google matrix）</p>
+<p>y → y, a；a → y, m；m → m。β = 0.8，計 3 個 iteration。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>Teleport = 0.2/3 = 0.0667
+r_y = 0.8(r_y/2 + r_a/2) + 0.0667
+r_a = 0.8(r_y/2) + 0.0667
+r_m = 0.8(r_a/2 + r_m) + 0.0667
+
+r(1) = [0.3333, 0.2000, 0.4667]
+r(2) = [0.2800, 0.2000, 0.5200]
+r(3) = [0.2587, 0.1787, 0.5627]</code></pre>
+<p>m 一路升（trap），但有 teleport 所以會停喺 21/33 ≈ 0.636，唔會變 1。</p>
+</div></details>
+
+<p class="q">Drill 3 · Dead end</p>
+<p>A → B, C；B → C；C 冇 out-link。β = 0.8，dead end 用「一定 teleport」處理，計 2 個 iteration。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<p>C 係 dead end，所以 C 嗰個 column 改做全部 1/3：</p>
+<div class="tw"><table><tr><th>to \ from</th><th class="c">A</th><th class="c">B</th><th class="c">C</th></tr>
+<tr><th>A</th><td class="c">0</td><td class="c">0</td><td class="c">1/3</td></tr>
+<tr><th>B</th><td class="c">1/2</td><td class="c">0</td><td class="c">1/3</td></tr>
+<tr><th>C</th><td class="c">1/2</td><td class="c">1</td><td class="c">1/3</td></tr></table></div>
+<pre><code>Teleport = 0.2/3 = 0.0667
+r_A = 0.8(r_C/3) + 0.0667
+r_B = 0.8(r_A/2 + r_C/3) + 0.0667
+r_C = 0.8(r_A/2 + r_B + r_C/3) + 0.0667
+
+r(1) = [0.1556, 0.2889, 0.5556]
+r(2) = [0.2148, 0.2770, 0.5081]</code></pre>
+<p>唔改 column 嘅話，每個 iteration 總和都會細過 1（importance 漏走）。</p>
+</div></details>
+
+<p class="q">Drill 4 · Flow equation（Gaussian elimination）</p>
+<p>a → b；b → a, c；c → a。寫 flow equations，加 r_a + r_b + r_c = 1，解出 PageRank。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>r_a = r_b/2 + r_c
+r_b = r_a
+r_c = r_b/2
+→ r_b = r_a，r_c = r_a/2
+→ r_a + r_a + r_a/2 = 1 → r_a = 2/5
+r_a = 2/5, r_b = 2/5, r_c = 1/5</code></pre>
+</div></details>
+
+<h2 id="code">五、PySpark PageRank code（2025s1 Q3c，10 分）</h2>
+<p>要求：用 adjacency list RDD <code>(node, [out-neighbours])</code>，只用 RDD transformation（map、flatMap、join、reduceByKey），唔用 DataFrame 或者 matrix。</p>
+<pre><code>from pyspark.sql import SparkSession
+from operator import add
+
+ss = SparkSession.builder.appName("Spark PageRank").master("local[4]").getOrCreate()
+spark = ss.sparkContext
+
+links = spark.parallelize([
+    ("1", ["2", "4", "5"]),
+    ("2", ["3", "5"]),
+    ("3", ["5"]),
+    ("4", ["2", "3"]),
+    ("5", ["2"]),
+]).cache()
+
+N = links.count()
+beta = 0.8
+ranks = links.mapValues(lambda _: 1.0 / N)          # r(0) = 1/N
+
+for i in range(2):
+    # 每頁將 rank 平均分俾 out-neighbours
+    contribs = links.join(ranks).flatMap(
+        lambda x: [(dst, x[1][1] / len(x[1][0])) for dst in x[1][0]])
+    # 冇 in-link 嘅頁都要保留（貢獻 0）
+    contribs = contribs.union(links.mapValues(lambda _: 0.0))
+    ranks = contribs.reduceByKey(add) \
+                    .mapValues(lambda s: beta * s + (1 - beta) / N)
+
+for page, r in sorted(ranks.collect()):
+    print(page, round(r, 4))</code></pre>
+<figure class="fig"><div class="mflow">
+<div class="mfcol"><div class="mfh">links</div><div class="fb">("1", ["2","4","5"])<br>("2", ["3","5"]) …</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">join(ranks)</div><div class="fb">("1", (["2","4","5"], 0.2))<br>("2", (["3","5"], 0.2)) …</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">flatMap</div><div class="fb">("2", 0.0667) ("4", 0.0667)<br>("5", 0.0667) ("3", 0.1) …</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">union + reduceByKey</div><div class="fb hl2">("1", 0.0) ("2", 0.3667)<br>("3", 0.2) …</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">mapValues</div><div class="fb ac2">("1", 0.04) ("2", 0.3333) …</div></div></div>
+<figcaption>第一個 iteration 每一步之後 RDD 嘅樣（頁 1 冇人分俾佢，靠 union 補 0）</figcaption></figure>
+<div class="tw"><table><tr><th>步驟</th><th>做咩</th></tr>
+<tr><td><code>links.join(ranks)</code></td><td>每頁變成 <code>(page, ([neighbours], rank))</code></td></tr>
+<tr><td><code>flatMap</code></td><td>每頁產生<b>好多個</b> (dst, rank/d)，所以用 flatMap</td></tr>
+<tr><td><code>union(... 0.0)</code></td><td>頁 1 冇 in-link，唔補 0 嘅話 reduceByKey 之後會消失</td></tr>
+<tr><td><code>reduceByKey(add)</code></td><td>將每頁收到嘅貢獻加埋（Σ r_i/d_i）</td></tr>
+<tr><td><code>mapValues(β·s + (1−β)/N)</code></td><td>加 teleport</td></tr></table></div>
+<p>輸出：1 0.04、2 0.3547、3 0.2107、4 0.0507、5 0.344，同人手計一樣（已用 Python 模擬 RDD 運算核對）。</p>
+
+<h2 id="mcq">六、MCQ</h2>
+<div class="mcq" data-set="A"><script type="application/json">[
+{"t":"L7","s":"<p>In PageRank, a page is considered more important if it has:</p>","o":["Many out-links","Many in-links from important pages","Many words","A long URL"],"a":1,"e":"Links as votes：睇 <b>in-link</b>，而且 link 你嗰頁越重要，票越重。Out-link 自己控制得到，可以作弊。"},
+{"t":"L7","s":"<p>Page i has 4 out-links and rank r_i. How much rank does it pass to each linked page (no teleport)?</p>","o":["r_i","4 r_i","r_i / 4","r_i / N"],"a":2,"e":"Flow formulation：平均分俾 out-link，每條 <b>r_i / d_i</b>。"},
+{"t":"L7","s":"<p>In the column-stochastic matrix M, the entry M[j][i] = 1/d_i means:</p>","o":["Page j links to page i","Page i links to page j","Both link to each other","Page i has j out-links"],"a":1,"e":"<b>Column = from，row = to</b>。M[j][i] 係「由 i 去 j」。"},
+{"t":"L7","s":"<p>Which property must every column of M have (when there are no dead ends)?</p>","o":["Sums to 0","Sums to 1","Sums to N","Has exactly one non-zero entry"],"a":1,"e":"Column stochastic：每個 column 加埋 = 1，即係每頁嘅 rank 全部分晒出去。"},
+{"t":"L7","s":"<p>A page has no out-links. This is called a:</p>","o":["Spider trap","Dead end","Hub","Sink cluster"],"a":1,"e":"<b>Dead end</b>：冇 out-link，importance 漏走。Spider trap 係一組頁嘅 link 全部留喺組入面。"},
+{"t":"L7","s":"<p>Pages X and Y only link to each other, and other pages link into them. Over iterations, X and Y collect almost all the PageRank. This is a:</p>","o":["Dead end","Spider trap","Teleport","Stationary distribution"],"a":1,"e":"入得去出唔返嚟 = <b>spider trap</b>，會吸晒 importance。"},
+{"t":"L7","s":"<p>Why are dead ends a mathematical problem for power iteration?</p>","o":["M becomes too large","M is no longer column stochastic, so importance leaks and all ranks go to 0","Rank values become negative","Iteration never starts"],"a":1,"e":"Dead end 嗰個 column 全部 0，加埋唔係 1，<b>total rank 一路減</b>。解決：嗰個 column 改做 1/N（一定 teleport）。"},
+{"t":"L7","s":"<p>With β = 0.8 and N = 4, the teleport term is:</p>","o":["0.2","0.05","0.8","0.25"],"a":1,"e":"(1 − β)/N = 0.2/4 = <b>0.05</b>。"},
+{"t":"L7","s":"<p>What does β represent in the random surfer model?</p>","o":["Probability of teleporting","Probability of following a link","Number of iterations","Damping of the matrix size"],"a":1,"e":"<b>β = 跟 link 行嘅機率</b>；1 − β 先係 teleport 機率。"},
+{"t":"L7","s":"<p>The Google matrix is:</p>","o":["A = M + β","A = βM + (1 − β)[1/N]","A = (1 − β)M + β[1/N]","A = M / N"],"a":1,"e":"<b>A = βM + (1 − β)[1/N]_{N×N}</b>。"},
+{"t":"L7","s":"<p>Why do we NOT build the Google matrix A explicitly for the real web?</p>","o":["It is not stochastic","It is dense (no zero entries), so N² entries cannot fit in memory","It has negative values","It cannot be multiplied"],"a":1,"e":"加咗 teleport 之後每格都唔係 0，N = 10⁹ 就要 10¹⁸ 格。所以只存 sparse M，計 βMr 再加返 (1 − S)/N。"},
+{"t":"L7","s":"<p>A has no in-links. With β = 0.8 and N = 5, after any iteration r_A equals:</p>","o":["0","0.04","0.2","0.16"],"a":1,"e":"冇人分 rank 俾佢，只有 teleport：(1 − 0.8)/5 = <b>0.04</b>。"},
+{"t":"L7","s":"<p>Graph A ⇄ B only, no teleport, r(0) = [1, 0]. What happens?</p>","o":["Converges to [0.5, 0.5]","Oscillates [1,0], [0,1], [1,0]…","Becomes [0, 0]","Becomes [1, 1]"],"a":1,"e":"呢個係「唔收斂」問題：rank 喺兩頁之間來回跳。"},
+{"t":"L7","s":"<p>Graph A → B only (B has no out-links), no teleport, r(0) = [1, 0]. After 2 steps:</p>","o":["[0, 1]","[0, 0]","[0.5, 0.5]","[1, 0]"],"a":1,"e":"第一步 [0, 1]，第二步 B 冇地方去 → <b>[0, 0]</b>。Dead end 令 importance 漏晒。"},
+{"t":"L7","s":"<p>In the MapReduce version of PageRank, what does the mapper emit for page p with rank r and out-links L?</p>","o":["(p, r)","(q, r / |L|) for each q in L","(q, r) for each q in L","(p, |L|)"],"a":1,"e":"Mapper 將 rank 平均分：對每個 out-neighbour q emit <b>(q, r/|L|)</b>；reducer 加埋再加 teleport。"},
+{"t":"L7","s":"<p>In a PySpark PageRank, why is <code>flatMap</code> used to compute contributions instead of <code>map</code>?</p>","o":["flatMap is faster","Each page produces several (dst, contribution) pairs that must be flattened into one RDD","map cannot use lambda","flatMap sorts the data"],"a":1,"e":"每頁有幾條 out-link 就產生幾個 pair，要攤平。用 map 會變成「list 嘅 RDD」。"},
+{"t":"L7","s":"<p>The random walk interpretation says r_j is:</p>","o":["The number of links to j","The probability that the random surfer is at page j in the long run","The out-degree of j","The PageRank of the previous iteration"],"a":1,"e":"PageRank = random surfer 長遠停喺頁 j 嘅<b>機率</b>（stationary distribution），所以所有 r 加埋 = 1。"},
+{"t":"L7","s":"<p>After computing iteration 1, you get A = 0.35, B = 0.2167, C = 0.2167, D = 0.2. What should you suspect?</p>","o":["Nothing, it is fine","There is an arithmetic error, because the ranks must sum to 1","D is a dead end","β is too large"],"a":1,"e":"0.35 + 0.2167 × 2 + 0.2 = 0.983 ≠ 1。有 teleport 又冇 dead end 嘅話，<b>總和一定係 1</b>，係最好嘅自我檢查方法。"},
+{"t":"L7","s":"<p>Which statement about teleport and spider traps is correct?</p>","o":["Teleport makes spider traps impossible to enter","With teleport, the surfer escapes a spider trap within a finite number of steps","Teleport removes all links of the trap","Teleport only fixes dead ends"],"a":1,"e":"Teleport 唔係刪 link，而係令 surfer 每步都有 1 − β 機率跳走，所以幾步內就會離開 trap。"},
+{"t":"L7","s":"<p>In the sparse formulation, after computing r' = βMr, the ranks sum to S &lt; 1. What do we do?</p>","o":["Stop the iteration","Add (1 − S)/N to every page","Multiply by β again","Divide by S"],"a":1,"e":"將漏咗嘅 1 − S <b>平均補返</b>俾每頁：r_j = r'_j + (1 − S)/N。"}
+]</script></div>
+
+<h2 id="short">七、短答題</h2>
+<p class="q">S1. 用一句講 dead end 同 spider trap，各畀一個例子，再講解決方法。（2026s2 Q3a，8 分）</p>
+<details class="ans"><summary>參考答案</summary><div>
+<ul><li><b>Dead end</b>：頁冇 out-link，random surfer 去到冇路行，importance 漏走。例子：A → B，B 冇任何 link。</li>
+<li><b>Spider trap</b>：一組頁嘅 out-link 全部指返組入面，最後吸晒所有 importance。例子：C → C，C 自己 link 自己。</li>
+<li><b>解決</b>：random teleport。每步以 β 機率跟 link，1 − β 機率隨機跳去任何一頁：r_j = Σ β r_i/d_i + (1 − β)/N。Spider trap 幾步內跳得出；dead end 就一定 teleport（column 改做 1/N），令 M 重新 column stochastic。</li></ul>
+</div></details>
+<p class="q">S2. 點解 PageRank 唔直接數 in-link 數目？</p>
+<details class="ans"><summary>參考答案</summary><div><p>因為唔係每個 link 一樣有份量：重要頁嘅 link 應該更重；而且淨係數 in-link 好易被 spam 頁互相 link 嚟作弊。PageRank 用遞歸定義，rank 由 link 你嗰啲頁嘅 rank 決定，再按佢哋嘅 out-degree 攤分。</p></div></details>
+<p class="q">S3. 解釋點解 power iteration 適合大型 web graph。</p>
+<details class="ans"><summary>參考答案</summary><div><p>Gaussian elimination 要 O(N³)，N 係十億級做唔到。Power iteration 每步只係一次 sparse matrix 乘 vector（只同 link 數成正比），可以用 MapReduce／Spark 平行計，通常 50 次左右就收斂。</p></div></details>
+
+<h2 id="faq">八、常見疑問</h2>
+<dl class="faq">
+<dt>Q：考試要寫 matrix 定寫每頁 equation？</dt><dd>2025s1、2026s2 都要求先寫 stochastic matrix；舊 COMP4434 卷要求寫 equation。最穩陣兩樣都寫：matrix 一個表，然後由每個 row 寫 equation 再代數。</dd>
+<dt>Q：row 同 column 點分？</dt><dd>Column = from，row = to。睇 A 嗰個 column，就係 A 將分數分俾邊個。寫完檢查每個 column 加埋係咪 1。</dd>
+<dt>Q：teleport 嗰項係 (1−β)/N 定 (1−β)？</dt><dd>\((1-\beta)/N\)。Teleport 係平均跳去 N 頁之一，所以要除 N。β = 0.8、N = 4 就係 0.05。</dd>
+<dt>Q：Iteration 2 用咩數？</dt><dd>用 iteration 1 嘅結果，唔係 1/N。每一步都係用「上一步嘅 r」。</dd>
+<dt>Q：有 dead end 嘅題目點做？</dt><dd>將 dead end 嗰個 column 改成全部 1/N（一定 teleport），然後照常計。寫明你做咗呢個處理先攞到分。</dd>
+<dt>Q：兩頁分數一樣，排序點寫？</dt><dd>寫等號，例如 A &gt; B = C = D，講明打和。</dd>
+<dt>Q：題目話「Stochastic Adjacent matrix」要唔要加 teleport？</dt><dd>唔使。佢就係 M（每格 \(1/d_i\)）。Teleport 喺計 iteration 先加。</dd>
+<dt>Q：小數要留幾多位？</dt><dd>至少 4 位，或者用分數。過程唔好太早四捨五入，否則總和唔係 1。</dd>
+<dt>Q：Random surfer 同 PageRank 有咩關係？</dt><dd>PageRank 就係 random surfer 長遠停喺每頁嘅機率。所以全部頁加埋一定 = 1，可以用嚟檢查計數。</dd>
+</dl>
+<footer>DSAI4205 Final 溫習包 · 考試 2026-12-05</footer></main><script>
+(function(){
+var PAGE=document.body.dataset.page;
+function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+// section done checkboxes
+document.querySelectorAll('h2[id]').forEach(function(h){
+  var key='done:'+PAGE+':'+h.id;var l=document.createElement('label');l.className='done';
+  var c=document.createElement('input');c.type='checkbox';c.checked=!!ld(key,false);
+  c.onchange=function(){sv(key,c.checked)};l.appendChild(c);l.appendChild(document.createTextNode('呢部分溫完'));
+  h.insertAdjacentElement('afterend',l);
+});
+// MCQ
+document.querySelectorAll('.mcq').forEach(function(box){
+  var id=box.dataset.set, data=JSON.parse(box.querySelector('script').textContent);
+  var key='mcq:'+PAGE+':'+id, st=ld(key,{});
+  var bar=document.createElement('div');bar.className='bar';
+  var sc=document.createElement('span');var rs=document.createElement('button');rs.textContent='重做呢套';
+  bar.appendChild(sc);bar.appendChild(rs);box.appendChild(bar);
+  function score(){var a=0,c=0;data.forEach(function(q,i){if(st[i]!==undefined){a++;if(st[i]===q.a)c++}});
+    sc.textContent='答咗 '+a+'/'+data.length+' · 啱 '+c;sv(key,st);sv('mcqsum:'+PAGE+':'+id,{a:a,c:c,n:data.length})}
+  var L='ABCDEFG';
+  data.forEach(function(q,i){
+    var d=document.createElement('div');d.className='mq';
+    d.innerHTML='<div class="num">'+id+(i+1)+(q.t?' · '+q.t:'')+'</div><div class="stem">'+q.s+'</div>';
+    var btns=[];
+    q.o.forEach(function(o,j){var b=document.createElement('button');b.className='opt';
+      b.innerHTML='<span>'+L[j]+'</span><span>'+o+'</span>';b.onclick=function(){st[i]=j;show();score()};btns.push(b);d.appendChild(b)});
+    var ex=document.createElement('div');ex.className='exp';ex.hidden=true;d.appendChild(ex);
+    function show(){if(st[i]===undefined){btns.forEach(function(b){b.disabled=false;b.className='opt'});ex.hidden=true;return}
+      btns.forEach(function(b,j){b.disabled=true;b.className='opt'+(j===q.a?' right':(j===st[i]?' wrong':''))});
+      ex.hidden=false;ex.innerHTML=(st[i]===q.a?'<span class="v" style="color:var(--ok)">答啱！</span> ':'<span class="v" style="color:var(--bad)">答錯，正確答案係 '+L[q.a]+'。</span> ')+q.e}
+    d._show=show;show();box.appendChild(d);
+  });
+  rs.onclick=function(){st={};box.querySelectorAll('.mq').forEach(function(d){d._show()});score()};
+  score();
+});
+
+function norm(s){return s.replace(/[“”"]/g,"'").replace(/[‘’]/g,"'").replace(/\s+/g,'')}
+document.querySelectorAll('input.blank').forEach(function(inp){var alts=inp.dataset.ans.split('§');var w=Math.max.apply(null,alts.map(function(a){return a.length}));inp.style.width=(Math.max(w,3)+2)+'ch';inp.addEventListener('input',function(){inp.classList.remove('ok','bad','shown')})});
+document.querySelectorAll('.fill').forEach(function(box){var inputs=box.querySelectorAll('input.blank');var msg=box.querySelector('.fillmsg');
+ box.querySelector('[data-check]').addEventListener('click',function(){var r=0;inputs.forEach(function(inp){var v=norm(inp.value);var ok=inp.dataset.ans.split('§').some(function(a){return norm(a)===v});inp.classList.remove('ok','bad','shown');inp.classList.add(ok?'ok':'bad');if(ok)r++});msg.textContent='答啱 '+r+' / '+inputs.length+(r===inputs.length?'，全對！':'：紅色格再諗下，或者撳「顯示答案」。')});
+ box.querySelector('[data-show]').addEventListener('click',function(){inputs.forEach(function(inp){inp.value=inp.dataset.ans.split('§')[0];inp.classList.remove('ok','bad');inp.classList.add('shown')});msg.textContent='已填入答案（虛線格）。'});
+ box.querySelector('[data-clear]').addEventListener('click',function(){inputs.forEach(function(inp){inp.value='';inp.classList.remove('ok','bad','shown')});msg.textContent=''})});
+
+
+
+document.querySelectorAll('.tw > table:not(.stack)').forEach(function(t){if(t.closest('.dp')||t.classList.contains('nostack'))return;
+ var hr=t.querySelector('tr');if(!hr)return;var nh=hr.querySelectorAll('th').length;if(nh<3)return;
+ var cells=t.querySelectorAll('td'),L=0;cells.forEach(function(c){L+=c.textContent.trim().length});
+ if(cells.length&&L/cells.length>14)t.classList.add('stack')});
+document.querySelectorAll('table.stack').forEach(function(t){var hs=[].map.call(t.querySelectorAll('tr:first-child th'),function(h){return h.textContent});
+ t.querySelectorAll('tr').forEach(function(r,i){if(i===0)return;[].forEach.call(r.children,function(c,j){if(hs[j])c.setAttribute('data-label',hs[j])})})});
+
+// progress panel on index
+var pp=document.getElementById('progress');
+if(pp){var pages=JSON.parse(pp.dataset.pages);var html='';
+  pages.forEach(function(p){var n=0,m=0,a=0,c=0;
+    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);
+      if(k.indexOf('done:'+p[0]+':')===0&&ld(k,false))n++;
+      if(k.indexOf('mcqsum:'+p[0]+':')===0){var s=ld(k,{});a+=s.a||0;c+=s.c||0;m+=s.n||0}}
+    html+='<div class="row"><a href="'+p[0]+'">'+p[1]+'</a><span>'+(m||n?'溫完 '+n+' 部分 · MCQ '+a+'/'+m+'（啱 '+c+'）':'未開始')+'</span></div>'});
+  pp.innerHTML=html}
+})();
+</script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\(',right:'\)',display:false}],ignoredClasses:['mcq'],throwOnError:false})"></script></body></html>

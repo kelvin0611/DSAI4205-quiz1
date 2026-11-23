@@ -1,0 +1,403 @@
+<h1>DSAI4205 Big Data Analytics · Final 溫習包</h1>
+<p class="sub">考試：2026 年 12 月 5 日 · 範圍 L1–L8 · 呢頁係總覽：出題分析、Revision Questions 答案、跨課模擬卷</p>
+
+<div class="card"><b>點用呢個溫習包</b>
+<ol style="margin:6px 0 0;padding-left:20px">
+<li>先睇「一、出題分析」，知道邊啲必考。</li>
+<li>按次序做 P1 至 P5，每頁都有由零講起嘅筆記、MCQ、計數 drill 同 past paper 題目。</li>
+<li>最後返嚟做「三、Revision Questions」同「四、模擬卷」，當真考試咁計時做。</li>
+</ol></div>
+
+<h3>溫習進度</h3>
+<div id="progress" class="prog" data-pages="{{PAGES}}"></div>
+<p class="sub" style="font-size:13px">進度記喺你部機嘅瀏覽器入面，手機同電腦各自計。</p>
+
+<ul class="toc">
+<li><a href="#analysis">一、出題分析</a></li>
+<li><a href="#predict">二、預測同溫習次序</a></li>
+<li><a href="#rq">三、Revision Questions 2026/27 答案</a></li>
+<li><a href="#mock">四、跨課模擬卷</a></li>
+<li><a href="#formula">五、Formula sheet 同易錯位</a></li>
+</ul>
+
+<h2 id="analysis">一、出題分析</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>2 小時、closed book、100 分：MCQ 10–15 題 + 4–5 條長題（約 80 分），長題全部係計數、畫圖、寫 code。</li>
+<li>老師會<b>重用題目</b>：Revision Qs 同 2026s2 真卷差唔多一樣，係最強預測。</li>
+<li>必考：PageRank、MapReduce + PySpark、Levenshtein、Graph analytics。</li></ul></div>
+<h3>考試格式</h3>
+<div class="tw"><table>
+<tr><th>項目</th><th>內容</th><th>根據</th></tr>
+<tr><td>時間</td><td>2 小時</td><td>2025/26 Sem 1、Sem 2 真卷</td></tr>
+<tr><td>形式</td><td><b>Closed book</b>，卷尾附 formula sheet（TF-IDF、cosine、user profile、PageRank、Google matrix）</td><td>2025s1 Appendix</td></tr>
+<tr><td>總分</td><td>100 分</td><td>真卷</td></tr>
+<tr><td>Section A</td><td>MCQ，老師講 <b>10 至 15 題</b>（之前兩份真卷大約 20 至 22 分）</td><td>老師堂上講、真卷</td></tr>
+<tr><td>Section B</td><td>4 至 5 題長題，約 78 至 80 分，<b>全部係 problem solving</b>：計數、畫圖、寫 code，唔考背書</td><td>老師堂上講</td></tr>
+<tr><td>範圍</td><td>L1 Big Data、L2 Parallelism、L3 Spark、L4 Hive/Shark/SparkSQL、L5–L6 NLP + LLM、L7 PageRank、L8 Graph Analytics</td><td>Exam Review.pdf</td></tr>
+</table></div>
+
+<div class="warn"><b>留意 past paper 資料夾</b>2023s2、2024s1、2024s2、2025s2 四份其實係舊科 <b>COMP4434</b>，大部分考 k-means、collaborative filtering、CNN，<b>唔喺今個學期範圍</b>。只有入面嘅 PageRank 同 MapReduce pseudocode 題目有參考價值，已經放咗入 P1 同 P4 做額外練習。真正同一個老師（Dr Ken FONG）出嘅係 <b>2025s1</b> 同 <b>2026s2</b>。</div>
+
+<h3>長題逐題比較</h3>
+<div class="tw"><table>
+<tr><th>題型</th><th>2025s1 真卷</th><th>2026s2 真卷</th><th>2026/27 Revision Qs</th></tr>
+<tr><td><b>MapReduce + PySpark RDD</b></td><td>Inverted index：pseudocode + RDD code（20 分）</td><td>Mutual friends：畫 Map-Shuffle-Reduce 圖 + RDD fill-in（16 分）</td><td>Mutual friends：畫圖 + pseudocode + fill-in</td></tr>
+<tr><td><b>Spark DataFrame</b></td><td>—</td><td>—（Quiz 2 考咗 schema + UDF）</td><td>groupBy + sum + orderBy desc</td></tr>
+<tr><td><b>Levenshtein</b></td><td>—</td><td>Teh/The 表 + subproblem + 句子距離（8 分）</td><td>shoe/sock 表 + 句子距離</td></tr>
+<tr><td><b>Word2Vec</b></td><td>Skip-gram windows + CBOW 圖（9 分）</td><td>Embedding 定義、NLL、SGNS（12 分）</td><td>Embedding 定義 + Word2Vec 兩個問題</td></tr>
+<tr><td><b>BPE</b></td><td>—</td><td>apple pen 減到 10 tokens（6 分）</td><td>—</td></tr>
+<tr><td><b>TF-IDF + cosine</b></td><td>TF-IDF、user profile、cosine（20 分）</td><td>—</td><td>—</td></tr>
+<tr><td><b>PageRank</b></td><td>5 頁、β = 0.8、2 個 iteration + RDD code（25 分）</td><td>兩個問題 + 4 頁計數（18 分）</td><td><b>同 2026s2 一模一樣</b></td></tr>
+<tr><td><b>Graph analytics</b></td><td>邊個 node centrality 最高（6 分）</td><td>Density、CC、low-degree 點解重要、認 centrality 圖（10 分）</td><td>Diameter、平均 degree、density、CC、平均 CC、認 centrality 圖</td></tr>
+<tr><td>Big Data Vs</td><td>—</td><td>Palantir case study（8 分）</td><td>—</td></tr>
+</table></div>
+
+<h3>老師出題習慣</h3>
+<ul>
+<li><b>重用題目</b>：Revision Qs 同 2026s2 真卷差唔多逐題一樣；Practice Quiz 2 Q2、Q3、Q4 都係抄 2026s2、2025s1。所以 Revision Qs 係最強預測。</li>
+<li><b>情境包裝</b>：題目會包一個故事（Netflix 字幕、Palantir、搜尋器、社交網絡），但底下計法唔變。</li>
+<li><b>Code 題用 skeleton + TODO／blanks</b>：同 Quiz 2 Q1 一樣，俾你填 transformation 名、schema、UDF。</li>
+<li><b>計數題要「show all your steps」</b>：PageRank 要寫 matrix 同每個 iteration；Levenshtein 要填成個表。</li>
+<li><b>PageRank 一定用 β = 0.8、初始值 1/N、計 2 個 iteration 再排序</b>。</li>
+</ul>
+
+<h2 id="predict">二、預測同溫習次序</h2>
+<p><span class="tag t-must">必考</span>差唔多肯定會出 · <span class="tag t-likely">好可能</span>出其中一部分 · <span class="tag t-know">識認就得</span>多數只喺 MCQ</p>
+<div class="tw"><table>
+<tr><th>級別</th><th>題目</th><th>預計分數</th><th>喺邊頁</th></tr>
+<tr><td><span class="tag t-must">必考</span></td><td>PageRank：stochastic matrix、2 個 iteration、排序；dead end／spider trap 同 teleport</td><td>18–25</td><td><a href="P4-L7.html">P4</a></td></tr>
+<tr><td><span class="tag t-must">必考</span></td><td>MapReduce：Map-Shuffle-Reduce 圖 + pseudocode + PySpark RDD fill-in（flatMap、groupByKey、reduceByKey）</td><td>16–20</td><td><a href="P1-L1-L2.html">P1</a>、<a href="P2-L3-L4.html">P2</a></td></tr>
+<tr><td><span class="tag t-must">必考</span></td><td>Levenshtein：填 DP 表、traceback、句子距離</td><td>8–10</td><td><a href="P3-L5-L6.html">P3</a></td></tr>
+<tr><td><span class="tag t-must">必考</span></td><td>Graph：diameter、平均 degree、density、clustering coefficient、認 centrality</td><td>10</td><td><a href="P5-L8.html">P5</a></td></tr>
+<tr><td><span class="tag t-likely">好可能</span></td><td>Spark DataFrame code：groupBy、agg、orderBy、UDF、schema</td><td>8–12</td><td><a href="P2-L3-L4.html">P2</a></td></tr>
+<tr><td><span class="tag t-likely">好可能</span></td><td>Word2Vec：skip-gram windows、CBOW 圖、SGNS、Word2Vec 嘅問題</td><td>6–10</td><td><a href="P3-L5-L6.html">P3</a></td></tr>
+<tr><td><span class="tag t-likely">好可能</span></td><td>BPE、TF-IDF + cosine + user profile</td><td>6–20</td><td><a href="P3-L5-L6.html">P3</a></td></tr>
+<tr><td><span class="tag t-know">識認就得</span></td><td>6Vs、HDFS、Dask chunks、RDD lineage／lazy、Hive／Shark／Spark SQL、LLM 基礎</td><td>MCQ</td><td>P1、P2、P3</td></tr>
+</table></div>
+<div class="tip"><b>溫習次序建議（距離考試大約兩個禮拜）</b>
+先做分數最多又最穩陣嘅：<b>P4 PageRank → P5 Graph → P3 Levenshtein／Word2Vec → P1 + P2 MapReduce 同 Spark code</b>，最後做 MCQ 同模擬卷。</div>
+
+<h2 id="rq">三、Revision Questions 2026/27 答案</h2>
+<p>呢份係老師派嘅溫習題，同 2026s2 真卷幾乎一樣，最大機會再出。每題答案都係「考試寫法」，詳細教學喺對應嘅 P 頁。</p>
+
+<h3>RQ1 · MapReduce and Spark：Mutual friends</h3>
+<p>Input：A → B,C,D；B → A,C,D,E；C → A,B,D,E；D → A,B,C；E → B,C。Mapper 要將 pair 按字母排序。</p>
+<details class="ans"><summary>(a) Map-Shuffle-Reduce 圖</summary><div>
+<p><b>核心諗法（Combinatorial pair）</b>：如果 A 嘅朋友有 B、C、D，咁 A 就係 (B,C)、(B,D)、(C,D) 每一對嘅共同朋友。所以 mapper 將每個 user 嘅朋友 list 兩兩配對，value 係 user 自己。</p>
+<div class="mflow">
+<div class="mfcol"><div class="mfh">① Map（每個 user 一個 mapper）</div>
+<div class="fb"><b>A: B,C,D</b><br>((B,C),A) ((B,D),A) ((C,D),A)</div>
+<div class="fb"><b>B: A,C,D,E</b><br>((A,C),B) ((A,D),B) ((A,E),B)<br>((C,D),B) ((C,E),B) ((D,E),B)</div>
+<div class="fb"><b>C: A,B,D,E</b><br>((A,B),C) ((A,D),C) ((A,E),C)<br>((B,D),C) ((B,E),C) ((D,E),C)</div>
+<div class="fb"><b>D: A,B,C</b><br>((A,B),D) ((A,C),D) ((B,C),D)</div>
+<div class="fb"><b>E: B,C</b><br>((B,C),E)</div></div>
+<div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">② Shuffle（group by key）</div>
+<div class="fb hl2">(A,B) → [C, D]<br>(A,C) → [B, D]<br>(A,D) → [B, C]<br>(A,E) → [B, C]<br>(B,C) → [A, D, E]<br>(B,D) → [A, C]<br>(B,E) → [C]<br>(C,D) → [A, B]<br>(C,E) → [B]<br>(D,E) → [B, C]</div>
+<p style="font-size:13px;margin:4px 0">同一個 key 由唔同 mapper 送嚟，shuffle 將佢哋送去同一個 reducer。</p></div>
+<div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">③ Reduce（輸出 list）</div>
+<div class="fb ac2">(A,B): C, D<br>(A,C): B, D<br>(B,C): A, D, E<br>(A,D): B, C<br>…</div></div>
+</div>
+<div class="warn"><b>攞分位</b>Map 階段最少畫 2–3 個 mapper，寫明 output 係 <code>((friend1, friend2), user)</code>；Shuffle 要寫「group by key」；Reduce 最少寫 3 對嘅答案。pair 一定要排序，否則 (B,A) 同 (A,B) 會變兩個 key。</div>
+</div></details>
+
+<details class="ans"><summary>(b) Pseudocode</summary><div>
+<pre><code>function map(user, friend_list):
+    for i in 0 .. len(friend_list)-1:
+        for j in i+1 .. len(friend_list)-1:
+            pair = sort(friend_list[i], friend_list[j])
+            emit(pair, user)
+
+function reducer(pair, user_list):
+    emit(pair, list(user_list))</code></pre>
+<p>Reducer 收到嘅 <code>user_list</code> 就係「同時有呢兩個朋友嘅人」，即係佢哋嘅共同朋友。</p>
+</div></details>
+
+<details class="ans"><summary>(c) PySpark fill-in（TODO 1–5）</summary><div>
+<pre><code>def map_to_pairs(user_data):
+    user, friends = user_data
+    pairs = []
+    for i in range(len(friends)):                 # TODO 1：雙重 loop
+        for j in range(i + 1, len(friends)):
+            pair = tuple(sorted((friends[i], friends[j])))
+            pairs.append((pair, user))            # TODO 2：((f1, f2), user)
+    return pairs
+
+intermediate_rdd = rdd.flatMap(map_to_pairs)      # TODO 3
+grouped_rdd = intermediate_rdd.groupByKey()       # TODO 4
+final_output = grouped_rdd.mapValues(list)        # TODO 5</code></pre>
+<div class="tw"><table class="stack"><tr><th>Blank</th><th>答案</th><th>點解</th></tr>
+<tr><td>TODO 3</td><td><code>flatMap</code></td><td>每個 user 產生<b>好多個</b> pair，要「攤平」成一個 RDD。用 <code>map</code> 會得到「list 嘅 RDD」。</td></tr>
+<tr><td>TODO 4</td><td><code>groupByKey</code></td><td>將同一個 pair 嘅所有 user 收埋一齊。</td></tr>
+<tr><td>TODO 5</td><td><code>list</code></td><td>groupByKey 俾你一個 iterable（ResultIterable），轉做普通 list 先睇到內容。</td></tr></table></div>
+<p>已用 Python 模擬核對，輸出同上面嘅 shuffle 結果一樣，例如 (B,C) → [A, D, E]。</p>
+</div></details>
+
+<h3>RQ2 · Spark DataFrame and Text Similarity</h3>
+<p class="q">(a) 計每個 customer 嘅總消費，輸出 <code>total_spent</code>，按大至細排。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>from pyspark.sql.functions import sum, col
+
+def compute_total_spending(df):
+    result = (df.groupBy("customer_id")
+                .agg(sum("order_amount").alias("total_spent"))
+                .orderBy(col("total_spent").desc()))
+    return result</code></pre>
+<ul><li><code>groupBy("customer_id")</code>：每個 customer 一組。</li>
+<li><code>agg(sum(...).alias("total_spent"))</code>：每組加埋 order_amount，改名做 total_spent。</li>
+<li><code>orderBy(col("total_spent").desc())</code>：由大到細。都可以寫 <code>.orderBy("total_spent", ascending=False)</code>。</li></ul>
+<div class="warn"><b>易錯</b>題目 import 嘅係 <code>pyspark.sql.functions</code> 嘅 <code>sum</code>，唔係 Python 內置 sum。冇 <code>.alias</code> 嘅話 column 名會變成 <code>sum(order_amount)</code>，同 expected output 唔一樣。</div>
+</div></details>
+
+<p class="q">(b) Levenshtein distance：“shoe” 同 “sock”。(c) “The shoes are missing” vs “The socks are missing”。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<p>擺法：source “shoe” 放 row（左邊），target “sock” 放 column（上面）。index 0 寫字母，index 1 係空字串。</p>
+<div class="tw"><table>
+<tr><th class="c">idx</th><th class="c">0</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th></tr>
+<tr><th class="c">0</th><td></td><td class="c">‘’</td><td class="c">s</td><td class="c">o</td><td class="c">c</td><td class="c">k</td></tr>
+<tr><th class="c">1</th><td class="c">‘’</td><td class="c">0</td><td class="c">1</td><td class="c">2</td><td class="c">3</td><td class="c">4</td></tr>
+<tr><th class="c">2</th><td class="c">s</td><td class="c">1</td><td class="c"><b>0</b></td><td class="c">1</td><td class="c">2</td><td class="c">3</td></tr>
+<tr><th class="c">3</th><td class="c">h</td><td class="c">2</td><td class="c">1</td><td class="c"><b>1</b></td><td class="c">2</td><td class="c">3</td></tr>
+<tr><th class="c">4</th><td class="c">o</td><td class="c">3</td><td class="c">2</td><td class="c">1</td><td class="c"><b>2</b></td><td class="c">3</td></tr>
+<tr><th class="c">5</th><td class="c">e</td><td class="c">4</td><td class="c">3</td><td class="c">2</td><td class="c">2</td><td class="c"><b>3</b></td></tr>
+</table></div>
+<p><b>距離 = D[5][5] = 3</b>。粗體係其中一條最短路徑：</p>
+<div class="tw"><table><tr><th>Step</th><th>坐標</th><th>操作</th></tr>
+<tr><td>1</td><td>D[5][5] → D[4][4]</td><td>Substitute e → k（2 + 1 = 3）</td></tr>
+<tr><td>2</td><td>D[4][4] → D[3][3]</td><td>Substitute o → c（1 + 1 = 2）</td></tr>
+<tr><td>3</td><td>D[3][3] → D[2][2]</td><td>Substitute h → o（0 + 1 = 1）</td></tr>
+<tr><td>4</td><td>D[2][2] → D[1][1]</td><td>Match s（0）</td></tr></table></div>
+<p>另一條同樣係 3 步：delete h、match o、substitute e → c、insert k。</p>
+<p><b>(c)</b> 逐個字比較：The = The（0）、shoes → socks（3，同上，最尾 s 對 s 係 match）、are（0）、missing（0）。<b>總距離 = 3</b>（已用 DP 程式核對成句）。</p>
+</div></details>
+
+<h3>RQ3 · Text Embedding</h3>
+<p class="q">(a) Define word embedding，用例子說明。(b) 兩份文件用 Word2Vec 學 vector，講兩個可能問題。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<p><b>(a)</b> Word embedding 係將每個字變成一個<b>低維、dense 嘅實數向量</b>（例如 300 維），令意思相近或者用法相近嘅字，喺向量空間入面距離近。目的係俾 model 用數字理解字義，取代 one-hot 呢種又長又 sparse、又睇唔到相似度嘅表示法。</p>
+<p>例子：cos(“cat”, “dog”) 高過 cos(“cat”, “car”)；vector(“king”) − vector(“man”) + vector(“woman”) ≈ vector(“queen”)，表示「性別」呢個關係變成向量入面一個方向。</p>
+<p><b>(b) 可能問題</b></p>
+<ol><li><b>一字多義（polysemy）</b>：“book” 喺 Document 1 係動詞「訂枱」，喺 Document 2 係 “close the book” 嘅名詞片語，但 Word2Vec 每個字只有<b>一個固定 vector</b>，兩個意思會撈埋一齊。</li>
+<li><b>反義詞變相似</b>：“increased” 同 “decreased” 出現喺一模一樣嘅 context（“The company's profits ___ significantly compared to…”），Word2Vec 只睇 context，所以會學到幾乎一樣嘅 vector，雖然意思相反。</li>
+<li>（另一個都得）<b>語料太細</b>：得兩句，co-occurrence 太少，vector 唔可靠；而且冇見過嘅字（OOV，例如串錯嘅 “unearning”）冇 vector。</li></ol>
+<p>答兩個就夠，最穩陣係 1 同 2，因為都可以直接指住文件入面嘅字。</p>
+</div></details>
+
+<h3>RQ4 · PageRank</h3>
+<p>Graph：A → B, C, D；B → A, D；C → A；D → B, C。β = 0.8，N = 4，r⁽⁰⁾ = 1/4。</p>
+<svg viewBox="0 0 300 220" role="img" aria-label="PageRank 4 node graph" style="max-width:300px">
+<defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+<g style="color:var(--ink)">
+<line class="ln" x1="80" y1="45" x2="215" y2="45" marker-end="url(#ar2)"/>
+<line class="ln" x1="60" y1="62" x2="60" y2="160" marker-end="url(#ar2)"/>
+<line class="ln" x1="74" y1="58" x2="222" y2="166" marker-end="url(#ar2)"/>
+<path class="ln" d="M232 30 C 200 -5, 100 -5, 72 28" marker-end="url(#ar2)"/>
+<path class="ln" d="M255 55 C 285 100, 285 140, 255 168" marker-end="url(#ar2)"/>
+<path class="ln" d="M45 172 C 15 140, 15 90, 45 60" marker-end="url(#ar2)"/>
+<line class="ln" x1="240" y1="160" x2="240" y2="64" marker-end="url(#ar2)"/>
+<line class="ln" x1="220" y1="180" x2="82" y2="180" marker-end="url(#ar2)"/>
+</g>
+<circle class="bx" cx="60" cy="45" r="18"/><text x="60" y="50" text-anchor="middle">A</text>
+<circle class="bx" cx="240" cy="45" r="18"/><text x="240" y="50" text-anchor="middle">B</text>
+<circle class="bx" cx="60" cy="180" r="18"/><text x="60" y="185" text-anchor="middle">C</text>
+<circle class="bx" cx="240" cy="180" r="18"/><text x="240" y="185" text-anchor="middle">D</text>
+</svg>
+<details class="ans"><summary>(a) 兩個問題同解決方法</summary><div>
+<div class="tw"><table class="stack"><tr><th>問題</th><th>一句定義</th><th>例子</th></tr>
+<tr><td><b>Dead end</b></td><td>Page 冇 out-link，random surfer 去到就走唔出，importance 會「漏走」，總和唔再係 1。</td><td>A → B，但 B 冇任何 link；iterate 落去所有 rank 趨向 0。</td></tr>
+<tr><td><b>Spider trap</b></td><td>一組 page 嘅 out-link 全部指返自己組入面，最終吸晒所有 importance。</td><td>B → B（自己 link 自己），B 最後攞晒 1，其他 page 變 0。</td></tr></table></div>
+<p><b>解決方法：random teleport</b>。每一步有 β 機率跟 link 行，1 − β 機率隨機跳去任何一頁：</p>
+
+$$r_j = \sum_{i \to j} \beta\,\frac{r_i}{d_i} + \frac{1-\beta}{N}$$
+
+<p>Spider trap：teleport 令 surfer 幾步之內就跳得出去。Dead end：去到 dead end 就<b>一定 teleport</b>（將嗰個 column 改成全部 1/N），咁 matrix 先係 column-stochastic。</p>
+</div></details>
+<details class="ans"><summary>(b)(i) Stochastic adjacency matrix M</summary><div>
+<p>規則：<b>column = 由邊頁出發</b>，<b>row = 去邊頁</b>。M[j][i] = 1 / out-degree(i)（如果 i → j）。每個 column 加埋 = 1。</p>
+<div class="tw"><table><tr><th>to \ from</th><th class="c">A (d=3)</th><th class="c">B (d=2)</th><th class="c">C (d=1)</th><th class="c">D (d=2)</th></tr>
+<tr><th>A</th><td class="c">0</td><td class="c">1/2</td><td class="c">1</td><td class="c">0</td></tr>
+<tr><th>B</th><td class="c">1/3</td><td class="c">0</td><td class="c">0</td><td class="c">1/2</td></tr>
+<tr><th>C</th><td class="c">1/3</td><td class="c">0</td><td class="c">0</td><td class="c">1/2</td></tr>
+<tr><th>D</th><td class="c">1/3</td><td class="c">1/2</td><td class="c">0</td><td class="c">0</td></tr></table></div>
+</div></details>
+<details class="ans"><summary>(b)(ii) Iteration 1、2 同排序</summary><div>
+<p>Teleport 項：\(\dfrac{1-\beta}{N} = \dfrac{0.2}{4} = 0.05\)。由 M 每一行寫 equation：</p>
+$$\begin{aligned} r_A &= 0.8\left(\tfrac{r_B}{2} + r_C\right) + 0.05 \\ r_B &= 0.8\left(\tfrac{r_A}{3} + \tfrac{r_D}{2}\right) + 0.05 \\ r_C &= 0.8\left(\tfrac{r_A}{3} + \tfrac{r_D}{2}\right) + 0.05 \\ r_D &= 0.8\left(\tfrac{r_A}{3} + \tfrac{r_B}{2}\right) + 0.05 \end{aligned}$$
+<div class="tw"><table class="stack"><tr><th>頁</th><th>Iteration 1（全部代 0.25）</th><th class="c">r⁽¹⁾</th><th>Iteration 2（代 r⁽¹⁾）</th><th class="c">r⁽²⁾</th></tr>
+<tr><td>A</td><td>0.8(0.125 + 0.25) + 0.05</td><td class="c">0.3500</td><td>0.8(0.2167/2 + 0.2167) + 0.05</td><td class="c">0.3100</td></tr>
+<tr><td>B</td><td>0.8(0.0833 + 0.125) + 0.05</td><td class="c">0.2167</td><td>0.8(0.35/3 + 0.2167/2) + 0.05</td><td class="c">0.2300</td></tr>
+<tr><td>C</td><td>同 B</td><td class="c">0.2167</td><td>同 B</td><td class="c">0.2300</td></tr>
+<tr><td>D</td><td>0.8(0.0833 + 0.125) + 0.05</td><td class="c">0.2167</td><td>0.8(0.35/3 + 0.2167/2) + 0.05</td><td class="c">0.2300</td></tr>
+<tr><th>Σ</th><td></td><td class="c">1.0000 ✓</td><td></td><td class="c">1.0000 ✓</td></tr></table></div>
+<p><b>排序：A (0.31) &gt; B = C = D (0.23)</b>。檢查：0.31 + 3 × 0.23 = 1 ✓（已用 numpy 核對）。</p>
+</div></details>
+
+<h3>RQ5 · Graph Analytics</h3>
+<svg viewBox="0 0 300 230" role="img" aria-label="Graph G" style="max-width:300px">
+<g class="ln"><line x1="40" y1="30" x2="150" y2="25"/><line x1="40" y1="30" x2="100" y2="95"/><line x1="150" y1="25" x2="100" y2="95"/><line x1="150" y1="25" x2="210" y2="95"/><line x1="100" y1="95" x2="210" y2="95"/><line x1="40" y1="135" x2="100" y2="95"/><line x1="100" y1="95" x2="100" y2="195"/><line x1="100" y1="195" x2="210" y2="195"/><line x1="210" y1="95" x2="210" y2="195"/></g>
+<g><circle class="hl" cx="40" cy="30" r="16"/><text x="40" y="35" text-anchor="middle">A</text><circle class="hl" cx="150" cy="25" r="16"/><text x="150" y="30" text-anchor="middle">E</text><circle class="hl" cx="100" cy="95" r="16"/><text x="100" y="100" text-anchor="middle">C</text><circle class="hl" cx="210" cy="95" r="16"/><text x="210" y="100" text-anchor="middle">F</text><circle class="hl" cx="40" cy="135" r="16"/><text x="40" y="140" text-anchor="middle">B</text><circle class="hl" cx="100" cy="195" r="16"/><text x="100" y="200" text-anchor="middle">D</text><circle class="hl" cx="210" cy="195" r="16"/><text x="210" y="200" text-anchor="middle">G</text></g>
+</svg>
+<p>Edges（9 條）：A–C、A–E、C–E、E–F、C–F、B–C、C–D、D–G、F–G。N = 7。</p>
+<details class="ans"><summary>(a)–(e) 答案</summary><div>
+<div class="tw"><table class="stack"><tr><th>小題</th><th>答案</th><th>計法</th></tr>
+<tr><td>(a) Diameter</td><td><b>3</b></td><td>所有 node 對之間<b>最短路徑嘅最大值</b>。例如 B → G：B–C–D–G = 3；A → G 都係 3。冇一對要行 4 步。</td></tr>
+<tr><td>(b) 平均 degree ⟨k⟩</td><td><b>18/7 ≈ 2.57</b></td><td>\(\langle k\rangle = 2E/N = 2 \times 9 / 7\)。Degree：A2、B1、C5、D2、E3、F3、G2，加埋 18。</td></tr>
+<tr><td>(c) Density</td><td><b>9/21 ≈ 0.429</b></td><td>\(\dfrac{E}{N(N-1)/2} = \dfrac{9}{21}\)，即係「實際 edge ÷ 最多可以有幾多條」。</td></tr></table></div>
+<p><b>(d) Clustering coefficient</b>：</p>
+$$C_v = \frac{e_v}{k_v(k_v-1)/2}$$
+<p>\(e_v\) = 鄰居之間實際有幾多條 edge。</p>
+<div class="tw"><table><tr><th>Node</th><th>鄰居</th><th>k</th><th>鄰居之間嘅 edge</th><th>cc</th></tr>
+<tr><td>A</td><td>C, E</td><td>2</td><td>C–E（1）</td><td>1/1 = <b>1</b></td></tr>
+<tr><td>B</td><td>C</td><td>1</td><td>—</td><td><b>1</b>（題目假設 degree 1 = 1）</td></tr>
+<tr><td>C</td><td>A, B, D, E, F</td><td>5</td><td>A–E、E–F（2）</td><td>2/10 = <b>0.2</b></td></tr>
+<tr><td>D</td><td>C, G</td><td>2</td><td>冇（0）</td><td><b>0</b></td></tr>
+<tr><td>E</td><td>A, C, F</td><td>3</td><td>A–C、C–F（2）</td><td>2/3 ≈ <b>0.667</b></td></tr>
+<tr><td>F</td><td>C, E, G</td><td>3</td><td>C–E（1）</td><td>1/3 ≈ <b>0.333</b></td></tr>
+<tr><td>G</td><td>D, F</td><td>2</td><td>冇（0）</td><td><b>0</b></td></tr></table></div>
+<p>平均 CC = (1 + 1 + 0.2 + 0 + 0.667 + 0.333 + 0) / 7 = 3.2 / 7 ≈ <b>0.457</b>（已用 networkx 核對）。</p>
+<p><b>(e) 認圖</b>：(i) <b>Degree</b>、(ii) <b>Betweenness</b>、(iii) <b>Closeness</b>。所以按題目次序（Degree, Closeness, Betweenness）答 <b>(i), (iii), (ii)</b>。</p>
+<ul><li><b>Betweenness</b>：極少數 node（橋樑位）特別大，其他好細 → 大細差距最誇張嗰幅，即 (ii)。</li>
+<li><b>Closeness</b>：大家距離中心都差唔多，所以 node 大細<b>好平均</b> → (iii)。</li>
+<li><b>Degree</b>：朋友多嘅 hub 大，但差距冇 betweenness 咁極端 → (i)。</li></ul>
+</div></details>
+
+<h2 id="mock">四、跨課模擬卷</h2>
+<p>新題目，數字同真卷唔同，用嚟測試你係咪真係識計。建議計時：Section A 15 分鐘，Section B 90 分鐘。</p>
+<h3>Section A · MCQ（15 題）</h3>
+<div class="mcq" data-set="M"><script type="application/json">[
+{"t":"L1","s":"<p>A hospital's wearable sensors send heart-rate readings every second and doctors must be alerted within seconds. Which V of Big Data is this mainly about?</p>","o":["Volume","Velocity","Variety","Veracity"],"a":1,"e":"「每秒都有數據、要即時處理」= <b>Velocity</b>（數據產生同處理得幾快，streaming）。Volume 係數量大，Variety 係類型多，Veracity 係數據質素。"},
+{"t":"L1","s":"<p>Which statement about HDFS is correct?</p>","o":["Files are edited in place many times","Files are split into fixed-size blocks and each block is replicated (3 copies by default)","All data is stored on one master node","HDFS keeps data only in memory"],"a":1,"e":"HDFS：<b>fixed-size partitioning、3-way replication、write-once read-many</b>。唔係隨時改，亦唔係淨係放 memory。"},
+{"t":"L2","s":"<p><code>da.ones((10000, 12000), chunks=(5000, 4000))</code> creates how many chunks?</p>","o":["2","3","6","20"],"a":2,"e":"chunks 係<b>每塊嘅形狀</b>：10000/5000 = 2，12000/4000 = 3，2 × 3 = <b>6</b>。易錯位：chunks 唔係「分幾多塊」。"},
+{"t":"L2","s":"<p>In a word-count MapReduce job, what does the shuffle phase do?</p>","o":["Splits documents into words","Groups all intermediate values with the same key and sends them to the same reducer","Adds up the counts","Writes the final output"],"a":1,"e":"Map 拆字出 (w,1)；<b>Shuffle 按 key group 埋</b>；Reduce 加總。"},
+{"t":"L2","s":"<p>Why is MapReduce slow for iterative algorithms such as PageRank?</p>","o":["It cannot run in parallel","It writes intermediate results to disk between every job","It only supports one reducer","It cannot read HDFS"],"a":1,"e":"MapReduce 為咗 fault tolerance，<b>每一步都寫硬碟</b>，iteration 之間只可以經 shared storage 傳數據。Spark 用 memory 解決呢個問題。"},
+{"t":"L3","s":"<p>How does an RDD recover a lost partition?</p>","o":["From a full replica on another node","By recomputing it from its lineage (the recorded transformations)","By asking the user to rerun the job","It cannot recover"],"a":1,"e":"RDD 記低 <b>lineage</b>（由邊個 RDD 經咩 transformation 嚟），壞咗就重新計，唔使複製數據，冇出錯就冇額外成本。"},
+{"t":"L3","s":"<pre><code>rdd = sc.parallelize([\"a b\", \"c\"])\nx = rdd.flatMap(lambda s: s.split())\ny = x.map(lambda w: (w, 1))\nprint(y.count())</code></pre><p>Which line triggers the actual computation, and what is printed?</p>","o":["flatMap; 2","map; 3","count; 3","count; 2"],"a":2,"e":"flatMap、map 都係 transformation（lazy），<b>count 係 action</b> 先會執行。flatMap 攤平後有 a、b、c 三個字，所以印 <b>3</b>。用 map 嘅話先係 2。"},
+{"t":"L3","s":"<p>Which transformation is usually preferred over groupByKey for summing values per key, and why?</p>","o":["reduceByKey, because it combines values locally before shuffling","map, because it is faster","collect, because it returns everything","flatMap, because it flattens lists"],"a":0,"e":"<b>reduceByKey</b> 喺每個 partition 先加一次（map-side combine），shuffle 嘅數據少好多。groupByKey 會將所有值原封不動送過網絡。"},
+{"t":"L4","s":"<p>A team wants SQL queries on HDFS data to run much faster than Hive by keeping hot tables in memory. Which system was designed for exactly this?</p>","o":["Hive","Shark","HDFS","Dask"],"a":1,"e":"<b>Shark</b> = Hive on Spark：兼容 HiveQL，但用 Spark 喺 memory 計，加 columnar memory store 同 PDE。之後演變成 Spark SQL。"},
+{"t":"L4","s":"<p>A UDF is registered as <code>udf(f, IntegerType())</code> but f returns strings like \"High\". What appears in the new column?</p>","o":["The strings","null","An error at definition time","0"],"a":1,"e":"UDF 嘅 return type 同實際回傳值唔夾，Spark 唔會報錯，而係出 <b>null</b>。所以 return type 一定要寫啱。"},
+{"t":"L5","s":"<p>Using IDF = log₂((N+1)/(df+1)) + 1 with N = 3, what is the IDF of a word appearing in all 3 documents?</p>","o":["0","1","2","log₂3"],"a":1,"e":"log₂(4/4) + 1 = 0 + 1 = <b>1</b>。留意 2025s1 formula sheet 有 <b>+1</b>，同 Quiz 2 練習卷嘅 ln((N+1)/(df+1)) 唔同，考試要睇清楚 formula sheet。"},
+{"t":"L5","s":"<p>In BPE, what happens in each iteration?</p>","o":["The most frequent adjacent symbol pair is merged into a new token","The rarest word is deleted","Every word is split into characters again","Stop words are removed"],"a":0,"e":"BPE 每輪搵<b>最常出現嘅相鄰 pair</b> 合併，一直做到 token 數或者 vocabulary 大細達標。"},
+{"t":"L6","s":"<p>Why does Skip-gram with Negative Sampling (SGNS) speed up training?</p>","o":["It removes the hidden layer","Instead of a softmax over the whole vocabulary, it trains a few binary classifiers: the true context word vs k random negative words","It uses one-hot vectors only","It skips rare words"],"a":1,"e":"完整 softmax 每步要計成個 V（可能幾十萬字）。SGNS 只計 <b>1 個正例 + k 個負例</b> 嘅 sigmoid，快好多。"},
+{"t":"L7","s":"<p>In the PageRank equation with teleport, β = 0.8 and N = 5. What is the teleport term added to every page?</p>","o":["0.2","0.04","0.16","0.8"],"a":1,"e":"(1 − β)/N = 0.2/5 = <b>0.04</b>。易錯：唔好用 β/N。"},
+{"t":"L8","s":"<p>A node with only 2 edges connects two otherwise separate communities. Which centrality would rank it highest?</p>","o":["Degree","Betweenness","Clustering coefficient","Density"],"a":1,"e":"兩個群組之間嘅最短路徑全部經佢 → <b>betweenness</b> 好高，雖然 degree 低。呢個就係 2026s2「low-degree 但重要」嗰題嘅答案。"}
+]</script></div>
+
+<h3>Section B · 長題</h3>
+<h4>MB1 · MapReduce + RDD（16 分）</h4>
+<p>網購數據每行係 <code>(user, [items])</code>：U1: bread, milk, egg；U2: bread, milk；U3: milk, egg；U4: bread, egg, milk。要計<b>每一對產品被幾多個 user 一齊買</b>（pair 要按字母排序）。(a) 寫 Map 同 Reduce pseudocode，講明 input/output (key, value)。(b) 完成 PySpark：</p>
+<pre><code>def to_pairs(record):
+    user, items = record
+    items = sorted(items)
+    return [ ____(1)____ for i in range(len(items))
+                         for j in range(i + 1, len(items)) ]
+
+counts = rdd.____(2)____(to_pairs).____(3)____(add)
+print(counts.____(4)____())</code></pre>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>function map(user, items):          # input: (user, list of items)
+    items = sort(items)
+    for each pair (a, b) with a before b in items:
+        emit((a, b), 1)              # output: ((item1, item2), 1)
+
+function reduce(pair, counts):       # input: ((item1, item2), [1, 1, ...])
+    emit(pair, sum(counts))          # output: ((item1, item2), total)</code></pre>
+<p>(1) <code>((items[i], items[j]), 1)</code>　(2) <code>flatMap</code>　(3) <code>reduceByKey</code>　(4) <code>collect</code></p>
+<p>結果：(bread, egg) = 2、(bread, milk) = 3、(egg, milk) = 3（已用 Python 模擬核對）。</p>
+<div class="tip"><b>同 mutual friends 比較</b>兩題都係「兩兩配對」嘅 combinatorial pair。分別係：mutual friends 嘅 value 係 user（要 <code>groupByKey</code> 收集名單），呢題 value 係 1（要 <code>reduceByKey(add)</code> 數次數）。</div>
+</div></details>
+
+<h4>MB2 · Spark DataFrame + UDF（12 分）</h4>
+<p><code>df_orders</code> 有 <code>order_id (Integer)</code>、<code>customer_id (String)</code>、<code>amount (Double)</code>。(a) 寫 UDF <code>size_tier(amount)</code>：None 回傳 "Unknown"；≥ 500 "Large"；≥ 100 "Medium"；其他 "Small"。(b) 加 column <code>tier</code>，再計每個 tier 有幾多張單，按數量由多到少排。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>from pyspark.sql.functions import udf, col, count
+from pyspark.sql.types import StringType
+
+def size_tier(amount):
+    if amount is None:
+        return "Unknown"
+    if amount >= 500:
+        return "Large"
+    if amount >= 100:
+        return "Medium"
+    return "Small"
+
+tier_udf = udf(size_tier, StringType())
+
+df_tier = df_orders.withColumn("tier", tier_udf(col("amount")))
+result = (df_tier.groupBy("tier")
+                 .agg(count("*").alias("n_orders"))
+                 .orderBy(col("n_orders").desc()))
+result.show()</code></pre>
+<ul><li>先處理 <b>None</b>，否則 <code>None &gt;= 500</code> 會出錯。</li>
+<li>判斷次序由大到細：先 ≥ 500 再 ≥ 100，否則 600 會被當成 Medium。</li>
+<li>Return type 係 <code>StringType()</code>，寫錯會出 null。</li>
+<li>都可以寫 <code>df_tier.groupBy("tier").count().orderBy(col("count").desc())</code>。</li></ul>
+</div></details>
+
+<h4>MB3 · PageRank（18 分）</h4>
+<p>Graph：A → B, C；B → C；C → A；D → C。β = 0.8，r⁽⁰⁾ = 1/4。(a) 寫 stochastic matrix。(b) 計 iteration 1、2 同排序。(c) D 有咩特別？</p>
+<details class="ans"><summary>睇答案</summary><div>
+<div class="tw"><table><tr><th>to \ from</th><th class="c">A (d=2)</th><th class="c">B (d=1)</th><th class="c">C (d=1)</th><th class="c">D (d=1)</th></tr>
+<tr><th>A</th><td class="c">0</td><td class="c">0</td><td class="c">1</td><td class="c">0</td></tr>
+<tr><th>B</th><td class="c">1/2</td><td class="c">0</td><td class="c">0</td><td class="c">0</td></tr>
+<tr><th>C</th><td class="c">1/2</td><td class="c">1</td><td class="c">0</td><td class="c">1</td></tr>
+<tr><th>D</th><td class="c">0</td><td class="c">0</td><td class="c">0</td><td class="c">0</td></tr></table></div>
+<pre><code>Teleport = 0.2/4 = 0.05
+r_A = 0.8 r_C + 0.05
+r_B = 0.8 (r_A/2) + 0.05
+r_C = 0.8 (r_A/2 + r_B + r_D) + 0.05
+r_D = 0 + 0.05
+
+Iteration 1: A = 0.8(0.25)+0.05 = 0.25
+             B = 0.8(0.125)+0.05 = 0.15
+             C = 0.8(0.125+0.25+0.25)+0.05 = 0.55
+             D = 0.05
+Iteration 2: A = 0.8(0.55)+0.05 = 0.49
+             B = 0.8(0.125)+0.05 = 0.15
+             C = 0.8(0.125+0.15+0.05)+0.05 = 0.31
+             D = 0.05</code></pre>
+<p><b>排序：A (0.49) &gt; C (0.31) &gt; B (0.15) &gt; D (0.05)</b>，加埋 = 1 ✓。</p>
+<p>(c) D 冇 in-link，所以佢嘅 rank 永遠只係 teleport 嗰份 (1−β)/N = 0.05。冇 teleport 嘅話佢會係 0。</p>
+</div></details>
+
+<h4>MB4 · Levenshtein + Graph（20 分）</h4>
+<p>(a) Source X = “MAPS”（row），target Y = “SPAM”（column），填 6×6 表，再由 D[5][5] 倒退返 D[1][1]，寫每步操作。(b) Graph 有 edges A–B、A–C、B–C、C–D、D–E、E–F、D–F、F–G：計 diameter、⟨k⟩、density、每個 node 嘅 CC（degree 1 當 1）同平均 CC；邊個 node betweenness 最高？</p>
+<details class="ans"><summary>睇答案</summary><div>
+<div class="tw"><table>
+<tr><th class="c">idx</th><th class="c">0</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th></tr>
+<tr><th class="c">0</th><td></td><td class="c">‘’</td><td class="c">S</td><td class="c">P</td><td class="c">A</td><td class="c">M</td></tr>
+<tr><th class="c">1</th><td class="c">‘’</td><td class="c"><b>0</b></td><td class="c">1</td><td class="c">2</td><td class="c">3</td><td class="c">4</td></tr>
+<tr><th class="c">2</th><td class="c">M</td><td class="c"><b>1</b></td><td class="c">1</td><td class="c">2</td><td class="c">3</td><td class="c">3</td></tr>
+<tr><th class="c">3</th><td class="c">A</td><td class="c">2</td><td class="c"><b>2</b></td><td class="c">2</td><td class="c">2</td><td class="c">3</td></tr>
+<tr><th class="c">4</th><td class="c">P</td><td class="c">3</td><td class="c">3</td><td class="c"><b>2</b></td><td class="c">3</td><td class="c">3</td></tr>
+<tr><th class="c">5</th><td class="c">S</td><td class="c">4</td><td class="c">3</td><td class="c">3</td><td class="c"><b>3</b></td><td class="c"><b>4</b></td></tr></table></div>
+<p><b>距離 = 4</b>。Rows 係 source：↑ 上面 = delete X 字母，← 左邊 = insert Y 字母。</p>
+<div class="tw"><table><tr><th>Step</th><th>坐標</th><th>操作</th></tr>
+<tr><td>1</td><td>D[5][5] → D[5][4]</td><td>Insert ‘M’（3 + 1）</td></tr>
+<tr><td>2</td><td>D[5][4] → D[4][3]</td><td>Substitute ‘S’ → ‘A’（2 + 1）</td></tr>
+<tr><td>3</td><td>D[4][3] → D[3][2]</td><td>Match ‘P’（2 + 0）</td></tr>
+<tr><td>4</td><td>D[3][2] → D[2][1]</td><td>Substitute ‘A’ → ‘S’（1 + 1）</td></tr>
+<tr><td>5</td><td>D[2][1] → D[1][1]</td><td>Delete ‘M’（0 + 1）</td></tr></table></div>
+<p>順序睇：MAPS → APS → SPS → SPA → SPAM。D[5][5] 有三條路打和（diagonal、up、left 都係 4），寫一條就得，但最好註明有 tie。</p>
+<p><b>(b)</b> N = 7，E = 8。</p>
+<ul><li>Diameter = <b>4</b>（A 或 B 去 G：A–C–D–F–G）。</li>
+<li>⟨k⟩ = 2 × 8 / 7 = <b>16/7 ≈ 2.29</b>。</li>
+<li>Density = 8 / 21 ≈ <b>0.381</b>。</li>
+<li>CC：A = 1、B = 1、C = 1/3、D = 1/3（鄰居 C、E、F 之間只有 E–F）、E = 1、F = 1/3、G = 1（degree 1）。平均 = 5/7 ≈ <b>0.714</b>。</li>
+<li>Betweenness 最高：<b>D</b>（9，未 normalize），因為左邊三角形 {A,B,C} 去右邊 {E,F,G} 全部經 D；C 第二（8）。</li></ul>
+</div></details>
+
+<div class="tip"><b>仲想練多啲？</b>做 <a href="mock2.html">模擬卷 2</a>：9 條新長題，專練 PageRank、MapReduce + PySpark、Graph analytics。</div>
+
+<h2 id="formula">五、Formula sheet 同易錯位</h2>
+<div class="tw"><table class="stack"><tr><th>公式</th><th>寫法</th><th>易錯位</th></tr>
+<tr><td>PageRank</td><td>\(r_j = \sum_{i\to j} \beta \frac{r_i}{d_i} + \frac{1-\beta}{N}\)</td><td>d_i 係 <b>出發頁</b> 嘅 out-degree；teleport 係 (1−β)/N</td></tr>
+<tr><td>Google matrix</td><td>\(A = \beta M + (1-\beta)\left[\frac1N\right]_{N\times N}\)</td><td>M 嘅 column = from，row = to，每個 column 加埋 = 1</td></tr>
+<tr><td>TF-IDF（2025s1 版）</td><td>\(tf \times \left(\log_2\frac{N+1}{df+1} + 1\right)\)</td><td>有 <b>+1</b>，用 <b>log₂</b>；Quiz 2 練習卷係 ln 冇 +1，睇清楚當次 formula sheet</td></tr>
+<tr><td>Cosine</td><td>\(\dfrac{A\cdot B}{\lVert A\rVert\,\lVert B\rVert}\)</td><td>分母要開方</td></tr>
+<tr><td>User profile</td><td>\(\dfrac{\sum_i w_i \cdot \text{TFIDF}_i}{\sum_i |w_i|}\)</td><td>w_i 通常係 user rating − average rating</td></tr>
+<tr><td>Density</td><td>\(\dfrac{E}{N(N-1)/2}\)（無向）</td><td>有向圖分母係 N(N−1)</td></tr>
+<tr><td>平均 degree</td><td>\(2E/N\)</td><td>唔好漏咗 × 2</td></tr>
+<tr><td>Clustering coefficient</td><td>\(\dfrac{e_v}{k(k-1)/2}\)</td><td>e_v 係<b>鄰居之間</b>嘅 edge，唔計連去自己嗰啲</td></tr>
+<tr><td>Levenshtein</td><td>\(D[i][j] = \min(D_{\nwarrow} + [x_i \ne y_j],\ D_{\uparrow}+1,\ D_{\leftarrow}+1)\)</td><td>先寫低 row 係 source 定 target，決定 up/left 係 delete 定 insert</td></tr></table></div>

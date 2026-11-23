@@ -1,0 +1,205 @@
+<h1>P2 · L3–L4 Spark RDD、PySpark、Hive／Shark／Spark SQL、DataFrame</h1>
+<p class="sub">Code 題必考（RDD fill-in 或者 DataFrame + UDF）· 對應 L3、L4、T03、T04、Quiz 1、Quiz 2、2025s1 Q1b、2026s2 Q2b、Revision Qs</p>
+<ul class="toc">
+<li><a href="#exam">一、點考</a></li><li><a href="#spark">二、Spark 核心概念</a></li>
+<li><a href="#ops">三、RDD 操作速查</a></li><li><a href="#sql">四、Hive → Shark → Spark SQL、DataFrame</a></li>
+<li><a href="#past">五、Past paper 全答</a></li><li><a href="#fill">六、RDD 填充（11 題）</a></li>
+<li><a href="#dffill">七、DataFrame + UDF 填充（7 題）</a></li><li><a href="#mcq">八、MCQ</a></li>
+<li><a href="#short">九、短答題</a></li><li><a href="#faq">十、常見疑問</a></li></ul>
+
+<h2 id="exam">一、點考</h2>
+<div class="tw"><table><tr><th>卷</th><th>題目</th><th>分數</th></tr>
+<tr><td>2025s1 Q1(b)</td><td>用 PySpark RDD 寫 inverted index</td><td>10</td></tr>
+<tr><td>2025s1 Q3(c)</td><td>用 RDD 寫 PageRank power iteration（答案喺 <a href="P4-L7.html#code">P4</a>）</td><td>10</td></tr>
+<tr><td>2026s2 Q2(b) ／ Revision Qs</td><td>Mutual friends RDD fill-in：flatMap、groupByKey、list（答案喺 <a href="index.html#rq">總覽 RQ1</a>）</td><td>8</td></tr>
+<tr><td>Revision Qs</td><td>DataFrame：groupBy + sum + orderBy desc（答案喺 <a href="index.html#rq">總覽 RQ2</a>）</td><td>—</td></tr>
+<tr><td>Quiz 2 真卷 Q1(b)</td><td>回傳 struct 嘅 UDF：dict、StructType schema、udf()、flatten</td><td>12</td></tr></table></div>
+<div class="memo"><b>Code 題記住三樣</b>① 每個 element 變<b>多個</b>就用 <code>flatMap</code>，一個變一個用 <code>map</code> ② 數次數／加總用 <code>reduceByKey(add)</code>，要收集名單用 <code>groupByKey().mapValues(list)</code> ③ DataFrame：<code>groupBy().agg(F.alias())</code>、<code>orderBy(col().desc())</code>、UDF 一定要俾 return type。</div>
+
+<h2 id="spark">二、Spark 核心概念</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>RDD = 分散喺好多部機、唔可以改（immutable）嘅數據集合；壞咗靠 <b>lineage</b> 重新計。</li>
+<li><b>Transformation</b>（map、filter、flatMap、reduceByKey…）係 lazy，只係記低計劃；<b>Action</b>（collect、count、show、save）先真正執行。</li>
+<li>一變一用 <code>map</code>，一變多用 <code>flatMap</code>；加總用 <code>reduceByKey</code>，收集名單用 <code>groupByKey</code>。</li></ul></div>
+<div class="concept">
+<h3>Lazy evaluation：transformation 寫計劃，action 先開工</h3>
+<span class="lab">一句講完</span>
+<p>Transformation 唔會即刻計，只係喺 memory 起一個 operator DAG；去到 action 先由頭到尾一次過執行。</p>
+<span class="lab pic">圖解</span>
+<figure class="fig"><svg viewBox="0 0 330 250" role="img" aria-label="lazy evaluation" style="max-width:330px">
+<defs><marker id="s1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g font-size="12">
+<rect class="bx" x="20" y="10" width="200" height="30" rx="6"/><text x="30" y="30">textFile("data.txt")</text>
+<line class="ln" x1="120" y1="40" x2="120" y2="56" marker-end="url(#s1)"/>
+<rect class="bx" x="20" y="58" width="200" height="30" rx="6"/><text x="30" y="78">flatMap(split)</text>
+<line class="ln" x1="120" y1="88" x2="120" y2="104" marker-end="url(#s1)"/>
+<rect class="bx" x="20" y="106" width="200" height="30" rx="6"/><text x="30" y="126">map(w → (w, 1))</text>
+<line class="ln" x1="120" y1="136" x2="120" y2="152" marker-end="url(#s1)"/>
+<rect class="bx" x="20" y="154" width="200" height="30" rx="6"/><text x="30" y="174">reduceByKey(add)</text>
+<line class="ln" x1="120" y1="184" x2="120" y2="200" marker-end="url(#s1)"/>
+<rect class="ac" x="20" y="202" width="200" height="32" rx="6"/><text x="30" y="223" font-weight="700">collect()  ← action</text>
+<path d="M235 15 L 250 15 L 250 180 L 235 180" fill="none" stroke="#0B7472" stroke-width="2"/><text x="258" y="90" fill="#0B7472">只記低</text><text x="258" y="106" fill="#0B7472">計劃</text>
+<text x="230" y="223" fill="#BF4A14">真正執行</text></g>
+</svg><figcaption>首四步都係 transformation，去到 collect 先由頭計到尾</figcaption></figure>
+<span class="lab why">點解要 lazy</span>
+<p>等齊成個計劃先執行，Spark 可以合併步驟（pipelining）、避免計冇用嘅嘢；而且記低 lineage，有 partition 壞咗就照計劃重新計返嗰份。</p>
+<span class="lab trap">易錯</span>
+<p>MCQ 問「邊一行先真正執行」：搵第一個 action（collect、count、take、show、saveAsTextFile、write）。</p>
+</div>
+<div class="concept">
+<h3>map vs flatMap</h3>
+<span class="lab">一句講完</span>
+<p><code>map</code>：一個 element 變一個；<code>flatMap</code>：一個 element 變零至多個，再攤平成一個 RDD。</p>
+<span class="lab pic">圖解</span>
+<div class="grid2">
+<figure class="fig"><div class="mfh">map(lambda l: l.split())</div><div class="fb">"a b" → ["a", "b"]<br>"c" → ["c"]</div><div class="fb ac2">結果：[["a","b"], ["c"]]　2 個 element</div></figure>
+<figure class="fig"><div class="mfh">flatMap(lambda l: l.split())</div><div class="fb">"a b" → "a", "b"<br>"c" → "c"</div><div class="fb hl2">結果：["a", "b", "c"]　3 個 element</div></figure></div>
+<span class="lab eg">考試點揀</span>
+<p>Mutual friends 每個 user 產生好多個 pair、inverted index 每份文件產生好多個 (word, doc)、PageRank 每頁產生好多個貢獻：<b>全部用 flatMap</b>。</p>
+</div>
+<div class="concept">
+<h3>reduceByKey vs groupByKey</h3>
+<span class="lab">一句講完</span>
+<p>兩個都會按 key shuffle；<code>reduceByKey</code> 喺每個 partition 先合併一次再送，<code>groupByKey</code> 將所有 value 原封不動送過網絡。</p>
+<span class="lab pic">圖解</span>
+<div class="grid2">
+<figure class="fig"><div class="mfh">reduceByKey(add)</div><div class="fb">Partition 1：(a,1)(a,1)(b,1) → <b>(a,2)(b,1)</b></div><div class="fb">Partition 2：(a,1)(b,1) → <b>(a,1)(b,1)</b></div><div class="fb hl2">Shuffle 4 筆 → (a,3)(b,2)</div></figure>
+<figure class="fig"><div class="mfh">groupByKey()</div><div class="fb">Partition 1：(a,1)(a,1)(b,1)</div><div class="fb">Partition 2：(a,1)(b,1)</div><div class="fb ac2">Shuffle 5 筆 → a:[1,1,1] b:[1,1]</div></figure></div>
+<table class="stack"><tr><th>要做咩</th><th>用</th><th>例子</th></tr>
+<tr><td>加總、計數、搵最大</td><td><code>reduceByKey</code></td><td>word count、每個部門人數</td></tr>
+<tr><td>收集名單</td><td><code>groupByKey().mapValues(list)</code></td><td>mutual friends、inverted index</td></tr></table>
+</div>
+{{SEC:q1:spark}}
+
+<h2 id="ops">三、RDD 操作速查</h2>
+{{SEC:q1:ops}}
+
+<h2 id="sql">四、Hive → Shark → Spark SQL、DataFrame</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>Hive 將 SQL 變 <b>MapReduce</b>（慢）；Shark 用 <b>Spark</b> + memory（快）；Spark SQL 加 <b>DataFrame + Catalyst optimizer</b>。</li>
+<li>DataFrame = 有 schema 嘅分散式 table；schema 用 <code>StructType([StructField(name, type, nullable)])</code>。</li>
+<li>UDF = 自己寫嘅 Python function：<code>udf(f, ReturnType)</code>，return type 錯就出 null。</li></ul></div>
+<div class="concept">
+<h3>DataFrame + UDF 嘅資料流</h3>
+<span class="lab pic">圖解：Quiz 2 真卷 compliance UDF</span>
+<div class="mflow">
+<div class="mfcol"><div class="mfh">df_transactions</div><div class="fb">id | country | memo<br>1 | HK | "urgent bitcoin gift"</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">withColumn + UDF</div><div class="fb hl2">audit_result =<br>{risk_score: 80,<br>flagged_terms: [bitcoin, urgent, gift]}</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">select + "struct.field"</div><div class="fb ac2">audit_score = 80<br>triggered_keywords = [...]</div></div></div>
+<ol class="steps"><li>寫 Python function，回傳值嘅結構要同 schema 一樣（dict key = StructField 名）。</li>
+<li>用 <code>StructType</code> 寫 return type；list 用 <code>ArrayType(StringType())</code>。</li>
+<li><code>udf(function, schema)</code> 註冊。</li>
+<li><code>withColumn("新欄名", my_udf(col("a"), col("b")))</code>，column 次序要跟 function 參數。</li>
+<li>用 <code>col("struct.field").alias("新名")</code> 攤平。</li></ol>
+</div>
+{{SEC:q2:sparksql}}
+
+<h2 id="past">五、Past paper 全答</h2>
+<div class="practice"><span class="src">2025s1 Q1(b) · 10 分</span>
+<h4>用 PySpark RDD 建 inverted index</h4>
+<p>documents.txt 每行好似 <code>D1 || the cat sat on the mat</code>。輸出 <code>word: [doc ids]</code>，字按字母排，doc id 唔重複。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>from pyspark.sql import SparkSession
+ss = SparkSession.builder.appName("InvertedIndex").master("local[4]").getOrCreate()
+spark = ss.sparkContext
+
+lines = spark.textFile("documents.txt")
+docs = lines.map(lambda l: l.split("||")) \
+            .map(lambda p: (p[0].strip(), p[1].strip().split()))   # (doc_id, [words])
+
+index = docs.flatMap(lambda d: [(w, d[0]) for w in set(d[1])]) \
+            .groupByKey() \
+            .mapValues(lambda ids: sorted(set(ids))) \
+            .sortByKey()
+
+for word, ids in index.collect():
+    print(f"{word}: {ids}")</code></pre>
+<div class="tw"><table><tr><th>步驟</th><th>點解</th></tr>
+<tr><td><code>split("||")</code> + <code>strip()</code></td><td>分開 doc id 同內容，去走空格</td></tr>
+<tr><td><code>flatMap</code> + <code>set(d[1])</code></td><td>一份文件產生好多個 (word, doc)；set 令 D1 嘅兩個 “the” 只出一次</td></tr>
+<tr><td><code>groupByKey()</code></td><td>同一個字嘅 doc id 收埋一齊</td></tr>
+<tr><td><code>mapValues(sorted(set()))</code></td><td>轉做 list、去重、排序</td></tr>
+<tr><td><code>sortByKey()</code></td><td>字按字母排，同 expected output 一樣</td></tr></table></div>
+<p>都可以用 <code>reduceByKey(lambda a, b: a + b)</code>，map 嗰陣 value 寫 <code>[doc_id]</code>。已用 Python 模擬核對：the → ['D1', 'D3', 'D4']、brown → ['D2', 'D3', 'D4']。</p>
+</div></details></div>
+
+<div class="practice"><span class="src">Quiz 2 真卷 Q1(b) · 12 分</span>
+<h4>Compliance risk UDF：回傳 nested struct 再 flatten</h4>
+<p><code>df_transactions</code> 有 transaction_id、account_country、memo_text。Function 回傳 dict：risk_score（含 crypto／bitcoin／mixer +50；urgent／gift／loan 而且國家唔係 US +30；最多 100；memo 空就 −1）同 flagged_terms（搵到嘅字）。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>from pyspark.sql.functions import udf, col
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, ArrayType
+
+def evaluate_compliance_risk(memo, country):
+    if memo is None or str(memo).strip() == "":
+        return {"risk_score": -1, "flagged_terms": []}
+    memo_lower = str(memo).lower()
+    country_upper = str(country).upper() if country else ""
+    crypto_terms = {"crypto", "bitcoin", "mixer"}
+    urgency_terms = {"urgent", "gift", "loan"}
+    found_terms = [t for t in crypto_terms | urgency_terms if t in memo_lower]
+    score = 0
+    if any(t in memo_lower for t in crypto_terms):
+        score += 50
+    if any(t in memo_lower for t in urgency_terms) and country_upper != "US":
+        score += 30
+    score = min(score, 100)
+    return {"risk_score": score, "flagged_terms": found_terms}
+
+compliance_schema = StructType([
+    StructField("risk_score", IntegerType(), False),
+    StructField("flagged_terms", ArrayType(StringType()), False)
+])
+
+compliance_udf = udf(evaluate_compliance_risk, compliance_schema)
+
+df_temp = df_transactions.withColumn(
+    "audit_result", compliance_udf(col("memo_text"), col("account_country")))
+
+df_audited = df_temp.select(
+    col("transaction_id"), col("account_country"), col("memo_text"),
+    col("audit_result.risk_score").alias("audit_score"),
+    col("audit_result.flagged_terms").alias("triggered_keywords"))</code></pre>
+<ul><li>Dict 嘅 key 一定要同 StructField 名一樣，否則對唔上，出 null。</li>
+<li><code>ArrayType(StringType())</code> = 裝字串嘅 list。</li>
+<li>傳 column 嘅次序要跟 function 參數：先 memo，後 country。</li>
+<li>用 <code>"struct.field"</code> 攞出 nested 欄位，再 <code>.alias()</code> 改名。</li></ul>
+</div></details></div>
+
+<p>Practice Quiz 2 Q1（schema + 情感 UDF）：</p>
+{{Q2EXAM:0}}
+{{Q2EXAM:1}}
+
+<h2 id="fill">六、RDD 填充（11 題）</h2>
+<p>喺橙色格打答案，撳「對答案」。大小寫要啱（<code>flatMap</code> 唔係 <code>flatmap</code>），空格唔影響。</p>
+{{BLK:q1:sparkpractice:0-10}}
+
+<h2 id="dffill">七、DataFrame + UDF 填充（7 題）</h2>
+{{BLK:q2:q1practice:0-6}}
+
+<h2 id="mcq">八、MCQ</h2>
+<p>Set A：L3 Spark（Quiz 1 溫習包）；Set B：L4 Hive／Shark／Spark SQL（Quiz 2 溫習包）；Set C：新加期考題。</p>
+<div class="mcq" data-set="A"><script type="application/json">{{MCQ:q1:L3}}</script></div>
+<div class="mcq" data-set="B"><script type="application/json">{{MCQ:q2:L4}}</script></div>
+<div class="mcq" data-set="C"><script type="application/json">[
+{"t":"L3","s":"<pre><code>rdd.flatMap(map_to_pairs).groupByKey().mapValues(list)</code></pre><p>map_to_pairs returns a list of ((f1, f2), user). What is in the final RDD?</p>","o":["One record per user","One record per friend pair, with the list of users who have both as friends","A single number","A list of lists per user"],"a":1,"e":"flatMap 攤平所有 pair；groupByKey 按 pair group；list 將 iterable 轉 list → 每對朋友一筆，value = 共同朋友名單。"},
+{"t":"L3","s":"<p>Why must the friend pair be sorted inside the mapper of the mutual-friends job?</p>","o":["To make the output alphabetical only","So that (B, C) and (C, B) become the same key and are grouped together","Spark requires sorted keys","To reduce memory"],"a":1,"e":"唔排序就會有兩個唔同 key，shuffle 唔會 group 埋，答案會錯。"},
+{"t":"L4","s":"<p>Which code returns customers sorted by total spending, highest first?</p>","o":["df.groupBy('customer_id').sum('order_amount').orderBy('customer_id')","df.groupBy('customer_id').agg(sum('order_amount').alias('total_spent')).orderBy(col('total_spent').desc())","df.orderBy('order_amount').groupBy('customer_id')","df.select(sum('order_amount'))"],"a":1,"e":"先 groupBy 再 agg + alias，最後 orderBy desc。Revision Qs RQ2(a) 嘅答案。"},
+{"t":"L4","s":"<p>A UDF returns a Python dict {'score': 3, 'tags': ['a']}. What return type must be given?</p>","o":["StringType()","MapType only","StructType([StructField('score', IntegerType()), StructField('tags', ArrayType(StringType()))])","No type is needed"],"a":2,"e":"Nested object 要用 <b>StructType</b>，Spark 推斷唔到；field 名要同 dict key 一樣。"},
+{"t":"L4","s":"<p>After adding a struct column 'res' with fields score and tags, how do you make 'score' a top-level column called 'risk'?</p>","o":["col('res').alias('risk')","col('res.score').alias('risk')","col('score').alias('res')","res.withColumn('risk')"],"a":1,"e":"用 <b>'struct.field'</b> 攞 nested 欄位，再 alias。"},
+{"t":"L3","s":"<p>In the PySpark PageRank, why is links.mapValues(lambda _: 0.0) unioned into the contributions before reduceByKey?</p>","o":["To speed up the join","So pages with no in-links still appear in the result","To remove dead ends","To normalise the ranks"],"a":1,"e":"冇 in-link 嘅頁冇人送貢獻，reduceByKey 之後會消失；加 0 貢獻就保留得到佢，之後再加 teleport。"}
+]</script></div>
+
+<h2 id="short">九、短答題</h2>
+{{CONCEPT:q1:1,2,3,4,6}}
+{{CONCEPT:q2:1,2,3,9,10}}
+
+<h2 id="faq">十、常見疑問</h2>
+<dl class="faq">
+<dt>Q：RDD 同 DataFrame 有咩分別？</dt><dd>RDD 係最底層嘅分散式 collection，冇 schema，Spark 睇唔到你 lambda 入面做咩，所以冇得優化。DataFrame 有 schema（column 名同 type），Catalyst optimizer 可以自動優化，通常快啲。</dd>
+<dt>Q：SparkSession 同 SparkContext 點分？</dt><dd>SparkContext（題目通常叫 <code>spark</code> 或者 <code>sc</code>）係 RDD 嘅入口；SparkSession 係 DataFrame／SQL 嘅入口，入面包住一個 SparkContext（<code>ss.sparkContext</code>）。2025s1 卷寫 <code>spark = ss.sparkContext</code>，所以嗰張卷 <code>spark.textFile</code> 係 RDD。</dd>
+<dt>Q：groupByKey 同 reduceByKey 點揀？</dt><dd>要「收集名單」用 groupByKey；要「加總／計數／搵最大」用 reduceByKey，因為佢會先喺每個 partition 合併，shuffle 少好多。</dd>
+<dt>Q：col 係咪改名？</dt><dd>唔係。<code>col("x")</code> 係「揀出 x 呢個 column」；改名用 <code>.alias()</code>；withColumn 第一個參數係新 column 嘅名。</dd>
+<dt>Q：唔識 list comprehension 點算？</dt><dd>用普通 for loop 加 append 一樣得分，例如 mutual friends 嘅雙重 loop。</dd>
+<dt>Q：UDF return type 寫錯會點？</dt><dd>唔會報錯，個 column 會變 null。所以 schema／return type 一定要同實際回傳嘅嘢夾。</dd>
+</dl>

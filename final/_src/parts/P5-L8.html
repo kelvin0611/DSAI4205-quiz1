@@ -1,0 +1,374 @@
+<h1>P5 · L8 Graph Analytics</h1>
+<p class="sub">必考，約 6–10 分 · 對應 L8_Graph Analytics.pdf、2025s1 Q2c、2026s2 Q5、Revision Qs Graph Analytics</p>
+<ul class="toc">
+<li><a href="#exam">一、點考</a></li><li><a href="#notes">二、筆記：Graph 基本量度</a></li>
+<li><a href="#cent">三、Centrality：邊個 node 最重要</a></li><li><a href="#past">四、Past paper 全答</a></li>
+<li><a href="#drill">五、計數 drill</a></li><li><a href="#mcq">六、MCQ</a></li>
+<li><a href="#short">七、短答題</a></li><li><a href="#faq">八、常見疑問</a></li></ul>
+
+<h2 id="exam">一、點考</h2>
+<table class="stack"><tr><th>卷</th><th>題目</th><th>分數</th></tr>
+<tr><td>2025s1 Q2c</td><td>7 個 node 嘅圖：邊個 node degree／betweenness／closeness 最高（打和要全部寫）</td><td>6</td></tr>
+<tr><td>2026s2 Q5</td><td>(a) density (b) 4 個 node 嘅 CC (c) low-degree 點解可以重要 + 畫圖 (d) 認三幅 centrality 圖</td><td>10</td></tr>
+<tr><td>Revision Qs</td><td>同 2026s2 一樣嘅圖：diameter、平均 degree、density、CC + 平均 CC、認 centrality 圖</td><td>—</td></tr></table>
+<p>Graph 題全部都可以用同一個流程做，唔使驚：</p>
+<figure class="fig"><svg viewBox="0 0 320 400" role="img" aria-label="graph question steps" style="max-width:320px">
+<defs><marker id="g0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<rect class="hl" x="40" y="8" width="240" height="44" rx="8"/><text x="160" y="27" text-anchor="middle" font-weight="700">① 數 N 同 E</text><text x="160" y="44" text-anchor="middle" font-size="12">node 數、edge 數（逐條剔）</text>
+<line class="ln" x1="160" y1="52" x2="160" y2="72" marker-end="url(#g0)"/>
+<rect class="hl" x="40" y="75" width="240" height="44" rx="8"/><text x="160" y="94" text-anchor="middle" font-weight="700">② 鄰居表</text><text x="160" y="111" text-anchor="middle" font-size="12">每個 node：鄰居係邊個、degree 幾多</text>
+<line class="ln" x1="160" y1="119" x2="160" y2="139" marker-end="url(#g0)"/>
+<rect class="bx" x="40" y="142" width="240" height="44" rx="8"/><text x="160" y="161" text-anchor="middle" font-weight="700">③ ⟨k⟩ 同 density</text><text x="160" y="178" text-anchor="middle" font-size="12">2E/N；E ÷ N(N−1)/2</text>
+<line class="ln" x1="160" y1="186" x2="160" y2="206" marker-end="url(#g0)"/>
+<rect class="bx" x="40" y="209" width="240" height="44" rx="8"/><text x="160" y="228" text-anchor="middle" font-weight="700">④ Clustering coefficient</text><text x="160" y="245" text-anchor="middle" font-size="12">用鄰居表：鄰居之間有幾多條 edge</text>
+<line class="ln" x1="160" y1="253" x2="160" y2="273" marker-end="url(#g0)"/>
+<rect class="bx" x="40" y="276" width="240" height="44" rx="8"/><text x="160" y="295" text-anchor="middle" font-weight="700">⑤ Distance 表</text><text x="160" y="312" text-anchor="middle" font-size="12">每對 node 最短行幾步 → diameter、closeness</text>
+<line class="ln" x1="160" y1="320" x2="160" y2="340" marker-end="url(#g0)"/>
+<rect class="ac" x="40" y="343" width="240" height="44" rx="8"/><text x="160" y="362" text-anchor="middle" font-weight="700">⑥ Centrality</text><text x="160" y="379" text-anchor="middle" font-size="12">degree、closeness、betweenness</text>
+</svg><figcaption>由上至下做：後面嘅計數全部用到前面嘅表</figcaption></figure>
+
+<h2 id="notes">二、筆記：Graph 基本量度</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>Graph = node（點）+ edge（線）。無向圖嘅線冇方向，有向圖有箭咀。</li>
+<li>Degree = 鄰居數；平均 degree \(\langle k\rangle = 2E/N\)；density = 實際 edge ÷ 最多可以有幾多條。</li>
+<li>Distance = 最短路徑步數；diameter = 所有 distance 入面最大嗰個。</li>
+<li>Clustering coefficient = 你啲鄰居之間有幾多對都係朋友。</li></ul></div>
+
+<div class="concept">
+<h3>1. 無向圖同有向圖</h3>
+<span class="lab">一句講完</span>
+<p>無向圖（undirected）嘅關係係對稱嘅：i 連 j 即係 j 都連 i。有向圖（directed）有方向：A → B 唔代表 B → A。</p>
+<span class="lab pic">圖解</span>
+<div class="grid2">
+<figure class="fig"><svg viewBox="0 0 200 120" role="img" aria-label="undirected" style="max-width:200px">
+<g class="ln"><line x1="40" y1="30" x2="160" y2="30"/><line x1="40" y1="30" x2="100" y2="95"/><line x1="160" y1="30" x2="100" y2="95"/></g>
+<circle class="hl" cx="40" cy="30" r="15"/><text x="40" y="35" text-anchor="middle">A</text><circle class="hl" cx="160" cy="30" r="15"/><text x="160" y="35" text-anchor="middle">B</text><circle class="hl" cx="100" cy="95" r="15"/><text x="100" y="100" text-anchor="middle">C</text></svg>
+<figcaption>無向：Facebook 朋友、合著論文</figcaption></figure>
+<figure class="fig"><svg viewBox="0 0 200 120" role="img" aria-label="directed" style="max-width:200px">
+<defs><marker id="g1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g class="ln"><line x1="56" y1="30" x2="142" y2="30" marker-end="url(#g1)"/><line x1="152" y1="44" x2="110" y2="82" marker-end="url(#g1)"/><line x1="88" y1="82" x2="48" y2="44" marker-end="url(#g1)"/></g>
+<circle class="hl" cx="40" cy="30" r="15"/><text x="40" y="35" text-anchor="middle">A</text><circle class="hl" cx="160" cy="30" r="15"/><text x="160" y="35" text-anchor="middle">B</text><circle class="hl" cx="100" cy="95" r="15"/><text x="100" y="100" text-anchor="middle">C</text></svg>
+<figcaption>有向：Twitter follow、網頁 link</figcaption></figure></div>
+<span class="lab trap">易錯</span>
+<p>有向圖每個 node 有 <b>in-degree</b>（指入嚟）同 <b>out-degree</b>（指出去）兩個數；距離亦唔對稱，\(d(A,B)\) 可以唔等於 \(d(B,A)\)。</p>
+</div>
+
+<div class="concept">
+<h3>2. Degree 同平均 degree</h3>
+<span class="lab">一句講完</span>
+<p>Node i 嘅 degree \(k_i\) = 連住佢嘅 edge 數 = 佢有幾多個鄰居。</p>
+$$\langle k \rangle = \frac{1}{N}\sum_i k_i = \frac{2E}{N}$$
+<span class="lab why">點解係 2E</span>
+<p>每條 edge 有兩個端點，數 degree 嗰陣每條 edge 會被兩邊各數一次。所以全部 degree 加埋 = 2E。</p>
+<span class="lab pic">圖解（Revision Qs 嘅 graph G）</span>
+<figure class="fig"><svg viewBox="0 0 300 240" role="img" aria-label="graph G degrees" style="max-width:300px">
+<g class="ln"><line x1="40" y1="30" x2="150" y2="25"/><line x1="40" y1="30" x2="100" y2="95"/><line x1="150" y1="25" x2="100" y2="95"/><line x1="150" y1="25" x2="210" y2="95"/><line x1="100" y1="95" x2="210" y2="95"/><line x1="40" y1="135" x2="100" y2="95"/><line x1="100" y1="95" x2="100" y2="195"/><line x1="100" y1="195" x2="210" y2="195"/><line x1="210" y1="95" x2="210" y2="195"/></g>
+<circle class="hl" cx="40" cy="30" r="16"/><text x="40" y="35" text-anchor="middle">A</text><circle class="hl" cx="150" cy="25" r="16"/><text x="150" y="30" text-anchor="middle">E</text><circle class="ac" cx="100" cy="95" r="16"/><text x="100" y="100" text-anchor="middle">C</text><circle class="hl" cx="210" cy="95" r="16"/><text x="210" y="100" text-anchor="middle">F</text><circle class="hl" cx="40" cy="135" r="16"/><text x="40" y="140" text-anchor="middle">B</text><circle class="hl" cx="100" cy="195" r="16"/><text x="100" y="200" text-anchor="middle">D</text><circle class="hl" cx="210" cy="195" r="16"/><text x="210" y="200" text-anchor="middle">G</text>
+<g font-size="12" fill="#BF4A14"><text x="10" y="18">k=2</text><text x="170" y="15">k=3</text><text x="60" y="80">k=5</text><text x="232" y="90">k=3</text><text x="8" y="160">k=1</text><text x="72" y="225">k=2</text><text x="232" y="215">k=2</text></g>
+</svg><figcaption>橙色數字係 degree：2+1+5+2+3+3+2 = 18 = 2 × 9 條 edge</figcaption></figure>
+<span class="lab eg">例子</span>
+<p>N = 7，E = 9：\(\langle k\rangle = 2 \times 9 / 7 = 18/7 \approx 2.571\)。</p>
+<span class="lab trap">易錯</span>
+<p>寫 \(E/N\) 係錯嘅（漏咗 ×2）。可以用「degree 加埋 = 2E」嚟檢查自己有冇數漏 edge。</p>
+</div>
+
+<div class="concept">
+<h3>3. Density：個 graph 有幾密</h3>
+<span class="lab">一句講完</span>
+<p>Density = 實際有幾多條 edge ÷ 最多可以有幾多條 edge。</p>
+$$\text{Undirected: } \frac{E}{N(N-1)/2} = \frac{\langle k\rangle}{N-1} \qquad\qquad \text{Directed: } \frac{E}{N(N-1)}$$
+<span class="lab why">點解分母係 \(N(N-1)/2\)</span>
+<p>N 個 node 兩兩之間最多連一條線：第一個 node 可以連 N−1 個，第二個再連 N−2 個…… 加埋 \(= N(N-1)/2\)。有向圖每對可以有兩條（A→B 同 B→A），所以唔使除 2。</p>
+<span class="lab pic">圖解</span>
+<div class="grid2">
+<figure class="fig"><svg viewBox="0 0 160 130" role="img" aria-label="complete graph" style="max-width:160px">
+<g class="ln"><line x1="30" y1="20" x2="130" y2="20"/><line x1="30" y1="20" x2="30" y2="110"/><line x1="30" y1="20" x2="130" y2="110"/><line x1="130" y1="20" x2="30" y2="110"/><line x1="130" y1="20" x2="130" y2="110"/><line x1="30" y1="110" x2="130" y2="110"/></g>
+<g><circle class="hl" cx="30" cy="20" r="10"/><circle class="hl" cx="130" cy="20" r="10"/><circle class="hl" cx="30" cy="110" r="10"/><circle class="hl" cx="130" cy="110" r="10"/></g></svg>
+<figcaption>4 個 node 6 條線：density = 6/6 = 1</figcaption></figure>
+<figure class="fig"><svg viewBox="0 0 160 130" role="img" aria-label="sparse graph" style="max-width:160px">
+<g class="ln"><line x1="30" y1="20" x2="130" y2="20"/><line x1="130" y1="20" x2="130" y2="110"/></g>
+<g><circle class="hl" cx="30" cy="20" r="10"/><circle class="hl" cx="130" cy="20" r="10"/><circle class="hl" cx="30" cy="110" r="10"/><circle class="hl" cx="130" cy="110" r="10"/></g></svg>
+<figcaption>4 個 node 2 條線：density = 2/6 ≈ 0.33</figcaption></figure></div>
+<span class="lab eg">例子</span>
+<p>Graph G：\(\dfrac{9}{7 \times 6 / 2} = \dfrac{9}{21} \approx 0.429\)。</p>
+<p>真實網絡通常好 <b>sparse</b>：MSN 有 1.8 億人，但平均 degree 只係 14.4，density 細到接近 0。</p>
+</div>
+
+<div class="concept">
+<h3>4. Distance、diameter、平均路徑長度</h3>
+<span class="lab">一句講完</span>
+<p>Distance \(d(i,j)\) = 由 i 去 j <b>最短</b>要行幾多條 edge；diameter = 所有 node 對之間 distance 嘅<b>最大值</b>。</p>
+$$\text{diameter} = \max_{i,j}\, d(i,j) \qquad\qquad \bar{\ell} = \frac{1}{N(N-1)}\sum_{i \ne j} d(i,j)$$
+<span class="lab why">有咩用</span>
+<p>平均路徑短，資訊傳得快：互聯網傳數據快啲、電網損耗少啲。MSN 平均路徑只係 6.6，即係「六度分隔」嘅 small world。</p>
+<span class="lab pic">圖解：graph G 入面最遠嘅一對</span>
+<figure class="fig"><svg viewBox="0 0 300 240" role="img" aria-label="diameter path" style="max-width:300px">
+<g class="ln"><line x1="40" y1="30" x2="150" y2="25"/><line x1="40" y1="30" x2="100" y2="95"/><line x1="150" y1="25" x2="100" y2="95"/><line x1="150" y1="25" x2="210" y2="95"/><line x1="100" y1="95" x2="210" y2="95"/><line x1="210" y1="95" x2="210" y2="195"/></g>
+<g stroke="#BF4A14" stroke-width="4" fill="none"><line x1="40" y1="135" x2="100" y2="95"/><line x1="100" y1="95" x2="100" y2="195"/><line x1="100" y1="195" x2="210" y2="195"/></g>
+<circle class="hl" cx="40" cy="30" r="16"/><text x="40" y="35" text-anchor="middle">A</text><circle class="hl" cx="150" cy="25" r="16"/><text x="150" y="30" text-anchor="middle">E</text><circle class="hl" cx="100" cy="95" r="16"/><text x="100" y="100" text-anchor="middle">C</text><circle class="hl" cx="210" cy="95" r="16"/><text x="210" y="100" text-anchor="middle">F</text><circle class="ac" cx="40" cy="135" r="16"/><text x="40" y="140" text-anchor="middle">B</text><circle class="hl" cx="100" cy="195" r="16"/><text x="100" y="200" text-anchor="middle">D</text><circle class="ac" cx="210" cy="195" r="16"/><text x="210" y="200" text-anchor="middle">G</text>
+</svg><figcaption>B → G 最短要行 3 步（B–C–D–G），冇一對要行 4 步，所以 diameter = 3</figcaption></figure>
+<span class="lab eg">例子：搵 diameter 嘅步驟</span>
+<ol class="steps"><li>搵「最邊」嘅 node（degree 細、喺角落），例如 B、G、A。</li>
+<li>計佢哋之間嘅最短路徑：B→G = 3、A→G = 3（A–C–D–G 或者 A–E–F–G）、A→B = 2。</li>
+<li>確定冇一對大過 3 → diameter = 3。</li></ol>
+<span class="lab trap">易錯</span>
+<p>Diameter 唔係「最長嘅路徑」（可以兜好多圈），而係「<b>最短</b>路徑入面最長嗰個」。每一對都要用最短行法。</p>
+</div>
+
+<div class="concept">
+<h3>5. Clustering coefficient（CC）：你啲朋友係咪都係朋友</h3>
+<span class="lab">一句講完</span>
+<p>Node i 嘅 CC = 佢嘅鄰居之間<b>實際</b>有幾多條 edge ÷ 鄰居之間<b>最多</b>可以有幾多條。</p>
+$$C_i = \frac{e_i}{k_i(k_i-1)/2} = \frac{2e_i}{k_i(k_i-1)} \qquad\qquad \bar{C} = \frac{1}{N}\sum_i C_i$$
+<span class="lab why">點解要咁計</span>
+<p>社交網絡入面，「朋友嘅朋友都係朋友」好常見。CC 量度呢個「圍埋一齊」嘅程度：1 = 鄰居全部互相認識，0 = 鄰居之間完全唔認識。MSN 嘅平均 CC 係 0.11。</p>
+<span class="lab pic">圖解：計 E 嘅 CC</span>
+<figure class="fig"><svg viewBox="0 0 300 240" role="img" aria-label="clustering coefficient of E" style="max-width:300px">
+<g class="ln" opacity=".35"><line x1="40" y1="135" x2="100" y2="95"/><line x1="100" y1="95" x2="100" y2="195"/><line x1="100" y1="195" x2="210" y2="195"/><line x1="210" y1="95" x2="210" y2="195"/></g>
+<g stroke="#0B7472" stroke-width="2.5"><line x1="150" y1="25" x2="40" y2="30"/><line x1="150" y1="25" x2="100" y2="95"/><line x1="150" y1="25" x2="210" y2="95"/></g>
+<g stroke="#BF4A14" stroke-width="4"><line x1="40" y1="30" x2="100" y2="95"/><line x1="100" y1="95" x2="210" y2="95"/></g>
+<circle class="hl" cx="40" cy="30" r="16"/><text x="40" y="35" text-anchor="middle">A</text><circle class="ac" cx="150" cy="25" r="18"/><text x="150" y="30" text-anchor="middle" font-weight="700">E</text><circle class="hl" cx="100" cy="95" r="16"/><text x="100" y="100" text-anchor="middle">C</text><circle class="hl" cx="210" cy="95" r="16"/><text x="210" y="100" text-anchor="middle">F</text><circle class="bx" cx="40" cy="135" r="14"/><text x="40" y="140" text-anchor="middle" font-size="12">B</text><circle class="bx" cx="100" cy="195" r="14"/><text x="100" y="200" text-anchor="middle" font-size="12">D</text><circle class="bx" cx="210" cy="195" r="14"/><text x="210" y="200" text-anchor="middle" font-size="12">G</text>
+</svg><figcaption>綠線：E 嘅 3 個鄰居（A、C、F）；橙線：鄰居之間實際有 2 條（A–C、C–F）；A–F 冇連</figcaption></figure>
+<span class="lab eg">例子：逐步計</span>
+<ol class="steps"><li>E 嘅鄰居：A、C、F，所以 \(k_E = 3\)。</li>
+<li>鄰居之間最多可以有 \(3 \times 2 / 2 = 3\) 條：A–C、A–F、C–F。</li>
+<li>實際有 A–C、C–F 兩條，\(e_E = 2\)。</li>
+<li>\(C_E = 2/3 \approx 0.667\)。</li></ol>
+<span class="lab trap">易錯</span>
+<ul><li>\(e_i\) 只數<b>鄰居同鄰居之間</b>嘅 edge，唔好數連去自己嗰啲。</li>
+<li>Degree 1 嘅 node 分母 = 0，公式冇定義。Revision Qs 寫明當 1；networkx 預設當 0。考試<b>跟題目假設</b>，冇講就寫明你點假設。</li></ul>
+</div>
+
+<div class="concept">
+<h3>6. Connected component</h3>
+<span class="lab">一句講完</span>
+<p>Connected component = 入面任何兩個 node 都有路連住嘅一組 node；最大嗰組叫 <b>giant component</b>。</p>
+<span class="lab pic">流程圖：用 BFS 搵晒所有 component</span>
+<figure class="fig"><svg viewBox="0 0 300 250" role="img" aria-label="BFS components" style="max-width:300px">
+<defs><marker id="g2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<rect class="hl" x="50" y="10" width="200" height="36" rx="8"/><text x="150" y="33" text-anchor="middle" font-size="13">揀一個未到過嘅 node</text>
+<line class="ln" x1="150" y1="46" x2="150" y2="66" marker-end="url(#g2)"/>
+<rect class="bx" x="50" y="69" width="200" height="36" rx="8"/><text x="150" y="92" text-anchor="middle" font-size="13">由佢做 BFS，標記到過嘅 node</text>
+<line class="ln" x1="150" y1="105" x2="150" y2="125" marker-end="url(#g2)"/>
+<rect class="bx" x="50" y="128" width="200" height="36" rx="8"/><text x="150" y="151" text-anchor="middle" font-size="13">呢批 node = 一個 component</text>
+<line class="ln" x1="150" y1="164" x2="150" y2="184" marker-end="url(#g2)"/>
+<polygon class="ac" points="150,187 240,212 150,237 60,212"/><text x="150" y="216" text-anchor="middle" font-size="12">仲有未到過嘅 node？</text>
+<path class="ln" d="M240 212 L 280 212 L 280 28 L 252 28" marker-end="url(#g2)"/><text x="248" y="204" font-size="12">有</text>
+</svg><figcaption>冇未到過嘅 node 就完成；只得一個 component 即係個 graph 係 connected</figcaption></figure>
+</div>
+<h2 id="cent">三、Centrality：邊個 node 最重要</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li><b>Degree</b>：朋友最多。<b>Closeness</b>：去邊都近。<b>Betweenness</b>：人哋要經你先搵到對方（橋樑）。<b>Eigenvector</b>：你嘅朋友都重要。</li>
+<li>唔同 centrality 可以揀出唔同嘅「最重要」node，冇一種係最好。</li>
+<li>認圖：最極端（一兩粒好大）= betweenness；最平均 = closeness；中間 = degree。</li></ul></div>
+<table class="stack"><tr><th>Centrality</th><th>問咩問題</th><th>高分嘅 node</th></tr>
+<tr><td><b>Degree</b></td><td>你有幾多朋友？</td><td>Hub、朋友最多</td></tr>
+<tr><td><b>Closeness</b></td><td>你去其他人平均有幾近？</td><td>喺圖中間</td></tr>
+<tr><td><b>Harmonic</b></td><td>同 closeness 一樣，但圖唔連通都用得</td><td>近又多朋友</td></tr>
+<tr><td><b>Betweenness</b></td><td>幾多對人要經過你？</td><td>橋樑、broker</td></tr>
+<tr><td>Eigenvector</td><td>你嘅朋友重唔重要？</td><td>連住重要人物</td></tr></table>
+
+<div class="concept">
+<h3>1. Degree centrality</h3>
+<span class="lab">一句講完</span>
+<p>鄰居越多越重要：\(C_{deg}(i) = k_i\)，normalize 就係 \(k_i/(N-1)\)。</p>
+<span class="lab why">幾時唔準</span>
+<p>通常夠用（例如電影主角同最多人講嘢），但唔一定：Twitter 最多 contact 嘅帳號往往係 spam；Wikipedia link 最多嘅頁通常係參考列表。</p>
+</div>
+
+<div class="concept">
+<h3>2. Closeness centrality</h3>
+<span class="lab">一句講完</span>
+<p>去其他所有 node 嘅距離加埋越細，你就越「中心」。</p>
+$$C_{clos}(x) = \frac{1}{\sum_y d(y,x)} \qquad \text{normalised: } \frac{N-1}{\sum_y d(y,x)}$$
+<span class="lab pic">圖解（lecture slide 38）</span>
+<figure class="fig"><svg viewBox="0 0 330 110" role="img" aria-label="closeness path" style="max-width:330px">
+<g class="ln"><line x1="35" y1="45" x2="295" y2="45"/></g>
+<circle class="bx" cx="35" cy="45" r="18"/><circle class="hl" cx="100" cy="45" r="20"/><circle class="ac" cx="165" cy="45" r="22"/><circle class="hl" cx="230" cy="45" r="20"/><circle class="bx" cx="295" cy="45" r="18"/>
+<g text-anchor="middle"><text x="35" y="50">A</text><text x="100" y="50">B</text><text x="165" y="50">C</text><text x="230" y="50">D</text><text x="295" y="50">E</text>
+<g font-size="12"><text x="35" y="88">Σd=10</text><text x="100" y="88">Σd=7</text><text x="165" y="88">Σd=6</text><text x="230" y="88">Σd=7</text><text x="295" y="88">Σd=10</text>
+<text x="35" y="104">0.10</text><text x="100" y="104">0.14</text><text x="165" y="104">0.167</text><text x="230" y="104">0.14</text><text x="295" y="104">0.10</text></g></g>
+</svg><figcaption>C 喺中間，去邊都近，Σd 最細，closeness 最高</figcaption></figure>
+<span class="lab eg">例子：B 點計</span>
+<ol class="steps"><li>B 去 A = 1、去 C = 1、去 D = 2、去 E = 3。</li><li>加埋 Σd = 7。</li><li>\(C_{clos}(B) = 1/7 \approx 0.14\)。</li></ol>
+<span class="lab trap">易錯：圖唔連通</span>
+<p>有 node 去唔到，\(d = \infty\)，Σd = ∞，所有 node 都變 0。所以先有 <b>harmonic centrality</b>：</p>
+$$C_{harm}(x) = \sum_{y \ne x} \frac{1}{d(y,x)}$$
+<p>去唔到嘅 node \(1/\infty = 0\)，唔會搞到成條數變 0。例：鄰居 1 個、距離 2 嘅 2 個、距離 3、4 各 1 個：\(1 + \tfrac12 \times 2 + \tfrac13 + \tfrac14 \approx 2.58\)。</p>
+</div>
+
+<div class="concept">
+<h3>3. Betweenness centrality</h3>
+<span class="lab">一句講完</span>
+<p>數吓有幾多對 node 之間嘅最短路徑要<b>經過</b>你。</p>
+$$C_{bet}(v) = \sum_{s \ne v \ne t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
+<p>\(\sigma_{st}\) = s 同 t 之間有幾多條最短路徑；\(\sigma_{st}(v)\) = 其中幾多條經 v。無向圖每對只計一次。</p>
+<span class="lab why">有咩用</span>
+<p>量度「broker」角色：兩群人之間要經你傳訊息，你一走，網絡就斷開（single point of failure）。呢種 node 嘅 degree 可以好低。</p>
+<span class="lab pic">圖解：diamond（lecture slide 49）</span>
+<figure class="fig"><svg viewBox="0 0 340 185" role="img" aria-label="betweenness diamond" style="max-width:340px">
+<g class="ln" opacity=".4"><line x1="210" y1="25" x2="300" y2="85"/><line x1="210" y1="145" x2="300" y2="85"/></g>
+<g stroke="#BF4A14" stroke-width="4"><line x1="40" y1="85" x2="120" y2="85"/><line x1="120" y1="85" x2="210" y2="25"/></g>
+<g stroke="#0B7472" stroke-width="4" stroke-dasharray="7 4"><line x1="120" y1="85" x2="210" y2="145"/></g>
+<circle class="bx" cx="40" cy="85" r="16"/><text x="40" y="90" text-anchor="middle">A</text>
+<circle class="ac" cx="120" cy="85" r="18"/><text x="120" y="90" text-anchor="middle" font-weight="700">B</text>
+<circle class="bx" cx="210" cy="25" r="16"/><text x="210" y="30" text-anchor="middle">C</text>
+<circle class="bx" cx="210" cy="145" r="16"/><text x="210" y="150" text-anchor="middle">D</text>
+<circle class="bx" cx="300" cy="85" r="16"/><text x="300" y="90" text-anchor="middle">E</text>
+<text x="60" y="125" font-size="12">A→C 一定經 B：B +1</text><text x="150" y="175" font-size="12">C→D 有兩條（經 B 或 E）：各 +0.5</text>
+</svg><figcaption>B = 3.5（A–C 1、A–D 1、A–E 1、C–D 0.5）；C = D = 1；E = 0.5；A = 0</figcaption></figure>
+<span class="lab eg">例子：逐對數 C 嘅 betweenness</span>
+<table><tr><th>Pair</th><th>最短路徑</th><th>經 C？</th><th class="c">C 得分</th></tr>
+<tr><td>A–E</td><td>A-B-C-E、A-B-D-E（2 條）</td><td>1 條經 C</td><td class="c">0.5</td></tr>
+<tr><td>B–E</td><td>B-C-E、B-D-E（2 條）</td><td>1 條經 C</td><td class="c">0.5</td></tr>
+<tr><td>其他對</td><td>—</td><td>唔經 C</td><td class="c">0</td></tr>
+<tr><th colspan="3">合計</th><td class="c"><b>1</b></td></tr></table>
+<p>快捷：star（中間連住 n 個 leaf）中心 = \(n(n-1)/2\)，例如 5 個 leaf = 10。</p>
+<span class="lab trap">易錯</span>
+<p>有幾條一樣短嘅路徑時要<b>攤分</b>（partial credit）；唔好當成全部經你。</p>
+</div>
+
+<div class="concept">
+<h3>4. Eigenvector centrality</h3>
+<span class="lab">一句講完</span>
+<p>你嘅分數 = 你鄰居分數加埋。連住重要人物，你都重要。</p>
+$$c \leftarrow A\,c, \qquad c \leftarrow \frac{c}{\lVert c \rVert_2}$$
+<span class="lab eg">例子</span>
+<p>A–B、A–C、A–D、C–D，由 \(c^{(0)} = [1,1,1,1]\) 開始：A = B+C+D = 3、B = A = 1、C = A+D = 2、D = A+C = 2；除 \(\sqrt{18}\) 得 [0.707, 0.236, 0.471, 0.471]。繼續 iterate 收斂去 [0.612, 0.282, 0.523, 0.523]。PageRank 同 Katz 都係佢嘅變種。</p>
+</div>
+
+<div class="concept">
+<h3>5. 認 centrality 圖（必考位）</h3>
+<span class="lab pic">示意圖</span>
+<figure class="fig"><svg viewBox="0 0 330 130" role="img" aria-label="centrality patterns" style="max-width:330px">
+<g><circle class="ac" cx="40" cy="45" r="16"/><circle class="hl" cx="75" cy="35" r="6"/><circle class="hl" cx="70" cy="70" r="8"/><circle class="hl" cx="20" cy="80" r="6"/><circle class="hl" cx="45" cy="90" r="10"/>
+<circle class="ac" cx="150" cy="45" r="24"/><circle class="hl" cx="190" cy="40" r="4"/><circle class="hl" cx="185" cy="75" r="4"/><circle class="hl" cx="130" cy="88" r="4"/><circle class="hl" cx="160" cy="92" r="4"/>
+<circle class="ac" cx="265" cy="45" r="13"/><circle class="hl" cx="295" cy="40" r="11"/><circle class="hl" cx="290" cy="78" r="11"/><circle class="hl" cx="245" cy="82" r="10"/><circle class="hl" cx="270" cy="92" r="9"/></g>
+<g text-anchor="middle" font-size="12"><text x="50" y="122">Degree：中等差距</text><text x="160" y="122">Betweenness：極端</text><text x="270" y="122">Closeness：好平均</text></g>
+</svg><figcaption>按 node 大細嘅「差距」嚟認</figcaption></figure>
+<ol class="steps"><li>先搵<b>最極端</b>嗰幅：一兩粒特別大，其他差唔多全部好細 → <b>betweenness</b>。</li>
+<li>再搵<b>最平均</b>嗰幅：大部分 node 都中等大 → <b>closeness</b>（數值範圍窄）。</li>
+<li>剩低嗰幅 → <b>degree</b>。</li>
+<li>最後按題目要求嘅<b>次序</b>寫答案。2026s2／Revision Qs：Degree = (i)、Closeness = (iii)、Betweenness = (ii)。</li></ol>
+<span class="lab trap">易錯</span>
+<p>題目次序係「Degree, Closeness, Betweenness」，唔係 (i)(ii)(iii) 次序。答 <b>(i), (iii), (ii)</b>。</p>
+</div>
+<h2 id="past">四、Past paper 全答</h2>
+<h3>2026s2 Q5 ／ Revision Qs（graph G）</h3>
+<p>Edges：A–C、A–E、C–E、E–F、C–F、B–C、C–D、D–G、F–G。N = 7、E = 9。</p>
+<details class="ans"><summary>睇完整答案（diameter、⟨k⟩、density、CC、認圖）</summary><div>
+<div class="tw"><table><tr><th>Node</th><th>鄰居</th><th>k</th><th>鄰居之間嘅 edge</th><th>CC</th></tr>
+<tr><td>A</td><td>C, E</td><td>2</td><td>C–E</td><td>1/1 = 1</td></tr>
+<tr><td>B</td><td>C</td><td>1</td><td>—</td><td>1（題目假設）</td></tr>
+<tr><td>C</td><td>A, B, D, E, F</td><td>5</td><td>A–E、E–F</td><td>2/10 = 0.2</td></tr>
+<tr><td>D</td><td>C, G</td><td>2</td><td>冇</td><td>0</td></tr>
+<tr><td>E</td><td>A, C, F</td><td>3</td><td>A–C、C–F</td><td>2/3 ≈ 0.667</td></tr>
+<tr><td>F</td><td>C, E, G</td><td>3</td><td>C–E</td><td>1/3 ≈ 0.333</td></tr>
+<tr><td>G</td><td>D, F</td><td>2</td><td>冇</td><td>0</td></tr></table></div>
+<ul><li>Diameter = <b>3</b>（例如 B → G：B–C–D–G）。Average path length = 1.667。</li>
+<li>⟨k⟩ = 2 × 9 / 7 = <b>2.571</b>；Density = 9 / 21 = <b>0.429</b>。</li>
+<li>平均 CC = (1 + 1 + 0.2 + 0 + 0.667 + 0.333 + 0) / 7 = <b>0.457</b>。如果 B 當 0，就係 2.2/7 = 0.314。</li>
+<li>2026s2 只問 cc(C) = 0.2、cc(D) = 0、cc(E) = 0.667、cc(F) = 0.333。</li>
+<li>認圖：Degree = (i)、Closeness = (iii)、Betweenness = (ii)。</li></ul>
+<p><b>(c) Low-degree 點解可以重要</b>：如果一個 node 係連接兩個群組嘅<b>唯一橋樑</b>，佢 degree 可能只係 2，但兩邊之間所有最短路徑都要經佢，betweenness 好高；佢一斷，網絡就分裂。例子：兩個三角形 {A,B,C}、{E,F,G} 由 D 連住（C–D–E），D degree = 2，但 betweenness 最高。</p>
+<svg viewBox="0 0 360 120" role="img" aria-label="bridge node" style="max-width:360px">
+<g class="ln"><line x1="40" y1="30" x2="40" y2="90"/><line x1="40" y1="30" x2="110" y2="60"/><line x1="40" y1="90" x2="110" y2="60"/><line x1="110" y1="60" x2="180" y2="60"/><line x1="180" y1="60" x2="250" y2="60"/><line x1="250" y1="60" x2="320" y2="30"/><line x1="250" y1="60" x2="320" y2="90"/><line x1="320" y1="30" x2="320" y2="90"/></g>
+<g><circle class="bx" cx="40" cy="30" r="13"/><circle class="bx" cx="40" cy="90" r="13"/><circle class="bx" cx="110" cy="60" r="13"/><circle class="ac" cx="180" cy="60" r="15"/><circle class="bx" cx="250" cy="60" r="13"/><circle class="bx" cx="320" cy="30" r="13"/><circle class="bx" cx="320" cy="90" r="13"/></g>
+<text x="40" y="35" text-anchor="middle" font-size="12">A</text><text x="40" y="95" text-anchor="middle" font-size="12">B</text><text x="110" y="65" text-anchor="middle" font-size="12">C</text><text x="180" y="65" text-anchor="middle" font-size="12">D</text><text x="250" y="65" text-anchor="middle" font-size="12">E</text><text x="320" y="35" text-anchor="middle" font-size="12">F</text><text x="320" y="95" text-anchor="middle" font-size="12">G</text>
+<text x="180" y="105" text-anchor="middle" font-size="12">D：degree 2，betweenness 最高</text>
+</svg>
+</div></details>
+
+<h3>2025s1 Q2c（6 分）</h3>
+<p>Edges：1–2、1–3、2–3、3–4、2–5、5–6、5–7。打和要全部寫。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<div class="tw"><table><tr><th>Node</th><th>Degree</th><th>Σd</th><th>Closeness 1/Σd</th><th>Betweenness</th></tr>
+<tr><td>1</td><td>2</td><td>12</td><td>0.083</td><td>0</td></tr>
+<tr><td>2</td><td><b>3</b></td><td><b>9</b></td><td><b>0.111</b></td><td><b>9</b></td></tr>
+<tr><td>3</td><td><b>3</b></td><td>11</td><td>0.091</td><td>5</td></tr>
+<tr><td>4</td><td>1</td><td>16</td><td>0.063</td><td>0</td></tr>
+<tr><td>5</td><td><b>3</b></td><td>10</td><td>0.100</td><td><b>9</b></td></tr>
+<tr><td>6</td><td>1</td><td>15</td><td>0.067</td><td>0</td></tr>
+<tr><td>7</td><td>1</td><td>15</td><td>0.067</td><td>0</td></tr></table></div>
+<ul><li>(i) Degree 最高：<b>2, 3, 5</b>（都係 3）。</li>
+<li>(ii) Betweenness 最高：<b>2 同 5</b>（都係 9）。例如 5 嘅 9 分：{6,7} 去 {1,2,3,4} 嘅 8 對 + 6–7 一對 = 9；2 嘅 9 分：{1,3,4} 去 {5,6,7} 嘅 9 對。</li>
+<li>(iii) Closeness 最高：<b>2</b>（Σd = 9 最細）。</li></ul>
+<p>已用 networkx 核對。</p>
+</div></details>
+
+<h2 id="drill">五、計數 drill</h2>
+<p class="q">Drill 1 · Diamond（lecture slide 49）</p>
+<p>A–B、B–C、B–D、C–E、D–E。計每個 node 嘅 degree、closeness（1/Σd）、betweenness，同 density。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<div class="tw"><table><tr><th>Node</th><th>Degree</th><th>Σd</th><th>Closeness</th><th>Betweenness</th></tr>
+<tr><td>A</td><td>1</td><td>8</td><td>0.125</td><td>0</td></tr>
+<tr><td>B</td><td>3</td><td>5</td><td>0.2</td><td>3.5</td></tr>
+<tr><td>C</td><td>2</td><td>6</td><td>0.167</td><td>1</td></tr>
+<tr><td>D</td><td>2</td><td>6</td><td>0.167</td><td>1</td></tr>
+<tr><td>E</td><td>2</td><td>7</td><td>0.143</td><td>0.5</td></tr></table></div>
+<p>Density = 5 / 10 = 0.5；diameter = 3（A → E）。</p>
+</div></details>
+
+<p class="q">Drill 2 · Directed graph</p>
+<p>A → B、B → C、C → A、C → D。(a) Density (b) d(A, D) 同 d(D, A) (c) 呢個圖係咪 strongly connected？</p>
+<details class="ans"><summary>睇答案</summary><div>
+<ul><li>(a) 有向圖：E / [N(N−1)] = 4 / 12 = <b>0.333</b>。</li>
+<li>(b) d(A, D) = 3（A→B→C→D）；d(D, A) = <b>∞</b>，因為 D 冇 out-link。Distance 唔對稱。</li>
+<li>(c) <b>唔係</b>，D 去唔到任何 node。所以 closeness 喺呢個圖冇定義好，要用 harmonic。</li></ul>
+</div></details>
+
+<p class="q">Drill 3 · Eigenvector centrality power iteration</p>
+<p>A–B、A–C、A–D、C–D。c(0) = [1,1,1,1]，計 c(1)（normalize 前後）。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>c(1) = A·c(0)：每個 node = 鄰居分數加埋
+A = B + C + D = 3
+B = A = 1
+C = A + D = 2
+D = A + C = 2
+‖c‖ = √(9 + 1 + 4 + 4) = √18 = 4.243
+c(1) = [0.707, 0.236, 0.471, 0.471]</code></pre>
+<p>繼續 iterate 會收斂去 [0.612, 0.282, 0.523, 0.523]：A 最中心；C、D 雖然 degree 同 A 差唔多，但因為連住 A 所以都高。</p>
+</div></details>
+
+<p class="q">Drill 4 · 模擬卷 MB4(b) 嘅圖</p>
+<p>A–B、A–C、B–C、C–D、D–E、E–F、D–F、F–G。邊個 node closeness 最高？</p>
+<details class="ans"><summary>睇答案</summary><div><p>Σd：C = 10、D = 9、F = 11… <b>D 最高</b>（normalize 0.667）。Betweenness 都係 D 最高（9）。Degree 最高係 C、D、F（都係 3）。</p></div></details>
+
+<h2 id="mcq">六、MCQ</h2>
+<div class="mcq" data-set="A"><script type="application/json">[
+{"t":"L8","s":"<p>An undirected graph has 10 nodes and 15 edges. What is its average degree?</p>","o":["1.5","3","15","0.33"],"a":1,"e":"⟨k⟩ = 2E/N = 30/10 = <b>3</b>。唔好漏 ×2。"},
+{"t":"L8","s":"<p>Same graph (10 nodes, 15 edges). What is its density?</p>","o":["15/90","15/45","10/15","2/3"],"a":1,"e":"無向圖最多 N(N−1)/2 = 45 條：density = 15/45 = <b>1/3</b>。15/90 係有向圖嘅分母。"},
+{"t":"L8","s":"<p>Which best defines the diameter of a graph?</p>","o":["The longest path in the graph","The maximum shortest-path distance between any pair of nodes","The average distance between nodes","The number of nodes on the largest component"],"a":1,"e":"Diameter = <b>最短路徑入面最長嗰個</b>。"},
+{"t":"L8","s":"<p>Node v has 4 neighbours, and there are 3 edges among those neighbours. Its clustering coefficient is:</p>","o":["0.75","0.5","0.25","3"],"a":1,"e":"C = e / [k(k−1)/2] = 3 / 6 = <b>0.5</b>。"},
+{"t":"L8","s":"<p>A node's neighbours form a complete subgraph (every pair connected). Its clustering coefficient is:</p>","o":["0","0.5","1","k"],"a":2,"e":"鄰居兩兩都連 = 達到最大值 → <b>1</b>。"},
+{"t":"L8","s":"<p>Why is closeness centrality not well defined on a disconnected graph?</p>","o":["Degrees become zero","Some distances are infinite, so 1/Σd becomes 0 for every node","Betweenness is undefined","The adjacency matrix is not square"],"a":1,"e":"有 node 去唔到 → d = ∞ → Σd = ∞ → 每個 node closeness 都係 0。<b>Harmonic centrality</b>（Σ 1/d）解決咗呢個問題。"},
+{"t":"L8","s":"<p>Harmonic centrality of node x is:</p>","o":["Σ d(y,x)","1 / Σ d(y,x)","Σ 1/d(y,x)","Number of neighbours"],"a":2,"e":"<b>Σ_{y≠x} 1/d(y,x)</b>，去唔到嘅 node 1/∞ = 0，唔會搞亂。"},
+{"t":"L8","s":"<p>A star graph has one centre connected to 6 leaves. What is the (unnormalised) betweenness of the centre?</p>","o":["6","12","15","30"],"a":2,"e":"Leaf 之間 6×5/2 = <b>15</b> 對，全部經中心。"},
+{"t":"L8","s":"<p>Between nodes s and t there are 2 shortest paths, and only one passes through v. How much does the pair (s,t) contribute to v's betweenness?</p>","o":["0","0.5","1","2"],"a":1,"e":"Partial credit：σ_st(v)/σ_st = 1/2 = <b>0.5</b>。"},
+{"t":"L8","s":"<p>A Twitter account follows and is followed by millions of others, but most are spam bots. Which statement is correct?</p>","o":["It must be the most important node","High degree centrality does not always mean real importance","Its betweenness must be zero","Its clustering coefficient must be 1"],"a":1,"e":"Lecture 例子：最多 contact 嘅 Twitter user 往往係 spam。Degree 唔一定代表重要。"},
+{"t":"L8","s":"<p>Which centrality best captures a 'broker' who sits between two groups?</p>","o":["Degree","Closeness","Betweenness","Clustering coefficient"],"a":2,"e":"Brokerage = 兩群人之間要經你，即 <b>betweenness</b>。"},
+{"t":"L8","s":"<p>In a centrality visualisation, almost every node has a similar medium size and only peripheral nodes are smaller. Which centrality is most likely shown?</p>","o":["Degree","Closeness","Betweenness","Eigenvector"],"a":1,"e":"Closeness 嘅數值範圍窄，所以大細好<b>平均</b>。Betweenness 就會好極端。"},
+{"t":"L8","s":"<p>Eigenvector centrality says a node is important if:</p>","o":["It has many neighbours regardless of who they are","It is connected to other important nodes","It lies on many shortest paths","It is close to all other nodes"],"a":1,"e":"你嘅分數由鄰居嘅分數決定。PageRank 就係佢嘅變種。"},
+{"t":"L8","s":"<p>How do you find all connected components of a graph?</p>","o":["Sort nodes by degree","Run BFS from an unvisited node, mark everything reached, and repeat until all nodes are visited","Compute PageRank","Remove the highest-degree node"],"a":1,"e":"Lecture 方法：BFS 標記；仲有未到過嘅 node 就由佢開始再 BFS，每次 BFS 就係一個 component。"},
+{"t":"L8","s":"<p>In a directed graph, d(A,B) = 1. What can you say about d(B,A)?</p>","o":["It is also 1","It is 0","It may be different from 1, or even infinite","It is always 2"],"a":2,"e":"有向圖 distance <b>唔對稱</b>，要跟箭咀行，可能更長或者去唔到。"},
+{"t":"L8","s":"<p>For the path A–B–C–D–E, what is the closeness centrality (1/Σd) of node B?</p>","o":["1/10","1/7","1/6","1/4"],"a":1,"e":"B 去 A、C、D、E：1 + 1 + 2 + 3 = 7 → <b>1/7 ≈ 0.14</b>。"},
+{"t":"L8","s":"<p>Which statement about centrality measures is correct?</p>","o":["Betweenness is always the best","Different centralities can pick different 'most important' nodes, as in the Krackhardt kite graph","All centralities give the same ranking","Centrality measures the exact difference in importance between nodes"],"a":1,"e":"Lecture：冇一種係最好；Krackhardt kite 三種 centrality 揀出三個唔同 node。Ranking 亦唔量化差距有幾大。"},
+{"t":"L8","s":"<p>In the MSN network, the average path length is 6.6 while N is 180 million. What property does this illustrate?</p>","o":["The network is dense","Small-world: even huge networks have short average distances","The network is disconnected","High clustering"],"a":1,"e":"大網絡但平均幾步就到 = <b>small world</b>（六度分隔）。MSN 平均 degree 14.4，所以其實好 sparse。"}
+]</script></div>
+
+<h2 id="short">七、短答題</h2>
+<p class="q">S1. 點解有時 low-degree 嘅 node 都好重要？畫圖說明。（2026s2 Q5c，3 分）</p>
+<details class="ans"><summary>參考答案</summary><div><p>如果佢係連接兩個群組嘅<b>橋樑</b>（bridge／broker），兩邊之間嘅所有最短路徑都經佢，所以 betweenness 好高；佢一失效網絡就分開（single point of failure）。圖：兩個三角形中間由一個 degree 2 嘅 node 連住（見上面 past paper 答案嘅圖）。</p></div></details>
+<p class="q">S2. Closeness 同 harmonic 有咩分別？</p>
+<details class="ans"><summary>參考答案</summary><div><p>Closeness = 1/Σd（或者 (N−1)/Σd），只喺 connected graph 有意義；有 node 去唔到，d = ∞，全部變 0。Harmonic = Σ1/d，去唔到嘅貢獻 0，所以唔連通嘅圖都用得；同 closeness 高度相關，但會偏向 degree 大嘅 node。</p></div></details>
+
+<h2 id="faq">八、常見疑問</h2>
+<dl class="faq">
+<dt>Q：Betweenness 要唔要 normalize？</dt><dd>過去題目只問「邊個最高」，用原始數比較就得。要 normalize 嘅話，無向圖除以 \((N-1)(N-2)/2\)。</dd>
+<dt>Q：Betweenness 計 (s,t) 同 (t,s) 兩次？</dt><dd>無向圖每對計一次（lecture 嘅 star 例子 5×4/2 = 10 就係咁）。</dd>
+<dt>Q：Closeness 用 1/Σd 定 (N−1)/Σd？</dt><dd>Lecture 兩個都有：slide 38 用 1/Σd，slide 39 用 (N−1)/Σd。兩個排名一樣，寫清楚你用邊個。</dd>
+<dt>Q：CC 嘅 e 包唔包連去自己嗰啲 edge？</dt><dd>唔包，只數<b>鄰居同鄰居之間</b>嘅 edge。</dd>
+<dt>Q：Density 有向圖同無向圖點分？</dt><dd>無向圖分母 \(N(N-1)/2\)，有向圖分母 \(N(N-1)\)。題目冇講就睇 graph 有冇箭咀。</dd>
+<dt>Q：Diameter 同平均路徑長度點分？</dt><dd>Diameter 係所有最短路徑之中<b>最長</b>嗰個；平均路徑長度係所有最短路徑嘅<b>平均</b>。</dd>
+<dt>Q：認圖嗰題點樣唔撈亂？</dt><dd>先搵最極端（betweenness），再搵最平均（closeness），剩低係 degree，最後按題目要求次序寫。</dd>
+</dl>

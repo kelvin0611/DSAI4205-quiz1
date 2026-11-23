@@ -1,0 +1,1544 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>DSAI4205 Quiz 2 溫習包</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: one reading column with a sticky section nav. Code cells look like the lecture's numbered notebook cells.
+   Map / Shuffle / Reduce keep the same three colours in every diagram, table and tag. */
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --sunk:#E7EBF0; --ink:#15202B; --muted:#566273; --line:#D2D9E1;
+  --accent:#BF4A14; --accent-soft:#FAE6DA;
+  --map:#0B7472; --map-soft:#D9EFEE;
+  --shuf:#8F6200; --shuf-soft:#F6EBCB;
+  --red:#3D4BAA; --red-soft:#E2E6F8;
+  --ok:#17733A; --ok-soft:#DCF1E3; --bad:#B42318; --bad-soft:#FADFDB;
+  --code-bg:#E9EDF2; --code-ink:#17232F; --code-dim:#7B8796;
+  --f-display:"Archivo","Noto Sans TC",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Noto Sans TC",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1319; --surface:#151C24; --sunk:#1C2530; --ink:#E5EAF0; --muted:#97A3B2; --line:#2A3542;
+    --accent:#F2834A; --accent-soft:#3A2015;
+    --map:#4CC4BF; --map-soft:#0F2F2E;
+    --shuf:#E2B54A; --shuf-soft:#33290F;
+    --red:#97A3FF; --red-soft:#1C2247;
+    --ok:#62D18D; --ok-soft:#12301F; --bad:#FF8F84; --bad-soft:#3A1714;
+    --code-bg:#0A0F15; --code-ink:#DCE3EA; --code-dim:#6F7C8B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1319; --surface:#151C24; --sunk:#1C2530; --ink:#E5EAF0; --muted:#97A3B2; --line:#2A3542;
+  --accent:#F2834A; --accent-soft:#3A2015;
+  --map:#4CC4BF; --map-soft:#0F2F2E;
+  --shuf:#E2B54A; --shuf-soft:#33290F;
+  --red:#97A3FF; --red-soft:#1C2247;
+  --ok:#62D18D; --ok-soft:#12301F; --bad:#FF8F84; --bad-soft:#3A1714;
+  --code-bg:#0A0F15; --code-ink:#DCE3EA; --code-dim:#6F7C8B;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.72;-webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding-inline:20px;padding-block:0 80px}
+@media (max-width:480px){.wrap{padding-inline:16px}}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;line-height:1.2;margin:0}
+h2{font-size:clamp(1.55rem,1.2rem + 1.4vw,2.1rem);font-weight:800;font-stretch:88%;letter-spacing:-.01em}
+h3{font-size:1.22rem;font-weight:750;font-stretch:92%;margin-top:2.2rem}
+h4{font-size:1.02rem;font-weight:700;margin-top:1.4rem}
+p{margin:.7rem 0;max-width:68ch}
+ul,ol{margin:.6rem 0;padding-left:1.3rem;max-width:70ch}
+li{margin:.25rem 0}
+code{font-family:var(--f-mono);font-size:.9em;background:var(--code-bg);color:var(--code-ink);padding:.08em .35em;border-radius:4px}
+strong{font-weight:650}
+p code,li code,.exp code,.opt code{overflow-wrap:anywhere}
+
+/* nav */
+.topnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.topnav .in{max-width:940px;margin:0 auto;padding-inline:12px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.topnav .in::-webkit-scrollbar{display:none}
+.topnav a{flex:0 0 auto;font-family:var(--f-mono);font-size:13px;color:var(--muted);text-decoration:none;padding:12px 10px;border-bottom:2px solid transparent;white-space:nowrap}
+.topnav a:hover{color:var(--ink);border-bottom-color:var(--accent)}
+
+/* hero */
+.hero{padding-block:44px 8px;display:grid;gap:18px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.hero h1{font-size:clamp(2.2rem,1.4rem + 3.6vw,3.6rem);font-weight:850;font-stretch:80%;letter-spacing:-.02em}
+.hero h1 .k{color:var(--accent)}
+.hero .lede{font-size:1.06rem;color:var(--muted);max-width:62ch;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.fact{font-family:var(--f-mono);font-size:13px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px}
+.fact b{color:var(--accent);font-weight:600}
+
+section{padding-top:56px}
+.sec-head{display:grid;gap:6px;margin-bottom:12px}
+
+/* tables */
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{background:var(--sunk);font-weight:600;font-size:13px;letter-spacing:.02em;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td code{font-size:12.5px;white-space:nowrap}
+td.brk code{white-space:normal}
+.tbl.wide table{min-width:720px}
+.num{font-variant-numeric:tabular-nums}
+
+/* tags */
+.tag{display:inline-block;font-family:var(--f-mono);font-size:11.5px;font-weight:600;letter-spacing:.04em;padding:1px 8px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.map{background:var(--map-soft);color:var(--map)}
+.tag.shuf{background:var(--shuf-soft);color:var(--shuf)}
+.tag.red{background:var(--red-soft);color:var(--red)}
+.tag.acc{background:var(--accent-soft);color:var(--accent)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* code cells */
+pre.code{margin:12px 0;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px 12px 0;overflow-x:auto;font-family:var(--f-mono);font-size:13.5px;line-height:1.65;counter-reset:ln;white-space:pre}
+pre.code code{background:none;padding:0;font-size:inherit;color:inherit}
+pre.code .ln{display:block;counter-increment:ln;padding-left:52px;position:relative;min-height:1.65em}
+pre.code .ln::before{content:counter(ln);position:absolute;left:0;width:36px;text-align:right;color:var(--code-dim);font-size:12px}
+pre.code.plain .ln{padding-left:14px}
+pre.code.plain .ln::before{content:none}
+pre.code .c{color:var(--code-dim);font-style:italic}
+pre.code .hl{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 2px;font-weight:600}
+pre.code .given{color:var(--code-dim)}
+pre.code.sm{font-size:12.8px}
+.cap{font-size:13px;color:var(--muted);margin-top:-4px}
+
+/* callouts */
+.callout{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 16px;margin:16px 0}
+.callout > .lbl{font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:inline-block;margin-bottom:4px}
+.callout.warn{background:var(--bad-soft);border-color:transparent}
+.callout.warn > .lbl{color:var(--bad)}
+.callout.tip{background:var(--map-soft);border-color:transparent}
+.callout.tip > .lbl{color:var(--map)}
+.callout.key{background:var(--accent-soft);border-color:transparent}
+.callout.key > .lbl{color:var(--accent)}
+.callout p,.callout ul,.callout ol{margin:.35rem 0}
+
+/* question box (exam style) */
+.exam{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px 18px;margin:14px 0}
+.exam .src{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-bottom:6px}
+.exam p{margin:.4rem 0}
+
+/* figures */
+figure{margin:18px 0}
+figcaption{font-size:13.5px;color:var(--muted);margin-top:8px;max-width:72ch}
+.diawrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+svg.dia{display:block;width:100%;height:auto}
+svg.dia.w700{min-width:640px}
+svg.dia text{font-family:var(--f-body);fill:var(--ink);font-size:13px}
+svg.dia .mono{font-family:var(--f-mono);font-size:12.5px}
+svg.dia .small{font-size:11.5px;fill:var(--muted)}
+svg.dia .h{font-family:var(--f-display);font-weight:750;font-size:14.5px}
+svg.dia .box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+svg.dia .box2{fill:var(--sunk);stroke:var(--line);stroke-width:1}
+svg.dia .acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+svg.dia .fmap{fill:var(--map-soft);stroke:var(--map);stroke-width:1.2}
+svg.dia .fshuf{fill:var(--shuf-soft);stroke:var(--shuf);stroke-width:1.2}
+svg.dia .fred{fill:var(--red-soft);stroke:var(--red);stroke-width:1.2}
+svg.dia .fok{fill:var(--ok-soft);stroke:var(--ok);stroke-width:1.2}
+svg.dia .facc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2}
+svg.dia .arr{stroke:var(--ink);stroke-width:1.6;fill:none}
+svg.dia .arr.a{stroke:var(--accent)}
+svg.dia .dash{stroke:var(--muted);stroke-width:1.4;stroke-dasharray:5 5;fill:none}
+svg.dia .ah{fill:var(--ink)}
+svg.dia .ah.a{fill:var(--accent)}
+svg.dia .tacc{fill:var(--accent);font-weight:600}
+svg.dia .tmap{fill:var(--map);font-weight:600}
+svg.dia .tred{fill:var(--red);font-weight:600}
+svg.dia .tshuf{fill:var(--shuf);font-weight:600}
+
+/* MapReduce flow (html diagram) */
+.mrflow{display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1.25fr) 22px minmax(0,1.1fr) 22px minmax(0,1fr);gap:6px;align-items:stretch}
+.mrcol{border-radius:10px;padding:10px;min-width:0;border:1px solid var(--line);background:var(--surface)}
+.mrcol h5{margin:0 0 6px;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.mrcol.map{background:var(--map-soft);border-color:transparent}.mrcol.map h5{color:var(--map)}
+.mrcol.shuf{background:var(--shuf-soft);border-color:transparent}.mrcol.shuf h5{color:var(--shuf)}
+.mrcol.red{background:var(--red-soft);border-color:transparent}.mrcol.red h5{color:var(--red)}
+.mrcol .who{font-family:var(--f-body);font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400}
+.mrcol .row{font-family:var(--f-mono);font-size:12.3px;line-height:1.5;padding:4px 0;border-top:1px dashed var(--line);overflow-wrap:anywhere}
+.mrcol .row:first-of-type{border-top:0}
+.mrflow .arrow{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px}
+.strike{text-decoration:line-through;color:var(--bad)}
+@media (max-width:760px){
+  .mrflow{grid-template-columns:minmax(0,1fr)}
+  .mrflow .arrow{transform:rotate(90deg);height:18px}
+}
+
+/* map vs flatMap */
+.mf{display:grid;gap:10px}
+.mfrow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:560px){.mfrow{grid-template-columns:minmax(0,1fr)}}
+.mfrow .lab{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font-family:var(--f-mono);font-size:12.5px;padding:3px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
+.chip.outer{display:inline-flex;gap:4px;padding:4px;background:var(--shuf-soft);border-color:var(--shuf)}
+.chip.w{background:var(--map-soft);border-color:var(--map)}
+
+/* process flow */
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.flow span.st{font-size:13.5px;padding:6px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.flow span.ar{color:var(--muted)}
+
+/* MCQ */
+.qset{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:14px}
+.qset > .q,.stem,.opts{min-width:0}
+.scorebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;position:sticky;top:calc(env(safe-area-inset-top,0px) + 46px);z-index:10;background:var(--bg);padding:8px 0;border-bottom:1px solid var(--line)}
+.scorebar .s{font-family:var(--f-mono);font-size:13.5px}
+.scorebar .s b{color:var(--accent)}
+.btn{font:inherit;font-size:13.5px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.pri:hover{opacity:.9;color:var(--surface)}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.q header{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.qno{font-family:var(--f-display);font-weight:800;font-size:15px}
+.stem{margin:.2rem 0 .6rem}
+.stem p{margin:.3rem 0}
+.opts{display:grid;gap:6px}
+.opt{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start;text-align:left;font:inherit;font-size:15px;line-height:1.5;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt .L{font-family:var(--f-mono);font-weight:600;color:var(--muted)}
+.opt code{white-space:normal}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.right .L{color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt.wrong .L{color:var(--bad)}
+.exp{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--sunk);font-size:14.5px}
+.exp .v{font-weight:700}
+.exp .v.ok{color:var(--ok)} .exp .v.bad{color:var(--bad)}
+
+/* details / model answers */
+details{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:12px 0}
+details > summary{cursor:pointer;padding:10px 14px;font-weight:600;list-style:none;display:flex;gap:8px;align-items:center}
+details > summary::-webkit-details-marker{display:none}
+details > summary::before{content:"+";font-family:var(--f-mono);color:var(--accent);width:14px}
+details[open] > summary::before{content:"−"}
+details > .body{padding:2px 16px 14px}
+.practice{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:16px 18px;margin:18px 0}
+.practice > h3{margin-top:0}
+.practice .src{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+/* fill-in blanks */
+input.blank{font-family:var(--f-mono);font-size:13px;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:5px;padding:1px 4px;margin:0 1px;height:1.55em;vertical-align:baseline}
+input.blank.ok{border-color:var(--ok);background:var(--ok-soft)}
+input.blank.bad{border-color:var(--bad);background:var(--bad-soft)}
+input.blank.shown{border-style:dashed}
+.bn{display:inline-block;min-width:1.35em;text-align:center;font-size:10.5px;font-weight:600;color:var(--surface);background:var(--accent);border-radius:999px;margin-right:2px;line-height:1.5;vertical-align:1px}
+.fillbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fillmsg{font-size:13.5px;color:var(--muted)}
+
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.two{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.card h4{margin-top:0}
+.muted{color:var(--muted)}
+.sources li{font-size:14px}
+footer{margin-top:60px;font-size:13px;color:var(--muted)}
+
+.tbl.dp table{width:auto;min-width:0}
+.tbl.dp th,.tbl.dp td{text-align:center;font-family:var(--f-mono);font-variant-numeric:tabular-nums;padding:7px 12px}
+.tbl.dp td.hl{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.tbl.dp td.hl2{background:var(--map-soft);color:var(--map);font-weight:600}
+tbody.num td{font-variant-numeric:tabular-nums}
+.opt > span:last-child,.stem p,.exp{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+
+
+<nav class="topnav" aria-label="Sections">
+  <div class="in">
+    <a href="#format">考試格式</a>
+    <a href="#practice">練習卷答案</a>
+    <a href="#sparksql">L4 Spark SQL</a>
+    <a href="#nlp">L5 NLP</a>
+    <a href="#similarity">L6 相似度</a>
+    <a href="#embedding">L6 Embedding</a>
+    <a href="#mcq">模擬 MCQ</a>
+    <a href="#q1practice">Q1 填充</a>
+    <a href="#q2practice">Q2 計數</a>
+    <a href="#concept">概念短答</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">DSAI4205 Big Data Analytics · Dr Ken FONG</div>
+  <h1>Quiz 2 <span class="k">溫習包</span></h1>
+  <p class="lede">根據老師喺堂上講嘅 quiz 安排、Canvas 練習卷、L4–L6 同 T04–T06 整理。先睇練習卷答案（老師話會用同一個方式出題），再溫 Spark SQL、NLP、文字相似度同 word embedding，最後做 58 條 MCQ、7 條 Spark DataFrame／UDF 填充同 6 條 Q2 計數練習。新加嘅 Set C 同填充 7 跟足 Quiz 1 真卷嘅出題風格。</p>
+  <div class="facts">
+    <span class="fact">時間：<b>Week 11</b>，lecture 第二個鐘</span>
+    <span class="fact">範圍：<b>RDD 之後 → Text embedding</b></span>
+    <span class="fact"><b>15 MCQ</b> + <b>2 短答</b></span>
+    <span class="fact">只有 <b>1 題寫 code</b>：DataFrame + UDF</span>
+  </div>
+</header>
+
+<!-- ============ FORMAT ============ -->
+<section id="format">
+  <div class="sec-head"><span class="eyebrow">根據老師堂上錄音</span><h2>考試格式同老師會點出</h2></div>
+  <div class="tbl wide"><table>
+    <thead><tr><th>部分</th><th>內容</th><th>老師原話重點</th><th>點準備</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag acc">Section A</span></td><td>15 條 MCQ，同 Quiz 1 一樣</td><td>範圍係 RDD 之後：Spark DataFrame（L4）、NLP 同 TF-IDF（L5）、LLM 入面嘅 text similarity 同 text embedding（L6）</td><td>睇 L4–L6 筆記，做 <a href="#mcq">模擬 MCQ</a></td></tr>
+      <tr><td><span class="tag map">短答 1</span></td><td><b>唯一一題寫 code</b>：Spark DataFrame + UDF</td><td>「唔會再考 RDD，因為上次 quiz 考咗」。例子：由 RDD 用 <code>StructType</code> 起 DataFrame；寫 Python function、register 做 UDF、用 <code>withColumn</code> 加新 column</td><td>背熟 <a href="#practice">練習卷 Q1</a>，做 <a href="#q1practice">Q1 填充</a></td></tr>
+      <tr><td><span class="tag red">短答 2</span></td><td>唔使寫 code，計數同解釋</td><td>Subword（BPE）「係去年 Sem 2 期考原題」；TF-IDF；Levenshtein DP table；Skip-gram windows 同 CBOW 圖（「都係以前期考題」）</td><td>做 <a href="#practice">練習卷 Q2–Q4</a> 同 <a href="#q2practice">Q2 計數練習</a></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout key">
+    <span class="lbl">我對出題嘅推斷</span>
+    <ul>
+      <li><b>短答 1 幾乎肯定係練習卷 Q1 嘅變奏</b>：換個數據（例如由 sensor 換成學生、訂單），叫你寫 <code>StructType([StructField(...), ...])</code> + <code>spark.createDataFrame(rdd, schema)</code>，再寫一個有條件判斷嘅 Python function → <code>udf(f, 類型())</code> → <code>withColumn</code>。記住 <b>edge case（None／空字串）</b>同<b>return type</b>，練習卷特登寫明呢兩樣。</li>
+      <li><b>短答 2 好可能由練習卷 Q2–Q4 抽一兩題，換數字或者換句子</b>。老師明講 BPE 同 CBOW 係舊期考題；上個學期 DSAI4205 期考 Q2 就係一模一樣嘅 “The hero saves the day” skip-gram／CBOW 題。</li>
+      <li>TF-IDF 用 <b>log((N+1)/(df+1))</b>、TF 唔 normalize，同 Tutorial 5 PySpark 版一樣，用<b>自然對數 ln</b>。考試寫清楚用邊個 log 底就唔會失分。</li>
+      <li>MCQ 估計平均分佈：Hive／Shark／Spark SQL 概念、DataFrame 操作、NLP 前處理（stemming、lemmatization、POS、NER、stop words）、BoW／n-gram／TF-IDF、相似度公式、Skip-gram／CBOW／SGNS／GloVe。</li>
+    </ul>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">Quiz 1 真卷點出（用嚟估 Quiz 2）</span>
+    <div class="tbl wide" style="margin:8px 0"><table>
+      <thead><tr><th>Quiz 1 部分</th><th>實際題目</th><th>對 Quiz 2 嘅啟示</th></tr></thead>
+      <tbody>
+        <tr><td>Section A：15 MCQ × 2 分 = 30 分</td><td>幾乎全部係<b>情境題</b>（hospital 數據、food-delivery 平台、雙倍 worker 但快唔到幾多），唔係問定義；有計數題（Dask chunk 唔整除要計最後一塊）；Q14 係 <b>“Which TWO”</b></td><td>MCQ 要識將概念套落情境；計數題可能係 TF-IDF、Levenshtein、Jaccard、BPE 第一步、CBOW node 數。做 <a href="#mcq">Set C</a></td></tr>
+        <tr><td>Section B Q1：概念題 5 + 5 分</td><td>“Define lazy evaluation… Use Dask to justify”；“What are deterministic transformations and how do they help recover a lost partition?”</td><td>要用 2–4 句英文解釋，<b>一定要舉課程入面嘅工具做例</b>（DataFrame、Catalyst、BPE、SGNS）。睇 <a href="#concept">概念短答</a></td></tr>
+        <tr><td>Section B Q2(i)：MapReduce 10 分</td><td>每個 course 平均分（mapper 2 分、reducer 5 分、寫出 mapper output 同 final output 各 1 分）</td><td>今次冇 MapReduce；改為非 coding 計數題（BPE、TF-IDF、Levenshtein、CBOW）</td></tr>
+        <tr><td>Section B Q2(ii)：PySpark 填充 10 分</td><td>同一個場景嘅 RDD 版，挖 Blank A–F（map、mapValues、<code>(score, 1)</code>、<code>a[0]+b[0]</code>、<code>a[1]+b[1]</code>、total／count）</td><td>今次換成 DataFrame + UDF，好大機會又係<b>同一個場景先計數、再寫 code</b>。做 <a href="#fill7">填充 7</a>（Quiz 1 場景嘅 DataFrame 版）</td></tr>
+      </tbody>
+    </table></div>
+    <p>總分 60：Section A 30 分、Section B 30 分。Quiz 1 嘅 RDD 填充同上次溫習包「填充 5：每套電影平均評分」幾乎一樣，證明老師會沿用 tutorial 同練習卷嘅寫法。</p>
+  </div>
+
+  <div class="callout tip">
+    <span class="lbl">時間唔夠就跟呢個次序</span>
+    <ol>
+      <li><a href="#practice">練習卷四題答案</a>：逐步背熟，特別係 schema、UDF 三步、BPE 合併步驟、DP table。</li>
+      <li><a href="#q1practice">Q1 填充</a>：<code>StructField</code>、<code>udf(..., StringType())</code>、<code>withColumn</code>、<code>col</code>、<code>when</code>。</li>
+      <li><a href="#q2practice">Q2 計數</a>：自己計一次 BPE、TF-IDF、Levenshtein、skip-gram windows。</li>
+      <li>MCQ：Hive／Shark／Spark SQL 嘅比較最易出概念題。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ PRACTICE ============ -->
+<section id="practice">
+  <div class="sec-head"><span class="eyebrow">Canvas 上嘅 Practice_Quiz2.pdf</span><h2>練習卷答案同解釋</h2></div>
+
+  <h3>Q1(a) · RDD → DataFrame，用 StructType 明確定義 schema</h3>
+  <div class="exam">
+    <div class="src">Practice Quiz 2 · Q1 Spark DataFrame and UDF</div>
+    <p>An existing RDD <code>raw_sensor_rdd</code> has tuples <code>(sensor_id: Int, location: String, reading_value: Double, raw_timestamp: String)</code>. Convert it into a DataFrame <code>df_sensors</code>. You <b>must not</b> use <code>.toDF()</code>; define a strict schema with <code>StructType</code> and <code>StructField</code>.</p>
+  </div>
+<pre class="code"><code>from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DoubleType
+
+schema = StructType([
+    StructField("sensor_id",     IntegerType(), True),   # Int    → IntegerType
+    StructField("location",      StringType(),  True),   # String → StringType
+    StructField("reading_value", DoubleType(),  True),   # Double → DoubleType
+    StructField("raw_timestamp", StringType(),  True)    # 仍然係 String，唔係 TimestampType
+])
+
+df_sensors = spark.createDataFrame(raw_sensor_rdd, schema)
+df_sensors.printSchema()</code></pre>
+  <div class="tbl"><table>
+    <thead><tr><th>Python／題目寫法</th><th>Spark SQL type</th><th>記法</th></tr></thead>
+    <tbody>
+      <tr><td>Int / Integer</td><td><code>IntegerType()</code></td><td>要有括號，係 object</td></tr>
+      <tr><td>String / str</td><td><code>StringType()</code></td><td>timestamp 仲係 string 就照用 StringType</td></tr>
+      <tr><td>Double / float</td><td><code>DoubleType()</code></td><td>唔係 FloatType</td></tr>
+      <tr><td>list of strings</td><td><code>ArrayType(StringType())</code></td><td>UDF 回傳 list 時用</td></tr>
+      <tr><td>dict</td><td><code>MapType(StringType(), StringType())</code></td><td>L4 nested data 例子</td></tr>
+      <tr><td>nested record</td><td><code>StructType([...])</code></td><td>可以放入 ArrayType 入面</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><code>StructField(name, dataType, nullable)</code>：三個參數，第三個 <code>True</code> = 可以係 null。L4 slide 83 都寫成 <code>StructField(name="id", dataType=IntegerType(), nullable=True)</code>。</li>
+    <li>次序要同 tuple 一樣：tuple 第 1 個元素就對第 1 個 StructField。</li>
+    <li><code>spark</code> 喺呢度係 <b>SparkSession</b>（唔係 sparkContext）。<code>createDataFrame</code> 係 SparkSession 嘅 method。</li>
+  </ul>
+
+  <h3>Q1(b) · 寫 UDF 做情感分類</h3>
+  <div class="exam">
+    <div class="src">Practice Quiz 2 · Q1 第二部分（老師堂上逐步講過）</div>
+    <p><code>df_reviews</code> has <code>review_id (Integer)</code>, <code>customer_id (Integer)</code>, <code>feedback_text (String)</code>. (1) Write <code>analyze_sentiment(text)</code>: “Positive” if it contains great / love / excellent, “Negative” if bad / broken / waste (case-insensitive), otherwise “Neutral”; return “Unknown” if text is None or empty. (2) Register it as <code>sentiment_udf</code> with the correct Spark SQL return type. (3) Create <code>df_segmented</code> with all original columns plus <code>sentiment_category</code>.</p>
+  </div>
+<pre class="code"><code>from pyspark.sql import SparkSession
+from pyspark.sql.functions import udf, col
+from pyspark.sql.types import StringType
+
+# 1. Define the standard Python logic with edge-case handling
+def analyze_sentiment(text):
+    if text is None or text.strip() == "":            # edge case 先處理
+        return "Unknown"
+    t = text.lower()                                  # case-insensitive
+    if any(w in t for w in ["great", "love", "excellent"]):
+        return "Positive"
+    if any(w in t for w in ["bad", "broken", "waste"]):
+        return "Negative"
+    return "Neutral"
+
+# 2. Register the function as a PySpark UDF explicitly declaring StringType
+sentiment_udf = udf(analyze_sentiment, StringType())
+
+# 3. Apply it to the DataFrame using withColumn
+df_segmented = df_reviews.withColumn("sentiment_category", sentiment_udf(col("feedback_text")))
+
+# Displaying output
+df_segmented.show(truncate=False)</code></pre>
+  <div class="tbl"><table>
+    <thead><tr><th>feedback_text 例子</th><th>sentiment_category</th></tr></thead>
+    <tbody>
+      <tr><td><code>"I LOVE this phone"</code></td><td>Positive</td></tr>
+      <tr><td><code>"Arrived broken, total waste"</code></td><td>Negative</td></tr>
+      <tr><td><code>"It is okay"</code></td><td>Neutral</td></tr>
+      <tr><td><code>None</code> 或 <code>"   "</code></td><td>Unknown</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">以上 Python 邏輯已經逐個例子跑過核對。</p>
+  <div class="callout warn">
+    <span class="lbl">易失分位</span>
+    <ul>
+      <li><b>先檢查 None</b>：<code>text.lower()</code> 遇到 None 會出錯，所以 edge case 要放第一行。</li>
+      <li><b>一定要寫 return type</b>：<code>udf(analyze_sentiment, StringType())</code>。題目寫明 “explicitly declare the correct Spark SQL return data type”。</li>
+      <li><b>保留所有原本 column</b> → 用 <code>withColumn</code>，唔好用淨係揀一個 column 嘅 <code>select</code>。</li>
+      <li>UDF 要應用喺 column：<code>sentiment_udf(col("feedback_text"))</code>、<code>sentiment_udf(df_reviews.feedback_text)</code> 或 <code>sentiment_udf("feedback_text")</code> 都得。</li>
+      <li>同時有正面同負面字（例如 “great price but bad battery”）會因為次序先判 Positive，可以喺答案註明你嘅優先次序。</li>
+    </ul>
+  </div>
+
+  <h3>Q2(a) · BPE：將字串減到啱啱 10 個 token</h3>
+  <div class="exam">
+    <div class="src">Practice Quiz 2 · Q2(a) · 老師話係去年 Sem 2 期考原題</div>
+    <p>Demonstrate the iterative steps (such as in Byte Pair Encoding) required to reduce <code>"apple pen apple pen pineapple pen"</code> to exactly 10 tokens. You may use <code>&lt;_&gt;</code> to represent spaces or word boundaries.</p>
+  </div>
+  <p><b>做法</b>：每個字拆成字母，字尾加 <code>&lt;_&gt;</code>。字頻係 apple ×2、pen ×3、pineapple ×1。每一步搵<b>出現最多次</b>嘅相鄰 pair 合併，總 token 數 = 每個字嘅 token 數 × 出現次數。</p>
+  <div class="tbl wide"><table>
+    <thead><tr><th>步驟</th><th>合併</th><th>次數</th><th>apple ×2</th><th>pen ×3</th><th>pineapple ×1</th><th>總 token</th></tr></thead>
+    <tbody class="num">
+      <tr><td>0</td><td>（起點）</td><td>—</td><td><code>a p p l e &lt;_&gt;</code></td><td><code>p e n &lt;_&gt;</code></td><td><code>p i n e a p p l e &lt;_&gt;</code></td><td>2×6 + 3×4 + 10 = <b>34</b></td></tr>
+      <tr><td>1</td><td><code>a + p → ap</code></td><td>3</td><td><code>ap p l e &lt;_&gt;</code></td><td><code>p e n &lt;_&gt;</code></td><td><code>p i n e ap p l e &lt;_&gt;</code></td><td>31</td></tr>
+      <tr><td>2</td><td><code>ap + p → app</code></td><td>3</td><td><code>app l e &lt;_&gt;</code></td><td><code>p e n &lt;_&gt;</code></td><td><code>p i n e app l e &lt;_&gt;</code></td><td>28</td></tr>
+      <tr><td>3</td><td><code>app + l → appl</code></td><td>3</td><td><code>appl e &lt;_&gt;</code></td><td><code>p e n &lt;_&gt;</code></td><td><code>p i n e appl e &lt;_&gt;</code></td><td>25</td></tr>
+      <tr><td>4</td><td><code>appl + e → apple</code></td><td>3</td><td><code>apple &lt;_&gt;</code></td><td><code>p e n &lt;_&gt;</code></td><td><code>p i n e apple &lt;_&gt;</code></td><td>22</td></tr>
+      <tr><td>5</td><td><code>apple + &lt;_&gt; → apple&lt;_&gt;</code></td><td>3</td><td><code>apple&lt;_&gt;</code></td><td><code>p e n &lt;_&gt;</code></td><td><code>p i n e apple&lt;_&gt;</code></td><td>19</td></tr>
+      <tr><td>6</td><td><code>p + e → pe</code></td><td>3</td><td><code>apple&lt;_&gt;</code></td><td><code>pe n &lt;_&gt;</code></td><td><code>p i n e apple&lt;_&gt;</code></td><td>16</td></tr>
+      <tr><td>7</td><td><code>pe + n → pen</code></td><td>3</td><td><code>apple&lt;_&gt;</code></td><td><code>pen &lt;_&gt;</code></td><td><code>p i n e apple&lt;_&gt;</code></td><td>13</td></tr>
+      <tr><td>8</td><td><code>pen + &lt;_&gt; → pen&lt;_&gt;</code></td><td>3</td><td><code>apple&lt;_&gt;</code></td><td><code>pen&lt;_&gt;</code></td><td><code>p i n e apple&lt;_&gt;</code></td><td><b>10</b></td></tr>
+    </tbody>
+  </table></div>
+  <p><b>最後 10 個 token</b>：<code>apple&lt;_&gt; | pen&lt;_&gt; | apple&lt;_&gt; | pen&lt;_&gt; | p | i | n | e | apple&lt;_&gt; | pen&lt;_&gt;</code>。新增嘅 vocabulary：ap、app、appl、apple、apple&lt;_&gt;、pe、pen、pen&lt;_&gt;。</p>
+  <ul>
+    <li>每一步有好多 pair 同樣出現 3 次（例如 <code>p p</code>、<code>l e</code>、<code>e n</code>）。<b>打和揀邊個都得</b>，最緊要寫清楚每步合併邊個 pair、出現幾多次、合併後總 token 數。上表用「最先出現嘅 pair」打和。</li>
+    <li>點解 pineapple 冇變成一個 token：「p i n e」只出現 1 次，頻率低，未輪到合併就已經夠 10 個。呢個正正示範 subword 點樣處理罕見字：<b>由常見嘅 subword（apple）加字母砌出嚟</b>，就算 pineapple 從來冇見過都可以表示（OOV 問題）。</li>
+  </ul>
+  <p class="cap">已經用程式逐步模擬核對過每一步嘅 token 數。</p>
+
+  <h3>Q2(b) · TF-IDF 同三個缺點</h3>
+  <div class="exam">
+    <div class="src">Practice Quiz 2 · Q2(b)</div>
+    <p>Doc 1: Kelvin enjoys playing football · Doc 2: Kelvin enjoys food · Doc 3: Kelvin enjoys playing. Compute TF-IDF of each word in each document (IDF = log((No. of Doc + 1)/(No. of Doc containing the word + 1)), TF without normalization), and explain three shortcomings of TF-IDF with examples.</p>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Word</th><th>df</th><th>IDF = ln((3+1)/(df+1))</th><th>Doc 1</th><th>Doc 2</th><th>Doc 3</th></tr></thead>
+    <tbody class="num">
+      <tr><td>kelvin</td><td>3</td><td>ln(4/4) = <b>0</b></td><td>1 × 0 = 0</td><td>0</td><td>0</td></tr>
+      <tr><td>enjoys</td><td>3</td><td>ln(4/4) = <b>0</b></td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>playing</td><td>2</td><td>ln(4/3) = <b>0.2877</b></td><td>0.2877</td><td>—（0）</td><td>0.2877</td></tr>
+      <tr><td>football</td><td>1</td><td>ln(4/2) = <b>0.6931</b></td><td>0.6931</td><td>0</td><td>0</td></tr>
+      <tr><td>food</td><td>1</td><td>ln(4/2) = <b>0.6931</b></td><td>0</td><td>0.6931</td><td>0</td></tr>
+    </tbody>
+  </table></div>
+  <p>每個字喺每份文件最多出現一次，所以 TF 全部係 1 或 0，TF-IDF = IDF。<b>向量</b>（次序 kelvin, enjoys, playing, football, food）：Doc 1 = [0, 0, 0.2877, 0.6931, 0]，Doc 2 = [0, 0, 0, 0, 0.6931]，Doc 3 = [0, 0, 0.2877, 0, 0]。</p>
+  <p class="cap">如果老師要 log₁₀：playing 0.1249、football／food 0.3010；log₂：0.4150、1.0000。0 嗰啲唔變。考試寫明用邊個底。</p>
+  <div class="tbl wide"><table>
+    <thead><tr><th>缺點</th><th>用呢三份文件做例子</th></tr></thead>
+    <tbody>
+      <tr><td><b>1. 冇語意（semantic）</b>：每個字係獨立維度，近義字當完全唔同</td><td>如果 Doc 4 係 “Kelvin enjoys soccer”，soccer 同 football 意思一樣，但 TF-IDF 向量完全冇重疊，cosine = 0。</td></tr>
+      <tr><td><b>2. 冇字序同上下文</b>（bag of words）</td><td>“Kelvin enjoys playing football” 同 “football enjoys playing Kelvin” 會得到一模一樣嘅向量。“don't like” 同 “like” 分唔到。</td></tr>
+      <tr><td><b>3. 所有文件都有嘅字權重變 0</b></td><td>kelvin、enjoys 喺三份文件都有，IDF = 0，即使 “enjoys” 帶住重要嘅情感資訊都被完全忽略。</td></tr>
+      <tr><td>4. 高維、稀疏</td><td>向量長度 = vocabulary 大小；文件一多，維度好大而大部分係 0（例如 Doc 2 五個維度得一個非零）。</td></tr>
+      <tr><td>5. 處理唔到新字（OOV）</td><td>Query 入面有 “basketball”，vocabulary 冇呢個字，就冇維度表示佢。</td></tr>
+    </tbody>
+  </table></div>
+  <p>答三個就夠，最穩陣揀 1、2、3。另外可以指出：Doc 2 同 Doc 3 嘅 cosine similarity = 0，但兩份都講 “Kelvin enjoys …”，顯示 TF-IDF 量度唔到呢種相似。</p>
+
+  <h3>Q3 · Levenshtein distance：“Teh” 同 “The”</h3>
+  <div class="exam">
+    <div class="src">Practice Quiz 2 · Q3（老師講：fill in 5×5 嘅 DP table、Te → Th 嘅所有操作、成句嘅距離）</div>
+    <p>(i) Fill the 5×5 Levenshtein DP table for “Teh” and “The”. (ii) Show all possible operations to transform “Te” → “Th” using DP[2][3], DP[2][2], DP[3][2]. (iii) Compute the Levenshtein distance for “Teh hero save” vs “The hero saves”.</p>
+  </div>
+  <p><b>(i)</b> 5×5 = 第 0 行／列寫字母，第 1 行／列係空字串 “”。跟 lecture 嘅寫法，source（Teh）放上面，target（The）放左邊。</p>
+  <div class="tbl dp" style="max-width:420px"><table>
+    <thead><tr><th>idx</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+    <tbody>
+      <tr><th>0</th><td></td><td>“”</td><td>T</td><td>e</td><td>h</td></tr>
+      <tr><th>1</th><td>“”</td><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+      <tr><th>2</th><td>T</td><td>1</td><td class="hl2">0</td><td class="hl2">1</td><td>2</td></tr>
+      <tr><th>3</th><td>h</td><td>2</td><td class="hl2">1</td><td class="hl">1</td><td>1</td></tr>
+      <tr><th>4</th><td>e</td><td>3</td><td>2</td><td>1</td><td class="hl">2</td></tr>
+    </tbody>
+  </table></div>
+  <p>規則：<code>DP[i][j] = min( DP[i-1][j-1] + (字母唔同 ? 1 : 0),  DP[i-1][j] + 1,  DP[i][j-1] + 1 )</code>。第一行／列 = 0, 1, 2, 3（全部 insert 或者 delete）。<b>Teh → The 距離 = 2</b>（右下角）：e→h、h→e 兩次 substitution。Levenshtein 唔識「對調」，所以 swap 要計 2。</p>
+  <p><b>(ii)</b> 目標格係 DP[3][3]（source “Te” → target “Th”）。三個 subproblem：</p>
+  <div class="tbl wide"><table>
+    <thead><tr><th>由邊格嚟</th><th>Subproblem</th><th>值</th><th>再加一步</th><th>總數</th></tr></thead>
+    <tbody>
+      <tr><td><b>DP[2][2]</b>（對角）</td><td>“T” → “T”</td><td>0</td><td><b>Substitute</b> e → h</td><td><b>0 + 1 = 1 ✓ 最少</b></td></tr>
+      <tr><td><b>DP[2][3]</b>（上面）</td><td>“Te” → “T”（delete e）</td><td>1</td><td><b>Insert</b> h</td><td>1 + 1 = 2</td></tr>
+      <tr><td><b>DP[3][2]</b>（左邊）</td><td>“T” → “Th”（insert h）</td><td>1</td><td><b>Delete</b> e</td><td>1 + 1 = 2</td></tr>
+    </tbody>
+  </table></div>
+  <p>所以 DP[3][3] = min(1, 2, 2) = <b>1</b>。反方向 “Th” → “Te” 都一樣：用 DP[2][2] substitute h → e，1 步。Levenshtein 係對稱嘅，table 轉置之後數字一樣。</p>
+  <p><b>(iii)</b> “Teh hero save” → “The hero saves”：“Teh” → “The” 要 2 步，“hero” 一樣，“save” → “saves” insert s 1 步，<b>總距離 = 3</b>（已用 DP 程式核對）。</p>
+
+  <h3>Q4 · Skip-gram 訓練 window 同 CBOW 架構圖</h3>
+  <div class="exam">
+    <div class="src">Practice Quiz 2 · Q4 · 同 DSAI4205 2025/26 Sem 1 期考 Q2 一模一樣</div>
+    <p>Subtitle text “The hero saves the day”, window size m = 1. (a) Using PAD for padding, generate ALL Skip-gram training windows. (b) A CBOW model predicts the centre word “hero”, m = 1, embedding dimension d = 2. Draw the high-level network: input embedding layer, hidden layer (number of nodes), projection layer, output layer and data-flow arrows.</p>
+  </div>
+  <p><b>(a)</b> 每個字輪流做 center word，左右各 m = 1 個 context word；出界就用 PAD。</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Window</th><th>Center（input）</th><th>Context（要預測）</th><th>Training pairs</th></tr></thead>
+    <tbody>
+      <tr><td>[PAD, <b>The</b>, hero]</td><td>The</td><td>PAD, hero</td><td>(The, PAD), (The, hero)</td></tr>
+      <tr><td>[The, <b>hero</b>, saves]</td><td>hero</td><td>The, saves</td><td>(hero, The), (hero, saves)</td></tr>
+      <tr><td>[hero, <b>saves</b>, the]</td><td>saves</td><td>hero, the</td><td>(saves, hero), (saves, the)</td></tr>
+      <tr><td>[saves, <b>the</b>, day]</td><td>the</td><td>saves, day</td><td>(the, saves), (the, day)</td></tr>
+      <tr><td>[the, <b>day</b>, PAD]</td><td>day</td><td>the, PAD</td><td>(day, the), (day, PAD)</td></tr>
+    </tbody>
+  </table></div>
+  <p>共 5 個 window、10 個 (center, context) pair。Skip-gram 係「<b>俾 center 估 context</b>」。</p>
+  <p><b>(b)</b> CBOW 係「<b>俾 context 估 center</b>」：input 係 “The” 同 “saves” 嘅 one-hot，要預測 “hero”。Vocabulary 細階之後 = {the, hero, saves, day}，V = 4（如果將 PAD 都當 token 就 V = 5）。</p>
+  <figure>
+    <div class="diawrap">
+      <svg class="dia w700" viewBox="0 0 720 330" role="img" aria-labelledby="cbow-t">
+        <title id="cbow-t">CBOW network: two one-hot inputs of size 4 for "The" and "saves", shared embedding matrix W 4 by 2, averaged into a 2-node hidden projection layer, matrix W' 2 by 4, 4 output scores, softmax predicting "hero"</title>
+        <defs><marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+        <text x="14" y="16" class="h">Input layer（one-hot, V = 4）</text>
+        <g class="mono">
+          <rect x="20" y="40" width="70" height="104" rx="6" class="fmap"/>
+          <text x="55" y="34" text-anchor="middle" class="small">x₁ = “The”</text>
+          <text x="30" y="62">the  1</text><text x="30" y="86">hero 0</text><text x="30" y="110">saves 0</text><text x="30" y="134">day  0</text>
+          <rect x="20" y="186" width="70" height="104" rx="6" class="fmap"/>
+          <text x="55" y="180" text-anchor="middle" class="small">x₂ = “saves”</text>
+          <text x="30" y="208">the  0</text><text x="30" y="232">hero 0</text><text x="30" y="256">saves 1</text><text x="30" y="280">day  0</text>
+        </g>
+        <rect x="150" y="70" width="110" height="46" rx="6" class="box2"/><text x="205" y="92" text-anchor="middle" class="mono">W (4 × 2)</text><text x="205" y="108" text-anchor="middle" class="small">embedding</text>
+        <rect x="150" y="214" width="110" height="46" rx="6" class="box2"/><text x="205" y="236" text-anchor="middle" class="mono">W (4 × 2)</text><text x="205" y="252" text-anchor="middle" class="small">同一個 W（共用）</text>
+        <path d="M92 92 L146 92" class="arr" marker-end="url(#ahc)"/>
+        <path d="M92 238 L146 238" class="arr" marker-end="url(#ahc)"/>
+        <text x="270" y="86" class="small">v_the (2-d)</text>
+        <text x="270" y="270" class="small">v_saves (2-d)</text>
+        <path d="M262 92 L330 150" class="arr" marker-end="url(#ahc)"/>
+        <path d="M262 238 L330 180" class="arr" marker-end="url(#ahc)"/>
+        <text x="300" y="16" class="h">Hidden / projection</text>
+        <rect x="334" y="122" width="96" height="86" rx="10" class="facc"/>
+        <circle cx="382" cy="148" r="12" class="box"/><circle cx="382" cy="182" r="12" class="box"/>
+        <text x="382" y="152" text-anchor="middle" class="small">h₁</text><text x="382" y="186" text-anchor="middle" class="small">h₂</text>
+        <text x="382" y="228" text-anchor="middle" class="small tacc">2 個 node（d = 2）</text>
+        <text x="382" y="244" text-anchor="middle" class="small">h = (v_the + v_saves) / 2</text>
+        <rect x="462" y="142" width="86" height="46" rx="6" class="box2"/><text x="505" y="164" text-anchor="middle" class="mono">W′ (2 × 4)</text><text x="505" y="180" text-anchor="middle" class="small">score u·h</text>
+        <path d="M432 165 L458 165" class="arr" marker-end="url(#ahc)"/>
+        <text x="572" y="16" class="h">Output layer</text>
+        <rect x="574" y="70" width="128" height="190" rx="8" class="fred"/>
+        <text x="638" y="94" text-anchor="middle" class="small">softmax（4 個 node）</text>
+        <g class="mono"><text x="590" y="124">P(the)</text><text x="590" y="156" class="tred">P(hero) ★</text><text x="590" y="188">P(saves)</text><text x="590" y="220">P(day)</text></g>
+        <text x="638" y="250" text-anchor="middle" class="small">加埋 = 1</text>
+        <path d="M550 165 L570 165" class="arr" marker-end="url(#ahc)"/>
+        <text x="14" y="318" class="small">Loss = −log P(hero | The, saves)，訓練令 P(hero) 變大</text>
+      </svg>
+    </div>
+    <figcaption>圖 1：CBOW 架構（m = 1, d = 2, V = 4）。兩個 context word 用<b>同一個</b> embedding matrix W 查出 2 維向量，hidden／projection layer 取平均（2 個 node），再乘 W′ 得到 4 個分數，softmax 後輸出機率最大應該係 “hero”。</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <thead><tr><th>Layer</th><th>形狀</th><th>做咩</th></tr></thead>
+    <tbody>
+      <tr><td>Input（context one-hot）</td><td>2 個 × V = 4</td><td>“The”、“saves” 各一個 one-hot</td></tr>
+      <tr><td>Embedding W</td><td>V × d = 4 × 2</td><td>Lookup table，兩個 input 共用</td></tr>
+      <tr><td>Hidden／Projection</td><td><b>d = 2 個 node</b></td><td>平均：<code>h = ½(v_the + v_saves)</code>，冇 activation</td></tr>
+      <tr><td>W′</td><td>d × V = 2 × 4</td><td>每個字一個 output 向量 u</td></tr>
+      <tr><td>Output</td><td>V = 4 個 node</td><td>softmax 機率，target = hero</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ L4 ============ -->
+<section id="sparksql">
+  <div class="sec-head"><span class="eyebrow">L4 Exploring Hive, Shark and SparkSQL · T04</span><h2>Hive → Shark → Spark SQL 同 DataFrame</h2></div>
+
+  <figure>
+    <div class="diawrap">
+      <svg class="dia w700" viewBox="0 0 720 150" role="img" aria-labelledby="hist-t">
+        <title id="hist-t">Evolution: MapReduce is too low-level, Hive compiles SQL to MapReduce, Shark runs HiveQL on Spark RDDs in memory (2011–2014), Spark SQL adds DataFrames and the Catalyst optimizer (2014)</title>
+        <defs><marker id="ahh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+        <rect x="10" y="30" width="150" height="90" rx="10" class="box2"/><text x="85" y="56" text-anchor="middle" class="h">MapReduce</text><text x="85" y="80" text-anchor="middle" class="small">API 太 low-level</text><text x="85" y="98" text-anchor="middle" class="small">join／group 要自己寫</text>
+        <rect x="190" y="30" width="160" height="90" rx="10" class="fmap"/><text x="270" y="56" text-anchor="middle" class="h tmap">Hive（Facebook）</text><text x="270" y="80" text-anchor="middle" class="small">HiveQL → MapReduce jobs</text><text x="270" y="98" text-anchor="middle" class="small">慢：disk-based、高 latency</text>
+        <rect x="380" y="30" width="150" height="90" rx="10" class="fshuf"/><text x="455" y="56" text-anchor="middle" class="h tshuf">Shark（2011–14）</text><text x="455" y="80" text-anchor="middle" class="small">HiveQL 行喺 Spark RDD</text><text x="455" y="98" text-anchor="middle" class="small">in-memory、PDE、columnar</text>
+        <rect x="560" y="30" width="150" height="90" rx="10" class="fred"/><text x="635" y="56" text-anchor="middle" class="h tred">Spark SQL（2014）</text><text x="635" y="80" text-anchor="middle" class="small">DataFrame API</text><text x="635" y="98" text-anchor="middle" class="small">Catalyst optimizer</text>
+        <path d="M162 75 L186 75" class="arr" marker-end="url(#ahh)"/><path d="M352 75 L376 75" class="arr" marker-end="url(#ahh)"/><path d="M532 75 L556 75" class="arr" marker-end="url(#ahh)"/>
+      </svg>
+    </div>
+    <figcaption>圖 2：每一代都係為咗解決上一代嘅問題。</figcaption>
+  </figure>
+
+  <h3>Hive</h3>
+  <ul>
+    <li>Facebook 開發，將 structure／schema 加落 HDFS 數據，將 <b>HiveQL 編譯成 MapReduce jobs</b>。當年 Facebook 超過 90% MapReduce job 由 Hive 產生。</li>
+    <li>HiveQL 係 limited 版 SQL：DDL（create／drop／alter table、database、view）、DML（insert、select、update、delete、load data）、query（SELECT / WHERE / GROUP BY / HAVING / ORDER BY / LIMIT、各種 JOIN）、functions、<code>PARTITIONED BY</code>、<code>CLUSTERED BY</code>（bucketing）。</li>
+    <li><code>LOAD DATA LOCAL INPATH ... OVERWRITE INTO TABLE t</code>：LOCAL = 由本機讀；冇 LOCAL = 由 HDFS 讀；OVERWRITE = 刪走舊數據。Partitioned table 要寫 <code>PARTITION (ds='2025-09-16')</code>。</li>
+  </ul>
+  <div class="tbl wide"><table>
+    <thead><tr><th>Hive 數據模型三層</th><th>喺 HDFS 點樣存</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><b>Table</b></td><td>每個 table 一個 <b>directory</b>，數據 serialize 成 file 放入去</td><td>Typed columns（int、float、string、boolean），支援 map 類型</td></tr>
+      <tr><td><b>Partition</b></td><td>Table directory 入面嘅 <b>sub-directory</b></td><td>決定數據分佈，例如按日期 range-partition</td></tr>
+      <tr><td><b>Bucket</b></td><td>Partition directory 入面嘅 <b>file</b>（分 n 個 bucket 就 n 個 file）</td><td>用 hash 再細分，方便 sampling 同 join</td></tr>
+    </tbody>
+  </table></div>
+  <div class="two">
+    <div class="card"><h4>Hive 架構同編譯步驟</h4>
+      <ul>
+        <li><b>Metastore</b>：存 table 嘅 schema、位置、partition 資料</li>
+        <li><b>Driver</b>：管理 HiveQL query 嘅生命週期</li>
+        <li><b>Compiler</b>：HiveQL → parse tree → plan</li>
+        <li><b>Execution engine</b>：將 plan 變成 MapReduce 喺 Hadoop 執行</li>
+      </ul>
+      <p class="cap">Parser（語法、parse tree）→ Semantic analysis（檢查 table／column／type）→ Logical plan generator → Optimizer → Physical plan generator（DAG of MapReduce jobs）</p>
+    </div>
+    <div class="card"><h4>Hive 特點同限制</h4>
+      <ul>
+        <li>Petabyte 級 data warehouse，基於 MapReduce + HDFS；係 <b>OLAP</b>，<b>唔係 OLTP</b></li>
+        <li>Fault-tolerant、scale-out、支援 nested data、UDF、custom mapper／reducer、SerDe</li>
+        <li><b>限制</b>：高 latency（細 query 都要幾分鐘）、唔啱互動式分析、多 join 嘅複雜 query 慢、冇內置 ML／iterative algorithm</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Shark</h3>
+  <ul>
+    <li><b>動機</b>：data warehouse 有好強嘅 <b>temporal locality</b>（最近用過嘅數據好快會再用），Facebook <b>90% query 可以喺 main memory 完成</b>。大部分 query 只睇細嘅數據 window（例如每日 log），唔使將 petabyte 塞入 memory。</li>
+    <li><b>做法</b>：保留 Hive 嘅 scalability 同 extensibility，將 Hive 嘅 MapReduce physical plan／execution engine <b>換成 Spark RDD</b>，加 cache manager 同改 optimizer。</li>
+  </ul>
+  <div class="tbl wide"><table>
+    <thead><tr><th>Shark 嘅新功能</th><th>重點</th></tr></thead>
+    <tbody>
+      <tr><td>In-memory table caching</td><td><code>CREATE TABLE mytable_cached AS SELECT ...</code>，底層用 <code>RDD.cache()</code></td></tr>
+      <tr><td>Data co-partitioning</td><td>相同 join key 嘅 record 放同一個 partition，之後 join 更快</td></tr>
+      <tr><td>Cost-based optimizer</td><td>估算唔同執行策略嘅成本，揀 join 次序</td></tr>
+      <tr><td><b>Partial DAG Execution（PDE）</b></td><td>Run-time 收集統計（partition 大細同 record 數、heavy hitters、近似 histogram），worker 送去 master，動態改 plan：揀 <b>shuffle join 定 broadcast join</b>、決定 reducer 數量、處理 skew</td></tr>
+      <tr><td><b>Columnar memory store</b></td><td>按 column 存：<code>SELECT AVG(age)</code> 只讀 age 一欄，減少 I/O；壓縮好（dictionary encoding、run-length encoding）；少 object、對 JVM garbage collection 友好</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Shark 唔支援</b>：hash-based bucketing、不同 partition 用唔同 input format、合併細 output file、自動 map-side join。<b>點解 2014 年停止</b>：只可以 query Hive metastore 入面嘅外部數據（唔可以 query Spark 程式自己處理緊嘅 RDD）；要經 SQL string 調用，易出錯；沿用為 MapReduce 設計嘅 Hive optimizer，難擴展。→ 轉做 Spark SQL。</p>
+
+  <h3>Spark SQL 同 DataFrame</h3>
+  <p>Spark SQL（2014，Spark 1.0 開始）直接建喺 Spark core 上面，加咗兩樣嘢：<b>DataFrame API</b> 同 <b>Catalyst optimizer</b>（將 logical plan 變成高效 physical plan）。</p>
+  <div class="tbl wide"><table>
+    <thead><tr><th></th><th>RDD</th><th>DataFrame</th></tr></thead>
+    <tbody>
+      <tr><td>數據</td><td>Opaque Java／Python objects，Spark 唔知入面有咩欄位</td><td>有名嘅 columns + schema（好似 database table）</td></tr>
+      <tr><td>寫法</td><td>Functional：map、filter、reduce，傳 lambda</td><td>Declarative：講你要咩（select、filter、groupBy、SQL），Spark 決定點做</td></tr>
+      <tr><td>優化</td><td>Lambda 係 <b>black box</b>，engine 睇唔到入面，優化有限</td><td>Catalyst：predicate pushdown、constant folding、loop unrolling、join reordering、runtime code generation</td></tr>
+      <tr><td>Storage</td><td>Python object 好多時大過數據本身</td><td>Compact binary、columnar 壓縮</td></tr>
+      <tr><td>Lazy？</td><td>係</td><td>係：每個 DataFrame 代表一個 logical plan，去到 <code>show()</code>、<code>count()</code>、<code>save()</code> 等 output operation 先執行</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl wide"><table>
+    <thead><tr><th>Catalyst 優化</th><th>意思</th></tr></thead>
+    <tbody>
+      <tr><td>Predicate pushdown</td><td>將 filter 盡量推前（甚至推去 data source），早啲減少數據</td></tr>
+      <tr><td>Constant folding</td><td>Compile time 先計好常數，例如 <code>1+2+t1.value</code> 變 <code>3+t1.value</code></td></tr>
+      <tr><td>Loop unrolling</td><td>將 loop 展開成一串明確操作，減少 loop control 嘅 overhead</td></tr>
+      <tr><td>Join reordering</td><td>重新排 join 次序令 query 更快</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>DataFrame 操作速查（L4 + T04）</h4>
+  <div class="tbl wide"><table>
+    <thead><tr><th>要做</th><th>寫法</th></tr></thead>
+    <tbody>
+      <tr><td>讀 CSV</td><td><code>spark.read.csv(path, header=True, inferSchema=True)</code>；或 <code>schema=schema</code>。冇 inferSchema 嘅話全部 column 係 string</td></tr>
+      <tr><td>讀 JSON／Parquet</td><td><code>spark.read.json(path)</code>（多行 JSON 加 <code>multiLine=True</code>）；<code>df.write.parquet(dir)</code>、<code>spark.read.parquet(dir)</code></td></tr>
+      <tr><td>由 list／RDD 建立</td><td><code>spark.createDataFrame(my_list, ['letter', 'number'])</code>、<code>spark.createDataFrame(rdd, schema)</code>、<code>rdd.map(lambda x: Row(...)).toDF()</code></td></tr>
+      <tr><td>睇結構</td><td><code>df.printSchema()</code>、<code>df.columns</code>、<code>df.dtypes</code>、<code>df.show(5, truncate=False)</code></td></tr>
+      <tr><td>揀 column</td><td><code>df.select("id", "name")</code></td></tr>
+      <tr><td>過濾</td><td><code>df.filter(df.quantity &gt; 20)</code>、<code>df.where(col("gpa") &gt; 3.5)</code></td></tr>
+      <tr><td>分組統計</td><td><code>df.groupBy("category").agg({"quantity": "sum", "price": "avg"})</code>、<code>df.groupBy("level").count()</code></td></tr>
+      <tr><td>排序</td><td><code>df.orderBy("price")</code>、<code>df.orderBy(col("price").desc())</code>、<code>df.sort('avg(speed)', ascending=False)</code></td></tr>
+      <tr><td>加／改 column</td><td><code>df.withColumn("revenue", df.quantity * df.price)</code>、<code>df.withColumnRenamed("price", "product_price")</code></td></tr>
+      <tr><td>條件 column</td><td><code>when(col('x') &lt; 200, 'Easy').when(col('x') &lt; 350, 'Moderate').otherwise('Difficult')</code></td></tr>
+      <tr><td>其他</td><td><code>df.drop("a", "b")</code>、<code>df.select("category").distinct()</code>、<code>df.join(df2, "id", "inner")</code>、<code>df1.union(df2)</code>、<code>df.select('a','b').toDF('x','y')</code> 改名</td></tr>
+      <tr><td>SQL</td><td><code>df.createOrReplaceTempView("user")</code> → <code>spark.sql("SELECT gender, AVG(salary) FROM user GROUP BY gender")</code>；<code>spark.catalog.tableExists("user")</code>、<code>spark.catalog.dropTempView("user")</code></td></tr>
+      <tr><td>Window function</td><td><code>Window.partitionBy("department").orderBy(F.desc("salary"))</code> + <code>F.rank().over(w)</code></td></tr>
+      <tr><td>DataFrame → RDD</td><td><code>df.rdd</code>：每個元素係 <code>Row</code> object，可以 <code>x['name']</code> 或 <code>x.name</code></td></tr>
+    </tbody>
+  </table></div>
+  <h4>UDF（User-Defined Function）</h4>
+<pre class="code"><code>from pyspark.sql.functions import udf
+from pyspark.sql.types import IntegerType
+
+def round_float_down(x):          # 1. 普通 Python function
+    return int(x)
+
+round_float_down_udf = udf(round_float_down, IntegerType())    # 2. function + return type
+df.select(round_float_down_udf('price')).show()               # 3. 用喺 column</code></pre>
+  <p>L5 slide 28：<b>UDF 包含兩部分：一個 function 同 output datatype</b>。回傳 list 用 <code>ArrayType(StringType())</code>；回傳 list of tuple（例如 POS tagging）用 <code>ArrayType(StructType([StructField('f1', StringType()), StructField('f2', StringType())]))</code>。想喺 <code>spark.sql</code> 入面用：<code>spark.udf.register("name", f, StringType())</code>。</p>
+</section>
+
+<!-- ============ L5 ============ -->
+<section id="nlp">
+  <div class="sec-head"><span class="eyebrow">L5 Intro to NLP · T05</span><h2>NLP 前處理同文字表示</h2></div>
+  <div class="tbl wide"><table>
+    <thead><tr><th>語言學層次</th><th>研究咩</th><th>例子</th></tr></thead>
+    <tbody>
+      <tr><td><b>Phonetics</b></td><td>聲音嘅物理：點發聲、傳播（頻率、振幅）、點聽</td><td>分辨相似元音</td></tr>
+      <tr><td><b>Phonology</b></td><td>某個語言入面聲音嘅規則，phonemes 點樣有意義</td><td>“rules of the game”</td></tr>
+      <tr><td><b>Morphology</b></td><td>字點樣由 morpheme（最細有意義單位）組成：root + affixes</td><td>draw+s、draw+ing+s、un+draw+able。<b>Inflectional</b>（詞性唔變：give, gave, given）vs <b>Derivational</b>（詞性變：process → processor）</td></tr>
+      <tr><td><b>Syntax</b></td><td>字之間嘅結構關係</td><td>句子結構、Penn Treebank</td></tr>
+      <tr><td><b>Semantics</b></td><td>字面意思</td><td>ACTION = disconnect，ACTOR = you and Frank，OBJECT = me</td></tr>
+      <tr><td><b>Pragmatics</b></td><td>意思同講者目的、意圖嘅關係（禮貌、間接）</td><td>“I'm sorry Dave, I'm afraid I can't do that.”</td></tr>
+    </tbody>
+  </table></div>
+  <p>NLP 應用：spell checking、keyword search、information extraction、machine translation、sentiment analysis。NLTK 係 Python 處理人類語言嘅主要 library（classification、tokenization、stemming、tagging）。Chomsky 開創 generative linguistics。</p>
+
+  <h3>前處理步驟</h3>
+  <div class="tbl wide"><table>
+    <thead><tr><th>步驟</th><th>做咩</th><th>例子／重點</th></tr></thead>
+    <tbody>
+      <tr><td>Data cleaning</td><td>刪 HTML tag、標點、數字等</td><td>Regular expression；T05 normalize()</td></tr>
+      <tr><td><b>Tokenization</b></td><td>將文字切成 token</td><td>三類：<b>word</b>（歐洲語言，NLTK word_tokenize）、<b>character</b>（中日韓泰，冇空格；中文用字通常好過用詞，詞會令 vocabulary 好大又多罕見字）、<b>subword</b>（BPE）</td></tr>
+      <tr><td><b>Stemming</b></td><td>粗暴切走詞綴得到 stem（唔一定係真字）</td><td>computational、computing → comput；Porter：sses→ss（classes→class）、ies→i（companies→compani）、s→（cats→cat）、ational→ate、tional→tion</td></tr>
+      <tr><td><b>Lemmatization</b></td><td>還原到字典形式（lemma），要考慮詞性</td><td>am, are, is → be；car, cars, car's → car；run, ran → run</td></tr>
+      <tr><td>Stop words removal</td><td>刪常見但冇資訊嘅字（通常 200–300 個）</td><td>a, an, the。但有時有用：“To be or not to be”、“Let it be”、“flights to London”</td></tr>
+      <tr><td><b>POS tagging</b></td><td>標詞性（noun、verb、adjective…）</td><td>“present” 可以係名詞（禮物）、動詞、形容詞；PySpark 用 UDF 包 nltk.pos_tag</td></tr>
+      <tr><td><b>NER</b></td><td>自動認出命名實體（人、地方、機構）</td><td>Peter Parker、New York</td></tr>
+      <tr><td>Chunking</td><td>將多個 token 組成片語</td><td>Noun phrase：<code>NP: {&lt;DT&gt;?&lt;JJ&gt;*&lt;NN&gt;}</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Subword tokenization（BPE）</h3>
+  <p><b>點解要</b>：解決 unknown word（OOV）。例如訓練數據有 “foot” 同 “ball” 但冇 “football”，或者有 low、new、newer 但冇 lower。Subword 可以減細 vocabulary，靈感來自 information theory 嘅數據壓縮。</p>
+  <div class="tbl wide"><table>
+    <thead><tr><th>三個演算法</th><th>做咩</th></tr></thead>
+    <tbody>
+      <tr><td><b>Token learner</b></td><td>由 training corpus 學 vocabulary：① 全部拆成單字母 ② 搵最常出現嘅相鄰 pair ③ 合併並加入 vocabulary（大小 +1）④ 重複直至夠數或者冇 pair 再夠頻率</td></tr>
+      <tr><td><b>Token segmenter（encoder）</b></td><td>用學到嘅 vocabulary（同 merge 次序）切新句子</td></tr>
+      <tr><td><b>Token merger（decoder）</b></td><td>將 token 序列砌返原本句子</td></tr>
+    </tbody>
+  </table></div>
+  <p>Lecture 例子：(“hug”,10), (“pug”,5), (“pun”,12), (“bun”,4), (“hugs”,5) → 先合併 <code>u g → ug</code>（20 次），再 <code>u n → un</code>（16 次），再 <code>h ug → hug</code>（15 次）。GPT 類 tokenizer 將空格變成特別字元 <code>Ġ</code>，放喺字頭。</p>
+
+  <h3>文字變數字</h3>
+  <div class="tbl wide"><table>
+    <thead><tr><th>方法</th><th>做法</th><th>缺點</th></tr></thead>
+    <tbody>
+      <tr><td>One-hot encoding</td><td>每個 distinct value 開一個 binary column（name_Goldy、kind_Dog…）</td><td>維度大；兩個唔同字嘅 cosine 永遠 = 0</td></tr>
+      <tr><td>Bag of Words（CountVectorizer）</td><td>數每個字喺文件出現幾多次</td><td><b>字序冇咗</b>、稀疏</td></tr>
+      <tr><td>N-gram</td><td>Sliding window 數連續 N 個字（bigram：“don't like”）</td><td>保留局部字序，但 vocabulary 更大</td></tr>
+      <tr><td><b>TF-IDF</b></td><td>TF × IDF，量度字喺文件嘅重要性</td><td>見練習卷 Q2(b) 嘅缺點表</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Sparse vector</b> <code>(3, [0, 2], [1.0, 3.0])</code> = 長度 3、index 0 同 2 非零 = dense <code>[1.0, 0.0, 3.0]</code>。PySpark feature 輸出格式 (N, [I], [F])。</li>
+    <li><b>Vector space model</b>：t = vocabulary 大小，每份文件同 query 都係 t 維向量；term-document matrix 每格係 weight，0 = 冇出現。</li>
+  </ul>
+  <div class="tbl wide"><table>
+    <thead><tr><th>公式</th><th>Lecture 版</th><th>PySpark／Tutorial 5／練習卷版</th></tr></thead>
+    <tbody>
+      <tr><td>TF</td><td><code>tf = f / max f</code>（normalize by 最常見嘅字）</td><td>Raw count，唔 normalize</td></tr>
+      <tr><td>IDF</td><td><code>log₂(N / df)</code></td><td><code>ln((N + 1) / (df + 1))</code>，加 1 避免除 0</td></tr>
+      <tr><td>例子</td><td>A(3), B(2), C(1)；N = 10000；df A=50 → tf 1, idf 7.6, tf-idf 7.6</td><td>2 份文件，python 喺兩份都有 → idf = ln(3/3) = 0；spark df=1 → ln(3/2) = 0.4055，tf = 2 → 0.811</td></tr>
+    </tbody>
+  </table></div>
+  <p>PySpark pipeline：<code>Tokenizer</code>（按空格切）→ <code>CountVectorizer</code>（TF；參數 minTF、minDF、vocabSize）→ <code>IDF</code>（fit 再 transform，直接輸出 TF-IDF）。另有 <code>NGram(n=2)</code>、<code>StopWordsRemover</code>。</p>
+  <p><b>TF-IDF 直覺</b>：喺一份文件出現好多次、但喺成個 collection 好少文件出現嘅字，權重最高。每份文件都有嘅字 IDF = 0。</p>
+</section>
+
+<!-- ============ L6 similarity ============ -->
+<section id="similarity">
+  <div class="sec-head"><span class="eyebrow">L6 Part 1 · Text similarities</span><h2>文字相似度</h2></div>
+  <div class="tbl wide"><table>
+    <thead><tr><th>類別</th><th>方法</th><th>公式</th><th>例子 “The quick brown fox” vs “The quick brown dog”</th><th>優點／缺點</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2"><b>Edit-based</b></td><td>Hamming</td><td>相同長度，數位置唔同嘅字母（只計 substitution）</td><td>taking vs making = 1；dump vs puma = 2</td><td>快；<b>只可以用喺等長字串</b>，唔計 insert／delete</td></tr>
+      <tr><td>Levenshtein</td><td>最少 insert / delete / substitute 次數</td><td>kitten → sitting = 3</td><td>彈性；計算較貴（DP）</td></tr>
+      <tr><td rowspan="5"><b>Token-based</b></td><td>Jaccard</td><td>|A∩B| / |A∪B|</td><td>3 / 5 = 0.6</td><td>易明；受 set 大細影響</td></tr>
+      <tr><td>Sørensen-Dice</td><td>2|A∩B| / (|A| + |B|)</td><td>6 / 8 = 0.75</td><td>重視 overlap；仍受大細影響</td></tr>
+      <tr><td>Tversky</td><td>|A∩B| / (|A∩B| + α|A−B| + β|B−A|)</td><td>α = β = 0.5：3 / (3 + 0.5 + 0.5) = 0.75</td><td>Jaccard（α=β=1）同 Dice（α=β=0.5）嘅推廣；複雜</td></tr>
+      <tr><td>Overlap</td><td>|A∩B| / min(|A|, |B|)</td><td>3 / 4 = 0.75</td><td>較唔受大細影響；大細差好遠時唔好</td></tr>
+      <tr><td>Cosine</td><td>A·B / (‖A‖‖B‖)</td><td>3 / (2 × 2) = 0.75</td><td>高維都好用；<b>唔理向量長度</b></td></tr>
+      <tr><td><b>Hybrid</b></td><td>Monge-Elkan</td><td>對第一個 set 每個元素，用 secondary similarity 搵另一個 set 最高分，再取平均</td><td>—</td><td>處理到不同大小；計算量大，靠揀 secondary function</td></tr>
+    </tbody>
+  </table></div>
+  <p>其他：Tanimoto distance 都係 token-based。Lecture 嘅 embedding 例子：cosine(Jay, Steven) = 0.1897，cosine(Jay, Allie) = 0.3458 → Jay 同 Allie 較似。</p>
+
+  <h3>Levenshtein DP table 點填</h3>
+  <p><code>DP[i][j] = min( DP[i−1][j−1] + (相同 ? 0 : 1),  DP[i−1][j] + 1,  DP[i][j−1] + 1 )</code>：對角 = substitute（或 match 唔使錢）；上面同左邊 = insert 或 delete。第一行 = 由空字串砌（insertion）、第一列 = 刪到空（deletion）。</p>
+  <div class="two">
+    <div class="card"><h4>Lecture：BUT vs ANT（距離 2）</h4>
+      <div class="tbl dp"><table>
+        <thead><tr><th></th><th>“”</th><th>A</th><th>N</th><th>T</th></tr></thead>
+        <tbody><tr><th>“”</th><td>0</td><td>1</td><td>2</td><td>3</td></tr><tr><th>B</th><td>1</td><td>1</td><td>2</td><td>3</td></tr><tr><th>U</th><td>2</td><td>2</td><td>2</td><td>3</td></tr><tr><th>T</th><td>3</td><td>3</td><td>3</td><td class="hl">2</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="card"><h4>練習卷：Teh vs The（距離 2）</h4>
+      <div class="tbl dp"><table>
+        <thead><tr><th></th><th>“”</th><th>T</th><th>e</th><th>h</th></tr></thead>
+        <tbody><tr><th>“”</th><td>0</td><td>1</td><td>2</td><td>3</td></tr><tr><th>T</th><td>1</td><td>0</td><td>1</td><td>2</td></tr><tr><th>h</th><td>2</td><td>1</td><td>1</td><td>1</td></tr><tr><th>e</th><td>3</td><td>2</td><td>1</td><td class="hl">2</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ L6 embedding ============ -->
+<section id="embedding">
+  <div class="sec-head"><span class="eyebrow">L6 Part 2 · Text embedding · T06</span><h2>Word embedding：Word2Vec、SGNS、GloVe</h2></div>
+  <div class="two">
+    <div class="card"><h4>字嘅意思</h4>
+      <ul>
+        <li><b>Lemma</b>：break, breaks, broke, broken, breaking 共用 lemma “break”</li>
+        <li><b>Synonymy</b>：couch／sofa、car／automobile（完全同義好少）</li>
+        <li><b>Similarity</b> vs <b>relatedness</b>：couch／sofa 相似；couch／pillow 只係有關聯</li>
+        <li><b>Antonymy</b>：只喺一個特徵相反：long／short、rise／fall</li>
+      </ul>
+    </div>
+    <div class="card"><h4>Semantic feature space</h4>
+      <ul>
+        <li>用特徵（cuteness、size；gender、age、royalty）表示字，用 Euclidean distance 比較</li>
+        <li>Analogy：king − man + woman：[1,8,8] − [1,7,0] + [9,7,0] = <b>[9,8,8]</b> ≈ queen</li>
+        <li>手動設計特徵唔可行 → 由大量文字自動學，typical 300 維</li>
+      </ul>
+    </div>
+  </div>
+  <ul>
+    <li><b>Distributional hypothesis</b>：喺相似上下文出現嘅字意思相似。Harris（1954）：oculist 同 eye-doctor 出現喺差唔多嘅環境；Firth（1957）：“You shall know a word by the company it keeps.”</li>
+    <li><b>One-hot 嘅問題</b>：cat 同 feline 嘅 one-hot cosine = 0，捉唔到相似。Embedding 將每個字變成 continuous dense vector，意思近嘅字喺空間入面距離近。</li>
+  </ul>
+
+  <h3>Skip-gram vs CBOW（Word2Vec, Mikolov 2013）</h3>
+  <figure>
+    <div class="diawrap">
+      <svg class="dia w700" viewBox="0 0 720 200" role="img" aria-labelledby="sg-t">
+        <title id="sg-t">Skip-gram uses the centre word "loves" to predict the context words; CBOW uses the context words to predict "loves"</title>
+        <defs><marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah a"/></marker></defs>
+        <text x="20" y="24" class="h">Skip-gram：center → context</text>
+        <g class="mono">
+          <rect x="20" y="70" width="64" height="30" rx="5" class="fmap"/><text x="52" y="90" text-anchor="middle">the</text>
+          <rect x="90" y="70" width="64" height="30" rx="5" class="fmap"/><text x="122" y="90" text-anchor="middle">man</text>
+          <rect x="160" y="70" width="64" height="30" rx="5" class="facc"/><text x="192" y="90" text-anchor="middle" class="tacc">loves</text>
+          <rect x="230" y="70" width="64" height="30" rx="5" class="fmap"/><text x="262" y="90" text-anchor="middle">his</text>
+          <rect x="300" y="70" width="64" height="30" rx="5" class="fmap"/><text x="332" y="90" text-anchor="middle">son</text>
+        </g>
+        <path d="M180 68 Q 120 30 60 66" class="arr a" marker-end="url(#ahs)"/>
+        <path d="M186 68 Q 154 46 126 66" class="arr a" marker-end="url(#ahs)"/>
+        <path d="M198 68 Q 230 46 258 66" class="arr a" marker-end="url(#ahs)"/>
+        <path d="M204 68 Q 264 30 324 66" class="arr a" marker-end="url(#ahs)"/>
+        <text x="20" y="130" class="small">P(the|loves)·P(man|loves)·P(his|loves)·P(son|loves)</text>
+        <text x="20" y="150" class="small">Final embedding 用 center 向量 V</text>
+        <path d="M374 20 L374 180" class="dash"/>
+        <text x="390" y="24" class="h">CBOW：context → center</text>
+        <g class="mono">
+          <rect x="390" y="70" width="64" height="30" rx="5" class="fmap"/><text x="422" y="90" text-anchor="middle">the</text>
+          <rect x="460" y="70" width="64" height="30" rx="5" class="fmap"/><text x="492" y="90" text-anchor="middle">man</text>
+          <rect x="530" y="70" width="64" height="30" rx="5" class="facc"/><text x="562" y="90" text-anchor="middle" class="tacc">loves</text>
+          <rect x="600" y="70" width="64" height="30" rx="5" class="fmap"/><text x="632" y="90" text-anchor="middle">his</text>
+          <rect x="670" y="70" width="44" height="30" rx="5" class="fmap"/><text x="692" y="90" text-anchor="middle">son</text>
+        </g>
+        <path d="M420 104 Q 480 150 546 104" class="arr a" marker-end="url(#ahs)"/>
+        <path d="M492 104 Q 522 130 552 104" class="arr a" marker-end="url(#ahs)"/>
+        <path d="M632 104 Q 602 130 572 104" class="arr a" marker-end="url(#ahs)"/>
+        <path d="M692 104 Q 636 150 578 104" class="arr a" marker-end="url(#ahs)"/>
+        <text x="390" y="170" class="small">P(loves | the, man, his, son)：context 向量取平均</text>
+        <text x="390" y="190" class="small">Final embedding 通常用 context 向量</text>
+      </svg>
+    </div>
+    <figcaption>圖 3：window m = 2 嘅例子 “since the man loves his son so much”。</figcaption>
+  </figure>
+  <div class="tbl wide"><table>
+    <thead><tr><th></th><th>Skip-gram</th><th>CBOW</th></tr></thead>
+    <tbody>
+      <tr><td>Input → Output</td><td>Center word → 每個 context word</td><td>所有 context words → center word</td></tr>
+      <tr><td>假設</td><td>① 每個 window 係 i.i.d. 樣本 ② 俾定 center，context words 條件獨立 ③ 唔理 context 位置（前 1 位、後 2 位一樣處理）</td><td>① window i.i.d. ② 每個 context word 用同一方法處理，唔理位置</td></tr>
+      <tr><td>Loss</td><td><code>J(θ) = −Σₜ Σ₋ₘ≤ⱼ≤ₘ, ⱼ≠0 log P(wₜ₊ⱼ | wₜ)</code>（negative log likelihood）</td><td><code>J(θ) = −Σₜ log P(wₜ | wₜ₋ₘ, …, wₜ₊ₘ)</code></td></tr>
+      <tr><td>模型</td><td><code>P(o|c) = exp(u_o·v_c) / Σₖ exp(u_k·v_c)</code>（softmax）</td><td>用 <code>(1/2m)(v_o1 + … + v_o2m)</code> 平均再同 <code>u_c</code> 做 dot product + softmax</td></tr>
+      <tr><td>每個字兩個向量</td><td>用 center 向量 <b>V</b> 做 embedding；context 向量 U 只喺訓練用</td><td>通常用 context 向量做 embedding</td></tr>
+      <tr><td>T06 Keras 實作</td><td>—</td><td><code>Embedding(vocab, dim)</code> → <code>Lambda(mean)</code> → <code>Dense(vocab, softmax)</code>，loss = categorical cross-entropy，optimizer = Adam；PAD = index 0、UNK = 1</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Lecture 數字例子</b>：one-hot × W 等於揀出 W 嘅某一行（lookup table），例如 “passes” → v_c = [0.1, 0.2, 0.7]；乘 W′ 得 logits，softmax 後 loss = −log(0.155065) = 0.8095。CBOW example：W 兩行 (0.38, 0.42) 同 (−0.11, 0.1) 取平均 → h = (0.135, 0.26)，softmax 後 P(sit) = 0.2626，loss = −log(0.2626)。</p>
+
+  <h3>SGNS 同 GloVe</h3>
+  <div class="two">
+    <div class="card"><h4>Skip-gram with Negative Sampling</h4>
+      <ul>
+        <li><b>問題</b>：softmax 分母要加總成個 vocabulary V（可以好大），好慢</li>
+        <li><b>做法</b>：變成 <b>binary logistic regression</b>：(center, 真 context) → y = 1；(center, 隨機抽嘅字) → y = 0</li>
+        <li><code>P(y=1|c,o) = σ(u_o·v_c) = 1/(1+e^(−u_o·v_c))</code></li>
+        <li>點解要 negative：淨係有 positive，模型只要將 dot product 調到好大就「作弊」令 loss 變細</li>
+        <li>每個 positive 抽 k 個 negative：<code>J = −log σ(u_o·v_c) − Σ log(1 − σ(u_k·v_c))</code></li>
+      </ul>
+    </div>
+    <div class="card"><h4>GloVe（Stanford）</h4>
+      <ul>
+        <li>Global Vectors：先建 <b>co-occurrence count matrix</b>（V × V，好高維）</li>
+        <li>用 matrix factorization 分解成低維 embedding</li>
+        <li>好處：好快；捉到 word2vec（只睇 batch 入面嘅 window）睇唔到嘅 <b>global statistics</b></li>
+        <li>但一般 word2vec 效果較好</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MCQ ============ -->
+<section id="mcq">
+  <div class="sec-head"><span class="eyebrow">Section A 模擬</span><h2>模擬 MCQ</h2></div>
+  <p>撳選項即刻見對錯同解釋。<b>Set A</b> 15 題，題數同真 quiz 一樣；<b>Set B</b> 26 題係概念加強；<b>Set C</b> 17 題跟 Quiz 1 真卷風格：情境題、計數題同一條 “Which TWO”。計數題嘅答案已經用程式核對。</p>
+  <div class="qblock">
+    <div class="scorebar"><span class="s" id="score-A">Set A：已答 <b>0</b>/15 · 答啱 <b>0</b></span><button class="btn" type="button" data-reset="A">重新做 Set A</button></div>
+    <div class="qset" id="set-A"></div>
+  </div>
+  <div class="qblock" style="margin-top:28px">
+    <div class="scorebar"><span class="s" id="score-B">Set B：已答 <b>0</b>/26 · 答啱 <b>0</b></span><button class="btn" type="button" data-reset="B">重新做 Set B</button></div>
+    <div class="qset" id="set-B"></div>
+  </div>
+  <div class="qblock" style="margin-top:28px">
+    <div class="scorebar"><span class="s" id="score-C">Set C：已答 <b>0</b>/17 · 答啱 <b>0</b></span><button class="btn" type="button" data-reset="C">重新做 Set C</button></div>
+    <div class="qset" id="set-C"></div>
+  </div>
+</section>
+
+<!-- ============ Q1 PRACTICE ============ -->
+<section id="q1practice">
+  <div class="sec-head"><span class="eyebrow">短答 1 模擬 · 唯一 coding 題</span><h2>Spark DataFrame + UDF 填充</h2></div>
+  <p>喺橙色格打答案，撳「對答案」。大小寫要啱（<code>StringType</code> 唔係 <code>stringtype</code>），空格唔影響。開頭假設已經有 <code>spark = SparkSession.builder.getOrCreate()</code>。</p>
+
+  <div class="practice fill" id="fill1">
+    <span class="src">練習卷 Q1(a)</span>
+    <h3>填充 1：Sensor RDD → DataFrame</h3>
+<pre class="code"><code>from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DoubleType
+schema = StructType([
+    StructField("sensor_id", <span class="bn">1</span><input class="blank" id="f1-1" data-ans="IntegerType()" aria-label="Blank 1" autocomplete="off" spellcheck="false">, True),
+    StructField("location", <span class="bn">2</span><input class="blank" id="f1-2" data-ans="StringType()" aria-label="Blank 2" autocomplete="off" spellcheck="false">, True),
+    <span class="bn">3</span><input class="blank" id="f1-3" data-ans="StructField" aria-label="Blank 3" autocomplete="off" spellcheck="false">("reading_value", <span class="bn">4</span><input class="blank" id="f1-4" data-ans="DoubleType()" aria-label="Blank 4" autocomplete="off" spellcheck="false">, True),
+    StructField("raw_timestamp", StringType(), <span class="bn">5</span><input class="blank" id="f1-5" data-ans="True" aria-label="Blank 5" autocomplete="off" spellcheck="false">)
+])
+df_sensors = spark.<span class="bn">6</span><input class="blank" id="f1-6" data-ans="createDataFrame" aria-label="Blank 6" autocomplete="off" spellcheck="false">(raw_sensor_rdd, <span class="bn">7</span><input class="blank" id="f1-7" data-ans="schema" aria-label="Blank 7" autocomplete="off" spellcheck="false">)
+df_sensors.<span class="bn">8</span><input class="blank" id="f1-8" data-ans="printSchema" aria-label="Blank 8" autocomplete="off" spellcheck="false">()     # 檢查 column type</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+  </div>
+
+  <div class="practice fill" id="fill2">
+    <span class="src">練習卷 Q1(b)</span>
+    <h3>填充 2：情感分類 UDF</h3>
+<pre class="code"><code>from pyspark.sql.functions import udf, col
+from pyspark.sql.types import StringType
+
+def analyze_sentiment(text):
+    if text is <span class="bn">1</span><input class="blank" id="f2-1" data-ans="None" aria-label="Blank 1" autocomplete="off" spellcheck="false"> or text.strip() == "":
+        return "Unknown"
+    t = text.<span class="bn">2</span><input class="blank" id="f2-2" data-ans="lower" aria-label="Blank 2" autocomplete="off" spellcheck="false">()
+    if any(w in t for w in ["great", "love", "excellent"]):
+        return "Positive"
+    if any(w in t for w in ["bad", "broken", "waste"]):
+        return "Negative"
+    return "Neutral"
+
+sentiment_udf = <span class="bn">3</span><input class="blank" id="f2-3" data-ans="udf" aria-label="Blank 3" autocomplete="off" spellcheck="false">(analyze_sentiment, <span class="bn">4</span><input class="blank" id="f2-4" data-ans="StringType()" aria-label="Blank 4" autocomplete="off" spellcheck="false">)
+df_segmented = df_reviews.<span class="bn">5</span><input class="blank" id="f2-5" data-ans="withColumn" aria-label="Blank 5" autocomplete="off" spellcheck="false">("sentiment_category", sentiment_udf(<span class="bn">6</span><input class="blank" id="f2-6" data-ans="col('feedback_text')§df_reviews.feedback_text§df_reviews['feedback_text']§'feedback_text'" aria-label="Blank 6" autocomplete="off" spellcheck="false">))
+df_segmented.<span class="bn">7</span><input class="blank" id="f2-7" data-ans="show" aria-label="Blank 7" autocomplete="off" spellcheck="false">(truncate=False)</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+  </div>
+
+  <div class="practice fill" id="fill3">
+    <span class="src">新題 · schema + 分組統計</span>
+    <h3>填充 3：每個學系有幾多個 GPA &gt; 3.5 嘅學生</h3>
+    <p><code>student_rdd</code> 每個元素係 <code>(student_id: Int, name: String, dept: String, gpa: Double)</code>。</p>
+<pre class="code"><code>from pyspark.sql.functions import col, count
+schema = StructType([
+    StructField("student_id", IntegerType(), True),
+    StructField("name", StringType(), True),
+    StructField("dept", StringType(), True),
+    StructField("gpa", <span class="bn">1</span><input class="blank" id="f3-1" data-ans="DoubleType()" aria-label="Blank 1" autocomplete="off" spellcheck="false">, True)
+])
+df = spark.createDataFrame(student_rdd, schema)
+result = df.<span class="bn">2</span><input class="blank" id="f3-2" data-ans="filter§where" aria-label="Blank 2" autocomplete="off" spellcheck="false">(col("gpa") > 3.5) \
+           .<span class="bn">3</span><input class="blank" id="f3-3" data-ans="groupBy§groupby" aria-label="Blank 3" autocomplete="off" spellcheck="false">("dept") \
+           .agg(count("*").<span class="bn">4</span><input class="blank" id="f3-4" data-ans="alias" aria-label="Blank 4" autocomplete="off" spellcheck="false">("num_honours")) \
+           .<span class="bn">5</span><input class="blank" id="f3-5" data-ans="orderBy§sort" aria-label="Blank 5" autocomplete="off" spellcheck="false">(col("num_honours").<span class="bn">6</span><input class="blank" id="f3-6" data-ans="desc" aria-label="Blank 6" autocomplete="off" spellcheck="false">())
+result.show()</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li><code>filter</code> 同 <code>where</code> 一樣；<code>orderBy</code> 同 <code>sort</code> 一樣。</li>
+      <li>寫法二：<code>df.filter(df.gpa &gt; 3.5).groupBy("dept").count().orderBy(col("count").desc())</code>。</li>
+      <li>寫法三（SQL）：<code>df.createOrReplaceTempView("students")</code>，再 <code>spark.sql("SELECT dept, COUNT(*) AS num_honours FROM students WHERE gpa &gt; 3.5 GROUP BY dept ORDER BY num_honours DESC")</code>。</li>
+    </ul></div></details>
+  </div>
+
+  <div class="practice fill" id="fill4">
+    <span class="src">新題 · UDF 回傳 Integer + 喺 SQL 用 UDF</span>
+    <h3>填充 4：數每條 review 有幾多個字</h3>
+<pre class="code"><code>from pyspark.sql.functions import udf, col
+from pyspark.sql.types import IntegerType
+
+def word_count(text):
+    if text is None:
+        return 0
+    return <span class="bn">1</span><input class="blank" id="f4-1" data-ans="len" aria-label="Blank 1" autocomplete="off" spellcheck="false">(text.split())
+
+wc_udf = udf(word_count, <span class="bn">2</span><input class="blank" id="f4-2" data-ans="IntegerType()" aria-label="Blank 2" autocomplete="off" spellcheck="false">)
+df2 = df_reviews.withColumn("n_words", wc_udf(col("feedback_text")))
+
+# 想喺 SQL 入面用同一個 function
+spark.udf.<span class="bn">3</span><input class="blank" id="f4-3" data-ans="register" aria-label="Blank 3" autocomplete="off" spellcheck="false">("wc_sql", word_count, IntegerType())
+df_reviews.<span class="bn">4</span><input class="blank" id="f4-4" data-ans="createOrReplaceTempView" aria-label="Blank 4" autocomplete="off" spellcheck="false">("reviews")
+spark.<span class="bn">5</span><input class="blank" id="f4-5" data-ans="sql" aria-label="Blank 5" autocomplete="off" spellcheck="false">("SELECT review_id, wc_sql(feedback_text) AS n_words FROM reviews").show()</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>重點</summary><div class="body"><ul>
+      <li>Return type 要同 Python 回傳值對應：<code>len()</code> 係 int → <code>IntegerType()</code>。寫錯（例如 StringType）Spark 唔會報錯，但結果可能變 null。</li>
+      <li>L4：“UDFs available to other interfaces after registration”，即係 register 之後 SQL 都用得。</li>
+    </ul></div></details>
+  </div>
+
+  <div class="practice fill" id="fill5">
+    <span class="src">新題 · UDF 回傳 list（L5 POS／stop words 寫法）</span>
+    <h3>填充 5：Tokenize 同刪 stop words</h3>
+<pre class="code"><code>from pyspark.sql.types import ArrayType, StringType
+STOP = {"the", "a", "is", "and"}
+
+def clean_tokens(text):
+    if not text:
+        return []
+    return [w for w in text.lower().split() if w <span class="bn">1</span><input class="blank" id="f5-1" data-ans="not in" aria-label="Blank 1" autocomplete="off" spellcheck="false"> STOP]
+
+clean_udf = udf(clean_tokens, <span class="bn">2</span><input class="blank" id="f5-2" data-ans="ArrayType" aria-label="Blank 2" autocomplete="off" spellcheck="false">(<span class="bn">3</span><input class="blank" id="f5-3" data-ans="StringType()" aria-label="Blank 3" autocomplete="off" spellcheck="false">))
+df_tok = df_reviews.withColumn("tokens", clean_udf(col("feedback_text")))
+# "The battery is great and the screen is bad" → ['battery', 'great', 'screen', 'bad']</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+  </div>
+
+  <div class="practice fill" id="fill6">
+    <span class="src">T04 TODO 2.7 嘅寫法 · 唔用 UDF 都做到嘅條件</span>
+    <h3>填充 6：用 when() 分級</h3>
+<pre class="code"><code>from pyspark.sql.functions import when, col
+df_level = df.withColumn("level", <span class="bn">1</span><input class="blank" id="f6-1" data-ans="when" aria-label="Blank 1" autocomplete="off" spellcheck="false">(col("gpa") >= 3.7, "First")
+                                  .<span class="bn">2</span><input class="blank" id="f6-2" data-ans="when" aria-label="Blank 2" autocomplete="off" spellcheck="false">(col("gpa") >= 3.0, "Second")
+                                  .<span class="bn">3</span><input class="blank" id="f6-3" data-ans="otherwise" aria-label="Blank 3" autocomplete="off" spellcheck="false">("Pass"))
+df_level.groupBy("level").<span class="bn">4</span><input class="blank" id="f6-4" data-ans="count" aria-label="Blank 4" autocomplete="off" spellcheck="false">().show()</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>UDF 定 when()？</summary><div class="body"><p>簡單數值條件用內置 <code>when</code> 較好，Catalyst 睇得明可以優化；文字要逐個字檢查、要用 Python library（例如 NLTK）先需要 UDF。練習卷話 “Because the text is unstructured, you cannot use native Spark SQL functions”，所以嗰題要用 UDF。</p></div></details>
+  </div>
+
+  <div class="practice fill" id="fill7">
+    <span class="src">Quiz 1 Section B Q2 嘅 DataFrame + UDF 版 · 模仿 Blank A–G 格式</span>
+    <h3>填充 7：每科平均分同等級</h3>
+    <p>Same scenario as Quiz 1: records <code>CourseID, Score</code> (CS101, 80 / CS102, 70 / CS101, 90 / CS102, 60) are in <code>scores_rdd</code> as tuples <code>("CS101", 80.0)</code>. Build a DataFrame with an explicit schema, compute the average score per course, then add a grade with a UDF: A if avg ≥ 85, B if ≥ 70, otherwise C.</p>
+<pre class="code"><code>from pyspark.sql.types import StructType, StructField, StringType, DoubleType
+from pyspark.sql.functions import avg, col, udf
+
+schema = StructType([
+    StructField("course_id", <span class="bn">A</span><input class="blank" id="f7-1" data-ans="StringType()" aria-label="Blank A" autocomplete="off" spellcheck="false">, True),
+    StructField("score", <span class="bn">B</span><input class="blank" id="f7-2" data-ans="DoubleType()" aria-label="Blank B" autocomplete="off" spellcheck="false">, True)
+])
+df = spark.<span class="bn">C</span><input class="blank" id="f7-3" data-ans="createDataFrame" aria-label="Blank C" autocomplete="off" spellcheck="false">(scores_rdd, schema)
+
+avg_df = df.<span class="bn">D</span><input class="blank" id="f7-4" data-ans="groupBy§groupby" aria-label="Blank D" autocomplete="off" spellcheck="false">("course_id").agg(<span class="bn">E</span><input class="blank" id="f7-5" data-ans="avg§mean" aria-label="Blank E" autocomplete="off" spellcheck="false">("score").alias("avg_score"))
+
+def grade(x):
+    if x is None:
+        return "N/A"
+    if x >= 85:
+        return "A"
+    if x >= 70:
+        return "B"
+    return "C"
+
+grade_udf = udf(grade, <span class="bn">F</span><input class="blank" id="f7-6" data-ans="StringType()" aria-label="Blank F" autocomplete="off" spellcheck="false">)
+result = avg_df.<span class="bn">G</span><input class="blank" id="f7-7" data-ans="withColumn" aria-label="Blank G" autocomplete="off" spellcheck="false">("grade", grade_udf(col("avg_score"))).orderBy("course_id")
+result.show()
+# |course_id|avg_score|grade|
+# |    CS101|     85.0|    A|
+# |    CS102|     65.0|    C|</code></pre>
+    <div class="fillbar"><button class="btn pri" type="button" data-check>對答案</button><button class="btn" type="button" data-show>顯示答案</button><button class="btn" type="button" data-clear>清除</button><span class="fillmsg" aria-live="polite"></span></div>
+    <details><summary>同 Quiz 1 RDD 版比較</summary><div class="body">
+      <div class="tbl wide"><table>
+        <thead><tr><th>步驟</th><th>Quiz 1（RDD）</th><th>Quiz 2（DataFrame）</th></tr></thead>
+        <tbody>
+          <tr><td>入數據</td><td><code>scores.map(lambda r: (r.split(",")[0].strip(), float(...)))</code></td><td><code>spark.createDataFrame(rdd, schema)</code></td></tr>
+          <tr><td>平均</td><td><code>mapValues(lambda s: (s, 1)).reduceByKey(lambda a, b: (a[0]+b[0], a[1]+b[1]))</code>，再 <code>mapValues(lambda t: t[0]/t[1])</code></td><td><code>groupBy("course_id").agg(avg("score"))</code>，一行搞掂</td></tr>
+          <tr><td>自訂邏輯</td><td><code>map(lambda ...)</code></td><td>Python function + <code>udf(f, StringType())</code> + <code>withColumn</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>CS101 = (80 + 90) / 2 = 85 → A；CS102 = (70 + 60) / 2 = 65 → C。用 when 都得：<code>when(col("avg_score") &gt;= 85, "A").when(col("avg_score") &gt;= 70, "B").otherwise("C")</code>。</p>
+    </div></details>
+  </div>
+</section>
+
+<!-- ============ Q2 PRACTICE ============ -->
+<section id="q2practice">
+  <div class="sec-head"><span class="eyebrow">短答 2 模擬 · 唔使寫 code</span><h2>Q2 計數練習</h2></div>
+  <p>先喺紙上計，再打開答案。全部數字已經用程式核對。</p>
+
+  <div class="practice">
+    <span class="src">BPE · 用 lecture 嘅 hug／pug 字</span>
+    <h3>題 1：將 “hug pug hug pun bun hug” 減到 9 個 token</h3>
+    <p>Use <code>&lt;_&gt;</code> as the end-of-word marker. Show each merge, its frequency and the total number of tokens.</p>
+    <details><summary>睇答案</summary><div class="body">
+      <p>字頻：hug ×3、pug ×1、pun ×1、bun ×1。起點：<code>h u g &lt;_&gt;</code> 等，總 token = 6 × 4 = <b>24</b>。</p>
+      <div class="tbl wide"><table>
+        <thead><tr><th>步</th><th>合併</th><th>次數</th><th>結果</th><th>總數</th></tr></thead>
+        <tbody class="num">
+          <tr><td>1</td><td><code>u g → ug</code></td><td>4</td><td class="brk"><code>h ug &lt;_&gt;</code>、<code>p ug &lt;_&gt;</code>、<code>p u n &lt;_&gt;</code>、<code>b u n &lt;_&gt;</code></td><td>20</td></tr>
+          <tr><td>2</td><td><code>ug &lt;_&gt; → ug&lt;_&gt;</code></td><td>4</td><td class="brk"><code>h ug&lt;_&gt;</code>、<code>p ug&lt;_&gt;</code></td><td>16</td></tr>
+          <tr><td>3</td><td><code>h ug&lt;_&gt; → hug&lt;_&gt;</code></td><td>3</td><td class="brk"><code>hug&lt;_&gt;</code></td><td>13</td></tr>
+          <tr><td>4</td><td><code>u n → un</code></td><td>2</td><td class="brk"><code>p un &lt;_&gt;</code>、<code>b un &lt;_&gt;</code></td><td>11</td></tr>
+          <tr><td>5</td><td><code>un &lt;_&gt; → un&lt;_&gt;</code></td><td>2</td><td class="brk"><code>p un&lt;_&gt;</code>、<code>b un&lt;_&gt;</code></td><td><b>9</b></td></tr>
+        </tbody>
+      </table></div>
+      <p>最後：<code>hug&lt;_&gt; | p ug&lt;_&gt; | hug&lt;_&gt; | p un&lt;_&gt; | b un&lt;_&gt; | hug&lt;_&gt;</code> = 1+2+1+2+2+1 = 9。第 1 步 <code>u g</code> 同 <code>g &lt;_&gt;</code> 都係 4 次，揀邊個都得。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">TF-IDF · 有 TF = 2 嘅情況</span>
+    <h3>題 2：三份文件嘅 TF-IDF</h3>
+    <p>D1: big data needs big compute · D2: big data needs spark · D3: spark compute is fast. Use IDF = ln((N+1)/(df+1)), raw TF.</p>
+    <details><summary>睇答案</summary><div class="body">
+      <div class="tbl wide"><table>
+        <thead><tr><th>Word</th><th>df</th><th>IDF</th><th>D1</th><th>D2</th><th>D3</th></tr></thead>
+        <tbody class="num">
+          <tr><td>big</td><td>2</td><td>ln(4/3) = 0.2877</td><td>TF 2 → <b>0.5754</b></td><td>0.2877</td><td>0</td></tr>
+          <tr><td>data</td><td>2</td><td>0.2877</td><td>0.2877</td><td>0.2877</td><td>0</td></tr>
+          <tr><td>needs</td><td>2</td><td>0.2877</td><td>0.2877</td><td>0.2877</td><td>0</td></tr>
+          <tr><td>compute</td><td>2</td><td>0.2877</td><td>0.2877</td><td>0</td><td>0.2877</td></tr>
+          <tr><td>spark</td><td>2</td><td>0.2877</td><td>0</td><td>0.2877</td><td>0.2877</td></tr>
+          <tr><td>is</td><td>1</td><td>ln(4/2) = 0.6931</td><td>0</td><td>0</td><td>0.6931</td></tr>
+          <tr><td>fast</td><td>1</td><td>0.6931</td><td>0</td><td>0</td><td>0.6931</td></tr>
+        </tbody>
+      </table></div>
+      <p>留意 “is” 係 stop word，但因為只喺一份文件出現，TF-IDF 反而最高：又一個 TF-IDF 缺點，所以實際應用會先做 stop words removal。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Levenshtein · 長度唔同</span>
+    <h3>題 3：“SPARK” → “SPAM”</h3>
+    <p>Fill the DP table (source SPARK across the top, target SPAM down the side) and give the distance and the operations.</p>
+    <details><summary>睇答案</summary><div class="body">
+      <div class="tbl dp" style="max-width:420px"><table>
+        <thead><tr><th></th><th>“”</th><th>S</th><th>P</th><th>A</th><th>R</th><th>K</th></tr></thead>
+        <tbody>
+          <tr><th>“”</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+          <tr><th>S</th><td>1</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+          <tr><th>P</th><td>2</td><td>1</td><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+          <tr><th>A</th><td>3</td><td>2</td><td>1</td><td>0</td><td>1</td><td>2</td></tr>
+          <tr><th>M</th><td>4</td><td>3</td><td>2</td><td>1</td><td>1</td><td class="hl">2</td></tr>
+        </tbody>
+      </table></div>
+      <p><b>距離 = 2</b>：SPA 相同（0）→ R 換成 M（substitute）→ 刪 K（delete）。Hamming distance 用唔到，因為兩個字長度唔同。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Skip-gram · m = 2</span>
+    <h3>題 4：“big data needs spark”，m = 2，用 PAD</h3>
+    <p>Generate all skip-gram windows and count the (center, context) pairs. Then state the CBOW input and output when predicting “needs”.</p>
+    <details><summary>睇答案</summary><div class="body">
+      <div class="tbl"><table>
+        <thead><tr><th>Center</th><th>Window</th><th>Pairs</th></tr></thead>
+        <tbody>
+          <tr><td>big</td><td>[PAD, PAD, <b>big</b>, data, needs]</td><td>(big, PAD) ×2、(big, data)、(big, needs)</td></tr>
+          <tr><td>data</td><td>[PAD, big, <b>data</b>, needs, spark]</td><td>(data, PAD)、(data, big)、(data, needs)、(data, spark)</td></tr>
+          <tr><td>needs</td><td>[big, data, <b>needs</b>, spark, PAD]</td><td>(needs, big)、(needs, data)、(needs, spark)、(needs, PAD)</td></tr>
+          <tr><td>spark</td><td>[data, needs, <b>spark</b>, PAD, PAD]</td><td>(spark, data)、(spark, needs)、(spark, PAD) ×2</td></tr>
+        </tbody>
+      </table></div>
+      <p>4 個 window × 2m = 4 → <b>16 個 pair</b>（唔計 PAD 嘅話得 10 個）。CBOW 預測 “needs”：input = big、data、spark、PAD 四個 one-hot，經同一個 W 查 embedding 再取平均（hidden 有 d 個 node），output = V 個 node 嘅 softmax，target = needs。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">相似度公式</span>
+    <h3>題 5：“the quick brown fox jumps” vs “the lazy brown dog jumps”</h3>
+    <p>Compute Jaccard, Dice, Overlap, Tversky (α = β = 0.5) and cosine (binary word vectors). Also give the Hamming distance of “spark” and “shark”.</p>
+    <details><summary>睇答案</summary><div class="body">
+      <p>A = {the, quick, brown, fox, jumps}，B = {the, lazy, brown, dog, jumps}；A∩B = {the, brown, jumps} → 3；A∪B = 7；|A| = |B| = 5。</p>
+      <div class="tbl"><table>
+        <thead><tr><th>方法</th><th>計法</th><th>答案</th></tr></thead>
+        <tbody class="num">
+          <tr><td>Jaccard</td><td>3 / 7</td><td>0.4286</td></tr>
+          <tr><td>Dice</td><td>2×3 / (5+5)</td><td>0.6</td></tr>
+          <tr><td>Overlap</td><td>3 / min(5,5)</td><td>0.6</td></tr>
+          <tr><td>Tversky</td><td>3 / (3 + 0.5×2 + 0.5×2)</td><td>0.6</td></tr>
+          <tr><td>Cosine</td><td>3 / (√5 × √5)</td><td>0.6</td></tr>
+          <tr><td>Hamming spark／shark</td><td>只有 p ≠ h</td><td>1</td></tr>
+        </tbody>
+      </table></div>
+      <p>規律：兩個 set 一樣大細時，Dice = Overlap = Tversky(0.5, 0.5) = binary cosine；Jaccard 一定最細。</p>
+    </div></details>
+  </div>
+
+  <div class="practice">
+    <span class="src">Embedding · cosine 同 analogy</span>
+    <h3>題 6：計 cosine 同 analogy</h3>
+    <p>(a) cosine of u = [1, 2, 2] and v = [2, 0, 1]. (b) With king = [1, 8, 8], man = [1, 7, 0], woman = [9, 7, 0], compute king − man + woman.</p>
+    <details><summary>睇答案</summary><div class="body">
+      <p>(a) u·v = 2 + 0 + 2 = 4；‖u‖ = √9 = 3；‖v‖ = √5 ≈ 2.236 → cosine = 4 / 6.708 ≈ <b>0.596</b>。</p>
+      <p>(b) [1−1+9, 8−7+7, 8−0+0] = <b>[9, 8, 8]</b>，最近嘅字係 queen（lecture 例子）。</p>
+    </div></details>
+  </div>
+</section>
+
+<!-- ============ CONCEPT ============ -->
+<section id="concept">
+  <div class="sec-head"><span class="eyebrow">MCQ 同短答解釋部分</span><h2>概念短答</h2></div>
+  <p>Quiz 1 Section B Q1 係兩條各 5 分嘅概念題（“Define lazy evaluation… Use Dask to justify”）。答題格式：<b>一句定義 → 用課程工具解釋點運作 → 一個具體例子</b>。第 9–11 題特登用呢個格式寫。</p>
+  <details><summary>1. 點解 DataFrame 通常比 RDD 快？</summary><div class="body">
+    <p>A DataFrame has a schema (named, typed columns), so Spark knows the structure of the data and the operations are declarative. The Catalyst optimizer can rewrite the logical plan (predicate pushdown, constant folding, join reordering, runtime code generation) and data is stored in a compact columnar binary format. RDD transformations take arbitrary lambdas that are black boxes to Spark, and the data are opaque Java/Python objects, so little optimization is possible.</p>
+  </div></details>
+  <details><summary>2. 點解 Hive 慢？Shark 點改善？</summary><div class="body">
+    <p>Hive compiles HiveQL into MapReduce jobs, which write intermediate results to disk, so even small queries take minutes and it is unsuitable for interactive or iterative analytics. Shark keeps HiveQL compatibility but replaces the MapReduce execution engine with Spark RDDs, exploiting temporal locality with in-memory table caching, columnar memory storage, data co-partitioning and Partial DAG Execution that re-optimizes the plan at run time.</p>
+  </div></details>
+  <details><summary>3. 點解 Shark 被 Spark SQL 取代？</summary><div class="body">
+    <p>Shark could only query external data in the Hive metastore, not data inside Spark programs; it had to be invoked through SQL strings, which is error-prone; and it inherited Hive's optimizer designed for MapReduce, which was hard to extend. Spark SQL adds the DataFrame API that mixes SQL with programmatic code and the extensible Catalyst optimizer.</p>
+  </div></details>
+  <details><summary>4. 點解要 subword tokenization？</summary><div class="body">
+    <p>Word-level models cannot handle unknown (out-of-vocabulary) words, e.g. “football” when only “foot” and “ball” were seen, and a word vocabulary becomes huge with many rare words. Subword methods such as BPE build a vocabulary of frequent character sequences by repeatedly merging the most frequent adjacent pair, so any new word can be represented as a sequence of known subwords while keeping the vocabulary small.</p>
+  </div></details>
+  <details><summary>5. Stemming 同 lemmatization 有咩分別？</summary><div class="body">
+    <p>Stemming crudely chops affixes with rules (e.g. Porter's), and the result may not be a real word (computing → comput, companies → compani). Lemmatization uses vocabulary and part-of-speech information to return the dictionary form (am, are, is → be; ran → run), which is more accurate but slower.</p>
+  </div></details>
+  <details><summary>6. Skip-gram 同 CBOW 有咩分別？</summary><div class="body">
+    <p>Skip-gram uses the centre word to predict each context word in the window; CBOW uses the (averaged) context words to predict the centre word. Both assume windows are independent samples and ignore the position of context words. Skip-gram uses the centre-word vectors as embeddings; CBOW commonly uses the context vectors.</p>
+  </div></details>
+  <details><summary>7. 點解要 negative sampling？</summary><div class="body">
+    <p>The softmax in standard skip-gram normalizes over the whole vocabulary V, which is very expensive when V is large. SGNS turns the task into binary logistic regression with a sigmoid: real (centre, context) pairs are labelled 1 and k randomly sampled words are labelled 0. Negative samples are needed because with only positive pairs the model could trivially make every dot product large.</p>
+  </div></details>
+  <details><summary>8. GloVe 同 Word2Vec 有咩分別？</summary><div class="body">
+    <p>Word2Vec learns from local context windows. GloVe first builds a global word–word co-occurrence count matrix (V × V) over the whole corpus and factorizes it into low-dimensional vectors, so it is fast and captures global statistics that window-based word2vec misses, although word2vec often works better in practice.</p>
+  </div></details>
+  <details><summary>9. (5 marks) Define lazy evaluation in Spark DataFrames. Use an example to justify your answer.</summary><div class="body">
+    <p>Lazy evaluation means operations are not executed when they are written; Spark only records them as a logical plan and runs them when an output operation needs a result. For example, <code>df.filter(df.quantity &gt; 20).withColumn("revenue", df.quantity * df.price)</code> reads no data; Spark only builds a plan with a filter and a new column. When <code>.show()</code> or <code>.count()</code> is called, the Catalyst optimizer optimizes the whole plan (e.g. pushes the filter down so fewer rows are processed) and then executes it on the workers.</p>
+  </div></details>
+  <details><summary>10. (5 marks) What is a user-defined function (UDF) in Spark SQL, and why must its return type be declared?</summary><div class="body">
+    <p>A UDF wraps a normal Python function so it can be applied to DataFrame columns when built-in Spark SQL functions are not enough, e.g. classifying unstructured review text. It has two parts, the function and the output data type, as in <code>sentiment_udf = udf(analyze_sentiment, StringType())</code>, applied with <code>withColumn("sentiment_category", sentiment_udf(col("feedback_text")))</code>. Because a DataFrame has a schema, Spark must know the type of the new column in advance; if the declared type does not match the returned values, the column becomes null. A UDF is a black box to the Catalyst optimizer, so built-in functions such as <code>when</code> are preferred when they can do the job.</p>
+  </div></details>
+  <details><summary>11. (5 marks) Explain the out-of-vocabulary (OOV) problem and how Byte Pair Encoding addresses it, with an example.</summary><div class="body">
+    <p>Word-level models only have vectors for words seen in training, so a new word such as “football” (when only “foot” and “ball” were seen) is unknown. BPE starts from single characters and repeatedly merges the most frequent adjacent pair into a new token, building a vocabulary of frequent subwords. A new word is then segmented into known subwords, e.g. “pineapple” → p, i, n, e, apple, so every word can be represented while the vocabulary stays small.</p>
+  </div></details>
+</section>
+
+<section id="sources">
+  <div class="sec-head"><h2>資料來源</h2></div>
+  <ul class="sources">
+    <li>你 folder 入面嘅 L4 Exploring Hive, Shark and SparkSQL、L5 Intro to NLP、L6 Intro to LLM（PDF）</li>
+    <li>Tutorial 4 Solution（Spark SQL）、Tutorial 5（Basic NLP Text Processing）、Tutorial 6（Text Embeddings）notebooks</li>
+    <li>Canvas Practice_Quiz2.pdf；DSAI4205 2025/26 Sem 1 期考 Q2（skip-gram／CBOW）</li>
+    <li>老師講 Quiz 2 安排嘅堂上錄音文字稿</li>
+    <li>Quiz 1 真卷同 solution（2026/27 Sem 1）</li>
+  </ul>
+  <footer>BPE、TF-IDF、Levenshtein、相似度同 UDF 嘅 Python 邏輯已用程式核對。祝考試順利。</footer>
+</section>
+
+</main>
+
+
+<script>
+(function(){
+  var A = [
+    {t:'L4', s:'<p>Hive makes HDFS data queryable with SQL-like syntax. What does Hive compile HiveQL queries into?</p>',
+     o:['Spark RDD transformations','MapReduce jobs','Python UDFs','Pandas DataFrames'], a:1,
+     e:'Hive 將 HiveQL 編譯成 <b>MapReduce jobs</b>（physical plan = DAG of MapReduce jobs），所以 latency 高。用 Spark RDD 執行嘅係 Shark。'},
+    {t:'L4', s:'<p>In Hive\'s data model, how is a <b>partition</b> of a table stored in HDFS?</p>',
+     o:['As a file inside the table directory','As a row in the metastore only','As a sub-directory of the table\'s directory','As a column of the table'], a:2,
+     e:'Table = directory；<b>partition = sub-directory</b>；bucket = partition directory 入面嘅 file。'},
+    {t:'L4', s:'<p>What observation motivated Shark to use in-memory computation for petabyte-scale data warehouses?</p>',
+     o:['Data warehouse queries show strong temporal locality; about 90% of Facebook queries could be served from main memory','All Facebook data fits into one machine\'s RAM','MapReduce cannot run SQL','HDFS does not support replication'], a:0,
+     e:'大部分 query 只睇細嘅數據 window（例如每日 log），而且最近用過嘅數據好快會再用（temporal locality）。'},
+    {t:'L4', s:'<p>Which of the following is NOT supported by Shark?</p>',
+     o:['In-memory table caching','Partial DAG Execution','Columnar memory store','Hash-based bucketing of tables'], a:3,
+     e:'Shark 唔支援 bucketing、唔同 partition 用唔同 input format、合併細 output file、自動 map-side join。'},
+    {t:'L4', s:'<p>Spark SQL added which two key features on top of Spark core?</p>',
+     o:['RDD lineage and caching','HiveQL and the metastore','The DataFrame API and the Catalyst optimizer','MLlib and GraphX'], a:2,
+     e:'L4 slide 41：Spark SQL 加咗 <b>DataFrames</b> 同 <b>extensible optimizer（Catalyst）</b>。'},
+    {t:'L4', s:'<p>Why is the Spark engine limited in optimizing <code>rdd.map(lambda x: ...)</code>?</p>',
+     o:['Lambdas run on the driver only','The functions passed to RDD transformations are black boxes, so the engine cannot inspect their logic','RDDs cannot be cached','Python lambdas are not allowed in Spark'], a:1,
+     e:'RDD API 收任意 function，Spark 睇唔到入面做咩，所以 Catalyst 冇辦法優化。DataFrame 係 declarative，有 schema。'},
+    {t:'L4', s:'<pre class="code sm plain"><code>df2 = df.filter(df.quantity > 20).withColumn("revenue", df.quantity * df.price)</code></pre><p>When does Spark actually execute this computation?</p>',
+     o:['Immediately when filter() is called','When withColumn() is called','When an output operation such as show() or count() is called','Never; DataFrames are computed eagerly at creation'], a:2,
+     e:'DataFrame 係 <b>lazy</b>：每個 DataFrame 只代表 logical plan，去到 output operation（count、show、save）先執行。'},
+    {t:'L4', s:'<p>Which code converts an RDD of tuples into a DataFrame using an explicit schema (without <code>.toDF()</code>)?</p>',
+     o:['spark.createDataFrame(raw_rdd, schema)','StructType(raw_rdd)','spark.read.csv(raw_rdd, schema)','raw_rdd.withColumn(schema)'], a:0,
+     e:'練習卷 Q1(a) 嘅答案：<code>spark.createDataFrame(rdd, schema)</code>，schema 用 <code>StructType([StructField(...), ...])</code>。'},
+    {t:'L4', s:'<p>When creating a PySpark UDF with <code>udf(...)</code>, what must you provide?</p>',
+     o:['The Python function and the return data type, e.g. udf(f, StringType())','Only a SQL string','The number of partitions','A temporary view name'], a:0,
+     e:'L5 slide 28：UDF 有兩部分：<b>function 同 output datatype</b>。'},
+    {t:'L5', s:'<p>Studying how “draw”, “draws”, “drawing” and “undrawable” are built from a root plus affixes belongs to which area of linguistics?</p>',
+     o:['Syntax','Pragmatics','Phonetics','Morphology'], a:3,
+     e:'Morphology 研究 morpheme（最細有意義單位）點樣組成字：root + prefix／suffix。'},
+    {t:'L5', s:'<p>Mapping “am, are, is” → “be” is an example of:</p>',
+     o:['Stemming','Lemmatization','Stop-word removal','Named entity recognition'], a:1,
+     e:'Lemmatization 還原到字典形式（lemma）。Stemming 只係切詞綴，例如 computing → comput。'},
+    {t:'L5', s:'<p>Why does character tokenization usually work better than word tokenization for Chinese?</p>',
+     o:['Chinese has no characters','Chinese is written without spaces between words, and word tokenization gives a huge vocabulary with many rare words','Chinese words are always one character long','NLTK only supports characters'], a:1,
+     e:'中日韓泰冇空格分詞；每個中文字大致係一個意思單位；用詞做 token 會令 vocabulary 好大兼好多罕見字。'},
+    {t:'L5', s:'<p>Using PySpark\'s IDF = log((N + 1) / (df + 1)), what is the IDF of a term that appears in all 3 documents of a 3-document corpus?</p>',
+     o:['1','0.2877','0','Undefined (division by zero)'], a:2,
+     e:'log((3+1)/(3+1)) = log(1) = <b>0</b>。所有文件都有嘅字冇區分能力。'},
+    {t:'L6', s:'<p>What is the Levenshtein distance between “kitten” and “sitting”?</p>',
+     o:['2','3','4','6'], a:1,
+     e:'k→s（substitute）、e→i（substitute）、加 g（insert）= <b>3</b>。'},
+    {t:'L6', s:'<p>Which statement correctly contrasts Skip-gram and CBOW?</p>',
+     o:['Skip-gram predicts the context words from the centre word; CBOW predicts the centre word from the context words','Skip-gram predicts the centre word from the context; CBOW predicts the context from the centre word','Both predict the next word only','Skip-gram uses co-occurrence matrix factorization; CBOW uses negative sampling'], a:0,
+     e:'Skip-gram：center → context；CBOW：context → center。Co-occurrence matrix 係 GloVe。'}
+  ];
+  var B = [
+    {t:'L4', s:'<p>Hive is designed mainly for:</p>',
+     o:['Online transaction processing (OLTP)','Real-time streaming','Data warehousing / online analytical processing (OLAP) in batch','Training neural networks'], a:2,
+     e:'Hive 係 petabyte 級 data warehouse，<b>唔係 OLTP</b>，專注 scalability 同 extensibility。'},
+    {t:'L4', s:'<p>Which is a limitation of Hive described in the lecture?</p>',
+     o:['It cannot handle petabytes of data','High latency, because queries run as MapReduce jobs, so even small queries can take minutes','It does not support joins','It cannot use HDFS'], a:1,
+     e:'Hive 限制：high latency、唔啱互動式分析、複雜 query 慢、冇內置 ML／iterative algorithm。'},
+    {t:'L4', s:'<p>For <code>SELECT AVG(age) FROM users</code>, what is the main benefit of column-oriented storage (used by Shark and Parquet)?</p>',
+     o:['Only the age column is read, reducing I/O','Every row is read faster','It removes the need for a schema','It sorts the data automatically'], a:0,
+     e:'Column storage 只讀需要嘅 column；壓縮又好（dictionary／run-length encoding），仲對 JVM GC 友好。'},
+    {t:'L4', s:'<p>What does Shark\'s Partial DAG Execution (PDE) do?</p>',
+     o:['Splits HiveQL into smaller strings','Caches every table in memory','Converts DataFrames into RDDs','Collects statistics at run time (partition sizes, heavy hitters, histograms) and changes the query plan, e.g. choosing a broadcast join or the number of reducers'], a:3,
+     e:'PDE 喺執行途中收集統計，worker 送去 master，再動態改 plan：join algorithm（shuffle vs broadcast）、parallelism、skew handling。'},
+    {t:'L4', s:'<p>Which Catalyst optimization evaluates constant expressions at compile time, e.g. turning <code>1+2+t1.value</code> into <code>3+t1.value</code>?</p>',
+     o:['Predicate pushdown','Join reordering','Constant folding','Loop unrolling'], a:2,
+     e:'Constant folding。Predicate pushdown = 將 filter 推前；loop unrolling = 展開 loop；join reordering = 改 join 次序。'},
+    {t:'L4', s:'<p>What does <code>df.withColumn("revenue", df.quantity * df.price)</code> return?</p>',
+     o:['Nothing; it modifies df in place','A new DataFrame with all original columns plus revenue','Only the revenue column','An RDD of Row objects'], a:1,
+     e:'DataFrame 係 immutable，withColumn 回傳<b>新</b> DataFrame，保留所有原本 column 再加新 column（所以練習卷 UDF 題要用 withColumn）。'},
+    {t:'L4', s:'<p>How do you make a DataFrame <code>people</code> queryable with <code>spark.sql("SELECT ... FROM user")</code>?</p>',
+     o:['people.cache("user")','people.createOrReplaceTempView("user")','spark.read.table(people)','people.toDF("user")'], a:1,
+     e:'<code>createOrReplaceTempView</code> 註冊成 temporary view；仍然係 unmaterialized，可以同 DataFrame expression 一齊優化。'},
+    {t:'L4', s:'<p><code>df = spark.read.csv("products.csv", header=True)</code> is called without <code>inferSchema</code> or <code>schema</code>. What are the column types?</p>',
+     o:['All string','Automatically integer or double where possible','All double','It raises an error'], a:0,
+     e:'冇 inferSchema 又冇 schema，CSV 每個 column 都讀成 string。要 <code>inferSchema=True</code> 或者傳 <code>schema=</code>。'},
+    {t:'L4', s:'<p>What does <code>df.rdd</code> return?</p>',
+     o:['A pandas DataFrame','A list of tuples on the driver','An RDD whose elements are pyspark.sql.Row objects','A Parquet file'], a:2,
+     e:'每個元素係 <code>Row</code>（key-value pairs），可以用 <code>x["name"]</code> 或 <code>x.name</code> 攞值。'},
+    {t:'L5', s:'<p>In the BPE token learner, what happens in each iteration?</p>',
+     o:['The least frequent symbol is deleted','The most frequent adjacent pair of symbols is merged and added to the vocabulary','Each word is split into characters again','Stop words are removed'], a:1,
+     e:'① 拆成字母 ② 搵最常見嘅相鄰 pair ③ 合併、vocabulary +1 ④ 重複至夠數。'},
+    {t:'L5', s:'<p>What is the main purpose of subword tokenization?</p>',
+     o:['To translate text','To remove punctuation','To handle unknown (out-of-vocabulary) words while keeping the vocabulary small','To tag parts of speech'], a:2,
+     e:'例如訓練有 foot、ball 但冇 football；subword 可以用已知片段砌出新字，亦減細 vocabulary。'},
+    {t:'L5', s:'<p>Using the Porter stemmer rule <code>ies → i</code>, what does “companies” become?</p>',
+     o:['company','compani','compan','companies'], a:1,
+     e:'Stemming 結果唔一定係真字：companies → <b>compani</b>。其他規則：sses → ss（classes → class）、s → （cats → cat）。'},
+    {t:'L5', s:'<p>The sparse vector <code>(5, [1, 3], [2.0, 4.0])</code> represents which dense vector?</p>',
+     o:['[0.0, 2.0, 0.0, 4.0, 0.0]','[1.0, 3.0, 2.0, 4.0, 5.0]','[2.0, 4.0, 0.0, 0.0, 0.0]','[0.0, 1.0, 0.0, 3.0, 0.0]'], a:0,
+     e:'格式 (size, [indices], [values])：長度 5，index 1 = 2.0、index 3 = 4.0，其他 0。'},
+    {t:'L5', s:'<p>Which is a limitation of the Bag-of-Words model?</p>',
+     o:['It cannot count words','It requires a GPU','It only works for Chinese','Word order is lost'], a:3,
+     e:'BoW 只數次數：字序冇咗、encoding 稀疏。N-gram 可以保留局部字序。'},
+    {t:'L5', s:'<p>A term gets a high TF-IDF weight in a document when it:</p>',
+     o:['Appears in every document','Appears often in this document but in few documents of the collection','Is a stop word','Appears once in a very long document'], a:1,
+     e:'TF 高（喺呢份文件多）× IDF 高（喺 collection 少）= 權重高。'},
+    {t:'L5', s:'<p>What does Named Entity Recognition (NER) do?</p>',
+     o:['Identifies named entities such as people, locations and organisations','Reduces words to their stems','Splits text into sentences','Counts word frequencies'], a:0,
+     e:'NER 自動認出 “Peter Parker”（人）、“New York”（地方）等，令文字多啲意義。'},
+    {t:'L6', s:'<p>For the word sets {The, quick, brown, fox} and {The, quick, brown, dog}, what is the Sørensen-Dice coefficient?</p>',
+     o:['0.6','0.5','0.75','1.0'], a:2,
+     e:'2 × 3 / (4 + 4) = <b>0.75</b>。Jaccard 係 3 / 5 = 0.6。'},
+    {t:'L6', s:'<p>What is the main weakness of Hamming distance?</p>',
+     o:['It is slow to compute','It only applies to strings of the same length and ignores insertions and deletions','It always returns 0','It needs word embeddings'], a:1,
+     e:'Hamming 只計 substitution；長度唔同就用唔到，要用 Levenshtein。'},
+    {t:'L6', s:'<p>What is the cosine similarity between the one-hot vectors of two different words such as “cat” and “feline”?</p>',
+     o:['1','0.5','−1','0'], a:3,
+     e:'唔同位置得一個 1，dot product = 0 → cosine = 0。One-hot 捉唔到相似，所以要 embedding。'},
+    {t:'L6', s:'<p>“You shall know a word by the company it keeps” expresses:</p>',
+     o:['The distributional hypothesis: words in similar contexts have similar meanings','The bag-of-words assumption','The Markov assumption','Zipf\'s law'], a:0,
+     e:'Firth（1957）；Harris（1954）講 oculist 同 eye-doctor 出現喺差唔多嘅環境。Word2Vec 就係建基於呢個諗法。'},
+    {t:'L6', s:'<p>Why does Skip-gram with Negative Sampling (SGNS) replace the softmax?</p>',
+     o:['Softmax cannot output probabilities','The softmax normalizes over the whole vocabulary V, which is very expensive; SGNS uses binary logistic regression with a sigmoid on positive and k sampled negative pairs','To remove the need for context words','To make embeddings one-hot'], a:1,
+     e:'Positive pair y = 1，隨機抽嘅字 y = 0。要有 negative，否則模型只要將 dot product 變大就令 loss 變細。'},
+    {t:'L6', s:'<p>What does GloVe build before learning embeddings?</p>',
+     o:['A decision tree','A V × V global word co-occurrence count matrix, which is then factorized','A list of stop words','A Levenshtein DP table'], a:1,
+     e:'GloVe = Global Vectors：用成個 corpus 嘅 co-occurrence 統計，快、捉到 global statistics。'},
+    {t:'L6', s:'<p>With king = [1, 8, 8], man = [1, 7, 0] and woman = [9, 7, 0], what is king − man + woman?</p>',
+     o:['[9, 8, 8]','[11, 22, 8]','[−7, 8, 8]','[9, 7, 0]'], a:0,
+     e:'[1−1+9, 8−7+7, 8−0+0] = <b>[9, 8, 8]</b> ≈ queen。'},
+    {t:'L6', s:'<p>In standard Skip-gram, every word has a centre vector <i>v</i> and a context vector <i>u</i>. Which is used as the final word embedding?</p>',
+     o:['The context vectors U','The one-hot vectors','The centre-word vectors V; U is only used during training','The average of all words'], a:2,
+     e:'Skip-gram 用 V；CBOW 一般用 context 向量。'},
+    {t:'L6', s:'<p>For “The hero saves the day” with window m = 1 and PAD at the edges, how many skip-gram (centre, context) training pairs are there?</p>',
+     o:['5','8','10','12'], a:2,
+     e:'5 個 centre word × 2 個 context = <b>10</b>（包括 (The, PAD) 同 (day, PAD)）。唔用 PAD 就係 8。'},
+    {t:'L6', s:'<p>Which describes the Monge-Elkan similarity?</p>',
+     o:['A hybrid method: for each element of the first set, take the maximum secondary similarity to the second set, then average','The number of substitutions between equal-length strings','Intersection over union','Twice the intersection over the total size'], a:0,
+     e:'Monge-Elkan 係唯一嘅 hybrid 方法（edit-based + token-based），計算量大，結果視乎 secondary function。B 係 Hamming，C 係 Jaccard，D 係 Dice。'}
+  ];
+
+var C = [
+    {t:'L4', s:'<p>A retailer runs HiveQL reports on 5 PB of sales data stored in HDFS. Analysts complain that even a small ad-hoc query takes several minutes. What is the most likely reason?</p>',
+     o:['Hive keeps all tables in RAM, which overflows','Hive cannot partition tables by date','HiveQL is compiled into MapReduce jobs whose disk-based processing gives high latency','Hive does not support SELECT queries'], a:2,
+     e:'Hive 嘅限制：用 MapReduce → high latency，細 query 都要幾分鐘；唔啱 interactive／ad-hoc 分析。'},
+    {t:'L4', s:'<p>A Hive table <code>logs</code> is partitioned by date, and each partition is split into 32 buckets by user_id. How is it laid out in HDFS?</p>',
+     o:['One directory for the table, one sub-directory per date, and 32 files inside each date sub-directory','One single file for the whole table','32 directories per table and one file per date','Only metadata in the metastore; no files in HDFS'], a:0,
+     e:'Table = directory，partition = sub-directory，bucket = sub-directory 入面嘅 file（n 個 bucket = n 個 file）。'},
+    {t:'L4', s:'<p>Analysts at a social network mostly query the last 7 days of logs, although the warehouse holds 2 PB. Which observation did Shark exploit to speed up such queries?</p>',
+     o:['Write-once, read-many storage','Hash-based bucketing','Online transaction processing','Temporal locality: the recent working set is small and reused, so it can be cached in memory'], a:3,
+     e:'Shark 動機：data warehouse 有 temporal locality，Facebook 90% query 可以喺 memory 完成，唔使將成個 petabyte 放入 memory。'},
+    {t:'L4', s:'<p>During a query that joins a huge <code>orders</code> table with <code>customers</code>, Shark\'s run-time statistics show that the filtered customers table is only 5 MB. What can Partial DAG Execution do?</p>',
+     o:['Rewrite the query as a Hive MapReduce job','Switch to a broadcast join, sending the small table to every node instead of shuffling both tables','Remove the join from the plan','Increase the HDFS replication factor'], a:1,
+     e:'PDE 用 run-time 統計改 plan：細 table → broadcast join（複製細 table 去所有 node），避免兩邊都 shuffle。'},
+    {t:'L4', s:'<p>The same logic is written as <code>rdd.map(lambda r: (r[0], r[2]*1.1)).filter(lambda r: r[1] > 100)</code> and as <code>df.withColumn("v", col("x")*1.1).filter(col("v") > 100)</code>. Why can the DataFrame version run faster?</p>',
+     o:['DataFrames execute eagerly','DataFrames bypass the driver','Catalyst understands the column expressions and can optimize the plan (e.g. predicate pushdown), while RDD lambdas are black boxes','RDDs cannot filter data'], a:2,
+     e:'DataFrame 有 schema + declarative expression，Catalyst 可以優化；RDD 嘅 lambda Spark 睇唔到入面。'},
+    {t:'L4', s:'<p>An RDD holds tuples <code>(101, "Hung Hom", 23.5, "2026-11-02 10:00")</code>. Which <code>StructField</code> correctly describes the third element?</p>',
+     o:['StructField("reading_value", IntegerType(), True)','StructField(DoubleType(), "reading_value")','StructField("reading_value", "double")','StructField("reading_value", DoubleType(), True)'], a:3,
+     e:'格式係 <code>StructField(name, dataType, nullable)</code>，dataType 要係 type object（<code>DoubleType()</code>）。23.5 係 double，唔係 integer。'},
+    {t:'L4', s:'<pre class="code sm plain"><code>def label(t):\n    return "Long" if len(t) > 100 else "Short"\nlabel_udf = udf(label, IntegerType())</code></pre><p>What happens when <code>label_udf</code> is applied to a text column?</p>',
+     o:['It works and returns "Long" / "Short"','The function is rejected when it is defined','The values do not match the declared IntegerType, so the new column is null','Spark converts "Long" to 1 and "Short" to 0'], a:2,
+     e:'Return type 宣告錯（應該係 <code>StringType()</code>），PySpark 唔會 convert，結果變 null。所以練習卷特登要你 “explicitly declare the correct return type”。'},
+    {t:'L4', s:'<p>You must keep every original column of <code>df_reviews</code> and add <code>sentiment_category</code>. Which line is correct?</p>',
+     o:['df_reviews.withColumn("sentiment_category", sentiment_udf(col("feedback_text")))','df_reviews.select(sentiment_udf(col("feedback_text")))','df_reviews.groupBy("sentiment_category").count()','df_reviews.drop("feedback_text")'], a:0,
+     e:'<code>withColumn</code> 保留所有原本 column 再加一個；淨係 <code>select</code> UDF 就只剩一欄。'},
+    {t:'L5', s:'<p>A chatbot was trained on text containing “foot” and “ball” but never “football”, and it fails when users type “football”. Which technique most directly addresses this?</p>',
+     o:['Stop-word removal','Subword tokenization such as Byte Pair Encoding','POS tagging','One-hot encoding of every word'], a:1,
+     e:'OOV（unknown word）問題 → subword：football 可以由 foot + ball 等已知片段組成。'},
+    {t:'L5', s:'<p>A search engine should match a query containing “run” with documents containing “running” and “ran”. Which pre-processing step is most suitable?</p>',
+     o:['Stop-word removal','Character tokenization','Lemmatization','Bigram encoding'], a:2,
+     e:'Lemmatization 會將 running、ran 都還原做 run。Stemming 處理到 running，但唔識將不規則嘅 ran 變 run。'},
+    {t:'L5', s:'<p>A sentiment model built on single-word features classifies “I don\'t like this product” as positive because of “like”. Which representation would best fix this?</p>',
+     o:['N-gram (e.g. bigram) features so “don\'t like” becomes one feature','Removing “don\'t” as a stop word','Hamming distance between reviews','Using the review ID as a feature'], a:0,
+     e:'L5／T05：phrase “don\'t like” 意思相反，用 n-gram 保留局部字序。刪走 “don\'t” 反而令情況更差。'},
+    {t:'L5', s:'<p>A corpus has 4 documents. “spark” appears in only one of them, document D2, where it occurs twice. Using raw TF and IDF = ln((N+1)/(df+1)), what is the TF-IDF of “spark” in D2?</p>',
+     o:['0.9163','2.7726','0','1.8326'], a:3,
+     e:'IDF = ln(5/2) = 0.9163；TF = 2 → 2 × 0.9163 = <b>1.8326</b>。'},
+    {t:'L5', s:'<p>A BPE learner starts from the corpus (“hug”,10), (“pug”,5), (“pun”,12), (“bun”,4), (“hugs”,5). Which pair is merged first?</p>',
+     o:['p + u (17 times)','u + g (20 times)','u + n (16 times)','h + u (15 times)'], a:1,
+     e:'u g 出現喺 hug(10) + pug(5) + hugs(5) = 20 次，最多。p u = pug 5 + pun 12 = 17。'},
+    {t:'L6', s:'<p>A spell-checker compares the typo “recieve” with dictionary words of different lengths and must allow insertions and deletions. Which measure fits best?</p>',
+     o:['Hamming distance','Jaccard index on word sets','Levenshtein distance','Cosine similarity of one-hot vectors'], a:2,
+     e:'Hamming 只可以比較等長字串；Levenshtein 計 insert、delete、substitute。'},
+    {t:'L6', s:'<p>A tool compares a 20-word abstract with a 2,000-word paper. Which measure gives 1.0 when every word of the abstract appears in the paper, regardless of the paper\'s length?</p>',
+     o:['Jaccard index','Sørensen-Dice coefficient','Hamming distance','Overlap coefficient'], a:3,
+     e:'Overlap = |A∩B| / min(|A|, |B|) = 20/20 = 1。Jaccard 同 Dice 會因為 paper 好長而好細。'},
+    {t:'L6', s:'<p>Which TWO statements about word embeddings are correct?<br>(i) Words that appear in similar contexts tend to get nearby vectors.<br>(ii) The cosine between one-hot vectors of two different words captures their similarity.<br>(iii) SGNS replaces the full softmax over V with binary classification on sampled negative words.<br>(iv) GloVe only looks inside one local context window.</p>',
+     o:['(i) and (ii)','(ii) and (iv)','(i) and (iii)','(iii) and (iv)'], a:2,
+     e:'(ii) 錯：one-hot cosine 永遠 0。(iv) 錯：GloVe 用成個 corpus 嘅 global co-occurrence。Quiz 1 Q14 都係 “Which TWO” 題型。'},
+    {t:'L6', s:'<p>A CBOW model is trained with window m = 2, embedding dimension d = 100 and vocabulary size V = 10,000. How many nodes are in the hidden (projection) layer and in the output layer?</p>',
+     o:['4 hidden, 100 output','100 hidden, 10,000 output','10,000 hidden, 100 output','200 hidden, 10,000 output'], a:1,
+     e:'Hidden = d = 100（context 向量取平均，唔係 2m × d）；output = V = 10,000 個 softmax node。'}
+  ];
+  var sets = {A:A, B:B, C:C};
+  var L = ['A','B','C','D'];
+  function render(key){
+    var host = document.getElementById('set-' + key);
+    host.innerHTML = '';
+    sets[key].forEach(function(q, i){
+      var art = document.createElement('article');
+      art.className = 'q';
+      art.id = 'q-' + key + (i+1);
+      var h = '<header><span class="qno">' + key + (i+1) + '</span><span class="tag">' + q.t + '</span></header>' +
+              '<div class="stem">' + q.s + '</div><div class="opts" role="group" aria-label="Options">';
+      q.o.forEach(function(op, j){
+        h += '<button type="button" class="opt" data-j="' + j + '"><span class="L">' + L[j] + '</span><span>' + op + '</span></button>';
+      });
+      h += '</div><div class="exp" hidden></div>';
+      art.innerHTML = h;
+      art.querySelectorAll('.opt').forEach(function(btn){
+        btn.addEventListener('click', function(){ answer(key, i, art, +btn.dataset.j); });
+      });
+      host.appendChild(art);
+    });
+    state[key] = {done:0, right:0};
+    updateScore(key);
+  }
+  var state = {};
+  function answer(key, i, art, j){
+    if (art.dataset.answered) return;
+    art.dataset.answered = '1';
+    var q = sets[key][i];
+    var btns = art.querySelectorAll('.opt');
+    btns.forEach(function(b){ b.disabled = true; });
+    btns[q.a].classList.add('right');
+    var ok = j === q.a;
+    if (!ok) btns[j].classList.add('wrong');
+    state[key].done++; if (ok) state[key].right++;
+    var exp = art.querySelector('.exp');
+    exp.innerHTML = '<span class="v ' + (ok ? 'ok">答啱。' : 'bad">答錯，正確答案係 ' + L[q.a] + '。') + '</span> ' + q.e;
+    exp.hidden = false;
+    updateScore(key);
+  }
+  function updateScore(key){
+    var n = sets[key].length, s = state[key];
+    document.getElementById('score-' + key).innerHTML = 'Set ' + key + '：已答 <b>' + s.done + '</b>/' + n + ' · 答啱 <b>' + s.right + '</b>';
+  }
+  render('A'); render('B'); render('C');
+  document.querySelectorAll('[data-reset]').forEach(function(b){
+    b.addEventListener('click', function(){ render(b.dataset.reset); numberCode(document.getElementById('set-' + b.dataset.reset)); });
+  });
+
+  /* ---------- code cells: line numbers + comment colour ---------- */
+  function numberCode(root){
+    root.querySelectorAll('pre.code').forEach(function(pre){
+      if (pre.dataset.done) return;
+      pre.dataset.done = '1';
+      var code = pre.querySelector('code') || pre;
+      var lines = code.innerHTML.replace(/\n$/, '').split('\n');
+      code.innerHTML = lines.map(function(l){
+        l = l.replace(/(^|[\s)])(#\s.*|\/\/.*)$/, function(m, p, c){ return p + '<span class="c">' + c + '</span>'; });
+        return '<span class="ln">' + (l === '' ? ' ' : l) + '</span>';
+      }).join('');
+    });
+  }
+  numberCode(document);
+
+  /* ---------- fill-in blanks ---------- */
+  function norm(s){ return s.replace(/[“”"]/g, "'").replace(/[‘’]/g, "'").replace(/\s+/g, ''); }
+  document.querySelectorAll('input.blank').forEach(function(inp){
+    var alts = inp.dataset.ans.split('§');
+    var w = Math.max.apply(null, alts.map(function(a){ return a.length; }));
+    inp.style.width = (Math.max(w, 3) + 2) + 'ch';
+    inp.addEventListener('input', function(){ inp.classList.remove('ok','bad','shown'); });
+  });
+  document.querySelectorAll('.fill').forEach(function(box){
+    var inputs = box.querySelectorAll('input.blank');
+    var msg = box.querySelector('.fillmsg');
+    box.querySelector('[data-check]').addEventListener('click', function(){
+      var right = 0;
+      inputs.forEach(function(inp){
+        var v = norm(inp.value);
+        var ok = inp.dataset.ans.split('§').some(function(a){ return norm(a) === v; });
+        inp.classList.remove('ok','bad','shown');
+        inp.classList.add(ok ? 'ok' : 'bad');
+        if (ok) right++;
+      });
+      msg.textContent = '答啱 ' + right + ' / ' + inputs.length + (right === inputs.length ? '，全對！' : '：紅色格再諗下，或者撳「顯示答案」。');
+    });
+    box.querySelector('[data-show]').addEventListener('click', function(){
+      inputs.forEach(function(inp){ inp.value = inp.dataset.ans.split('§')[0]; inp.classList.remove('ok','bad'); inp.classList.add('shown'); });
+      msg.textContent = '已填入答案（虛線格）。';
+    });
+    box.querySelector('[data-clear]').addEventListener('click', function(){
+      inputs.forEach(function(inp){ inp.value = ''; inp.classList.remove('ok','bad','shown'); });
+      msg.textContent = '';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

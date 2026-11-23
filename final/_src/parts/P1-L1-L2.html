@@ -1,0 +1,180 @@
+<h1>P1 · L1–L2 Big Data、Parallelism + MapReduce</h1>
+<p class="sub">MapReduce 長題每次 16–20 分（必考）；6Vs、HDFS、Dask 多數出 MCQ · 對應 L1、L2、L3 Part 1–2、2025s1 Q1、2026s2 Q1–Q2、Revision Qs</p>
+<ul class="toc">
+<li><a href="#exam">一、點考</a></li><li><a href="#l1l2">二、L1 Big Data · L2 Parallelism、HDFS、Dask</a></li>
+<li><a href="#case">三、Big Data Vs case study</a></li><li><a href="#mr">四、MapReduce 概念同答題模板</a></li>
+<li><a href="#past">五、Past paper 全答</a></li><li><a href="#drill">六、MapReduce 練習（14 題）</a></li>
+<li><a href="#mcq">七、MCQ</a></li><li><a href="#short">八、短答題</a></li><li><a href="#faq">九、常見疑問</a></li></ul>
+
+<h2 id="exam">一、點考</h2>
+<div class="tw"><table><tr><th>卷</th><th>題目</th><th>分數</th></tr>
+<tr><td>2025s1 Q1(a)</td><td>Inverted index：寫一個 MapReduce job 嘅 pseudocode</td><td>10</td></tr>
+<tr><td>2026s2 Q2(a) ／ Revision Qs</td><td>Mutual friends：畫 Map-Shuffle-Reduce 圖 + pseudocode</td><td>8</td></tr>
+<tr><td>2026s2 Q1</td><td>Palantir case study：4Vs 各搵證據 + 解決方法</td><td>8</td></tr>
+<tr><td>COMP4434 舊卷</td><td>Table 分散喺多個 file：每個城市／部門符合條件嘅人數（Map + Reduce pseudocode）</td><td>參考</td></tr>
+<tr><td>MCQ</td><td>6Vs、HDFS、scale up/out、sharding vs replication、Dask chunks、task graph</td><td>—</td></tr></table></div>
+<div class="memo"><b>MapReduce 答題模板</b>① 寫明 Map 嘅 input (key, value) 同 output (key, value) ② 寫明 Reduce 嘅 input (key, list of values) 同 output ③ 用題目例子 trace 一次：Map 出咩 → Shuffle 點 group → Reduce 出咩。圖題要分三欄畫：Map、Shuffle、Reduce。</div>
+
+<h2 id="l1l2">二、L1 Big Data · L2 Parallelism、HDFS、Dask</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>Big Data 用 <b>6Vs</b> 形容：Volume（多）、Velocity（快）、Variety（雜）、Veracity（準唔準）、Value（有冇用）、Variability（會變）。MCQ 會俾情境叫你揀邊個 V。</li>
+<li>單部電腦唔夠用，就 <b>scale out</b>：將數據切細（partition）分俾好多部機一齊做，再合併結果（divide and conquer）。</li>
+<li><b>HDFS</b>：檔案切成固定大細嘅 block，每個 block 存 3 份，寫一次讀好多次。</li>
+<li><b>Dask</b>：平行版 NumPy／Pandas，將 array 切成 chunks，lazy，<code>.compute()</code> 先計。</li></ul></div>
+<div class="concept">
+<h3>Divide and conquer：平行處理嘅基本諗法</h3>
+<span class="lab">一句講完</span>
+<p>將數據切成好多份（partition），每個 worker 處理一份，最後將 sub-result 合併。</p>
+<span class="lab pic">圖解</span>
+<figure class="fig"><svg viewBox="0 0 330 230" role="img" aria-label="divide and conquer" style="max-width:330px">
+<defs><marker id="d1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<rect class="hl" x="95" y="8" width="140" height="30" rx="8"/><text x="165" y="28" text-anchor="middle" font-size="13">Data</text>
+<g class="ln"><line x1="130" y1="38" x2="50" y2="62" marker-end="url(#d1)"/><line x1="155" y1="38" x2="130" y2="62" marker-end="url(#d1)"/><line x1="175" y1="38" x2="200" y2="62" marker-end="url(#d1)"/><line x1="200" y1="38" x2="280" y2="62" marker-end="url(#d1)"/></g>
+<g font-size="12" text-anchor="middle"><rect class="bx" x="20" y="65" width="62" height="26" rx="6"/><text x="51" y="82">Part 1</text><rect class="bx" x="100" y="65" width="62" height="26" rx="6"/><text x="131" y="82">Part 2</text><rect class="bx" x="170" y="65" width="62" height="26" rx="6"/><text x="201" y="82">…</text><rect class="bx" x="250" y="65" width="62" height="26" rx="6"/><text x="281" y="82">Part N</text>
+<g class="ln"><line x1="51" y1="91" x2="51" y2="113" marker-end="url(#d1)"/><line x1="131" y1="91" x2="131" y2="113" marker-end="url(#d1)"/><line x1="201" y1="91" x2="201" y2="113" marker-end="url(#d1)"/><line x1="281" y1="91" x2="281" y2="113" marker-end="url(#d1)"/></g>
+<rect class="ac" x="20" y="116" width="62" height="26" rx="6"/><text x="51" y="133">Worker 1</text><rect class="ac" x="100" y="116" width="62" height="26" rx="6"/><text x="131" y="133">Worker 2</text><rect class="ac" x="170" y="116" width="62" height="26" rx="6"/><text x="201" y="133">…</text><rect class="ac" x="250" y="116" width="62" height="26" rx="6"/><text x="281" y="133">Worker N</text>
+<g class="ln"><line x1="51" y1="142" x2="150" y2="180" marker-end="url(#d1)"/><line x1="131" y1="142" x2="158" y2="178" marker-end="url(#d1)"/><line x1="201" y1="142" x2="172" y2="178" marker-end="url(#d1)"/><line x1="281" y1="142" x2="180" y2="180" marker-end="url(#d1)"/></g></g>
+<rect class="hl" x="90" y="183" width="150" height="32" rx="8"/><text x="165" y="204" text-anchor="middle" font-size="13">Combined result</text>
+</svg><figcaption>Worker 可以係唔同地方嘅 server、一部本地機、或者一部機入面嘅一個 CPU core</figcaption></figure>
+<span class="lab trap">易錯</span>
+<p>Worker 加倍唔代表快一倍：要考慮溝通成本、數據搬運同等最慢嗰個 worker。</p>
+</div>
+<div class="concept">
+<h3>HDFS：分散式檔案系統</h3>
+<span class="lab">一句講完</span>
+<p>將一個大檔案切成<b>固定大細嘅 block</b>，每個 block 喺唔同機器存 <b>3 份</b>，檔案<b>寫一次、讀好多次</b>。</p>
+<span class="lab pic">圖解</span>
+<figure class="fig"><svg viewBox="0 0 330 200" role="img" aria-label="HDFS blocks" style="max-width:330px">
+<rect class="bx" x="10" y="10" width="310" height="34" rx="6"/><text x="165" y="32" text-anchor="middle" font-size="13">big_file.log（例如 384 MB）</text>
+<g font-size="12" text-anchor="middle"><rect class="ac" x="10" y="54" width="100" height="26" rx="6"/><text x="60" y="71">Block 1</text><rect class="hl" x="115" y="54" width="100" height="26" rx="6"/><text x="165" y="71">Block 2</text><rect class="fshuf" x="220" y="54" width="100" height="26" rx="6" style="fill:#F6EBCB;stroke:#8F6200"/><text x="270" y="71">Block 3</text></g>
+<g font-size="12"><rect class="bx" x="10" y="100" width="95" height="90" rx="8"/><text x="57" y="118" text-anchor="middle">Node 1</text><rect class="bx" x="118" y="100" width="95" height="90" rx="8"/><text x="165" y="118" text-anchor="middle">Node 2</text><rect class="bx" x="225" y="100" width="95" height="90" rx="8"/><text x="272" y="118" text-anchor="middle">Node 3</text>
+<rect class="ac" x="20" y="128" width="75" height="16" rx="4"/><rect class="hl" x="20" y="150" width="75" height="16" rx="4"/>
+<rect class="ac" x="128" y="128" width="75" height="16" rx="4"/><rect x="128" y="150" width="75" height="16" rx="4" style="fill:#F6EBCB;stroke:#8F6200"/>
+<rect class="hl" x="235" y="128" width="75" height="16" rx="4"/><rect x="235" y="150" width="75" height="16" rx="4" style="fill:#F6EBCB;stroke:#8F6200"/>
+<rect class="ac" x="235" y="170" width="75" height="14" rx="4"/><rect class="hl" x="128" y="170" width="75" height="14" rx="4"/><rect x="20" y="170" width="75" height="14" rx="4" style="fill:#F6EBCB;stroke:#8F6200"/></g>
+</svg><figcaption>每種顏色係一個 block，各有 3 份散落唔同 node：一部機壞咗都唔會冇數據</figcaption></figure>
+<table class="stack"><tr><th>特點</th><th>意思</th><th>點解</th></tr>
+<tr><td>Fixed-size partitioning</td><td>檔案切成一樣大嘅 block</td><td>方便分俾唔同機器平行處理</td></tr>
+<tr><td>3-way replication</td><td>每個 block 存 3 份</td><td>Fault tolerance：機壞咗仲有副本</td></tr>
+<tr><td>Write-once read-many</td><td>寫完唔改，只係讀</td><td>為 batch 分析設計，唔使處理同時改寫嘅問題</td></tr></table>
+</div>
+<div class="concept">
+<h3>Dask：chunks 同 block algorithm</h3>
+<span class="lab">一句講完</span>
+<p>Dask 將大 array 切成細 <b>chunks</b>，每塊各自計，再合併；係 <b>lazy</b> 嘅，<code>.compute()</code> 先真正計。</p>
+<span class="lab pic">圖解：4×4 array 用 chunks=(2,2) 計 sum（Exam Review slide 12–13）</span>
+<figure class="fig"><svg viewBox="0 0 330 170" role="img" aria-label="dask chunks sum" style="max-width:330px">
+<defs><marker id="d2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g font-size="13" text-anchor="middle">
+<rect class="ac" x="10" y="10" width="70" height="70"/><rect class="hl" x="80" y="10" width="70" height="70"/><rect x="10" y="80" width="70" height="70" style="fill:#F6EBCB;stroke:#8F6200"/><rect x="80" y="80" width="70" height="70" style="fill:#E2E6F8;stroke:#3D4BAA"/>
+<text x="28" y="40">1</text><text x="62" y="40">2</text><text x="98" y="40">3</text><text x="132" y="40">4</text><text x="28" y="70">5</text><text x="62" y="70">6</text><text x="98" y="70">7</text><text x="132" y="70">8</text>
+<text x="28" y="110">9</text><text x="62" y="110">10</text><text x="98" y="110">11</text><text x="132" y="110">12</text><text x="28" y="140">13</text><text x="62" y="140">14</text><text x="98" y="140">15</text><text x="132" y="140">16</text>
+<line class="ln" x1="155" y1="80" x2="190" y2="80" marker-end="url(#d2)"/>
+<text x="225" y="45">14</text><text x="265" y="45">22</text><text x="225" y="120">46</text><text x="265" y="120">54</text>
+<line class="ln" x1="285" y1="80" x2="300" y2="80" marker-end="url(#d2)"/><text x="318" y="85" font-weight="700">136</text></g>
+</svg><figcaption>每個 chunk 先各自加（14、22、46、54），再加埋 = 136</figcaption></figure>
+<span class="lab eg">例子：數 chunk</span>
+<p><code>da.ones((10000, 12000), chunks=(5000, 4000))</code>：第一個維度 10000/5000 = 2，第二個 12000/4000 = 3，共 \(2 \times 3 = 6\) 個 chunk。</p>
+<span class="lab trap">易錯</span>
+<p><code>chunks</code> 係<b>每塊嘅形狀</b>，唔係「分幾多塊」。太細（例如 1）overhead 大；太大放唔落 memory；建議每塊 100 MB 至 1 GB。<code>rechunk</code> 好貴。</p>
+</div>
+{{SEC:q1:l1l2}}
+<h3>Dask chunks 補充（Exam Review 重點）</h3>
+<div class="tw"><table><tr><th>寫法</th><th>意思</th><th>例子</th></tr>
+<tr><td><code>chunks=1000</code></td><td>每個維度每塊 1000</td><td>(10000, 12000) → 10 × 12 = 120 塊</td></tr>
+<tr><td><code>chunks=(5000, 4000)</code></td><td>每塊形狀 5000 × 4000</td><td>(10000, 12000) → 2 × 3 = <b>6 塊</b></td></tr>
+<tr><td><code>chunks={0: 1000, 1: 2000}</code></td><td>用 dict 逐個維度指定</td><td>同 (1000, 2000) 一樣</td></tr>
+<tr><td><code>chunks=((1000,1000,…),(3000,…))</code></td><td>逐塊寫明大細</td><td>可以唔平均</td></tr></table></div>
+<div class="warn"><b>易錯</b><code>chunks</code> 係<b>每塊嘅形狀</b>，唔係「分幾多塊」。<code>chunks=1</code> 即係每塊得 1 個元素，會慢到死。建議每塊 100 MB 至 1 GB；太細 overhead 大，太大放唔落 memory。<code>rechunk</code> 好貴。</div>
+<p><b>Block algorithm 例子</b>：4×4 array 用 <code>chunks=(2,2)</code> 分 4 塊，<code>sum()</code> 先計每塊（14、22、46、54），再加埋 = 136。<code>.visualize()</code> 畫出 task graph：node = task，線 = dependency。Dask 係 <b>lazy</b>，<code>.compute()</code> 先真正計。</p>
+
+<h2 id="case">三、Big Data Vs case study（2026s2 Q1，8 分）</h2>
+<p>Palantir Skywise：每次飛行 500 GB–1 TB sensor 數據、總共幾百 PB；即時處理 streaming telemetry 做 in-flight 診斷；要結合 structured（航班表、零件庫存）同 unstructured（手寫機師日誌、技術手冊、sensor time series）；有 data lineage 工具記錄每個改動，確保數據準確合規。</p>
+<details class="ans"><summary>參考答案（每個 V：證據 + 解決方法）</summary><div>
+<div class="tw"><table><tr><th>V</th><th>證據</th><th>解決方法</th></tr>
+<tr><td><b>Volume</b></td><td>每次飛行 500 GB–1 TB，總量幾百 petabytes</td><td>Scale out 嘅分散式儲存（HDFS／cloud object storage），partition + replication；用 Spark／MapReduce 平行處理</td></tr>
+<tr><td><b>Velocity</b></td><td>Streaming telemetry、飛緊都要即時診斷</td><td>Streaming pipeline（例如 Kafka + Spark Streaming），in-memory 計算，near real-time 決策</td></tr>
+<tr><td><b>Variety</b></td><td>Structured 航班表、庫存 + unstructured 手寫日誌、手冊、time series</td><td>Data lake（schema-on-read），用統一 ontology／common format 整合；NLP／OCR 處理文字</td></tr>
+<tr><td><b>Veracity</b></td><td>強調 data integrity、data lineage 記錄每個改動、要合規</td><td>Data validation 同 cleaning、lineage／audit trail、版本控制，確保安全決策用嘅數據可信</td></tr></table></div>
+<p>老師講長題唔考背書，所以就算出呢類題，都係要你<b>由情境搵證據</b>，唔係默定義。</p>
+</div></details>
+
+<h2 id="mr">四、MapReduce 概念同答題模板</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>MapReduce 三步：<b>Map</b>（每筆記錄出 (key, value)）→ <b>Shuffle</b>（framework 自動按 key 分組）→ <b>Reduce</b>（每個 key 合併 values）。</li>
+<li>寫 pseudocode 一定要寫明每一步嘅 input 同 output (key, value)。</li>
+<li>Filter 喺 Map 做；計數 emit (key, 1)、Reduce 加總；收集名單 Reduce 輸出 list。</li></ul></div>
+<div class="concept">
+<h3>MapReduce 成個流程</h3>
+<span class="lab pic">流程圖：word count</span>
+<figure class="fig"><svg viewBox="0 0 330 330" role="img" aria-label="mapreduce flow" style="max-width:330px">
+<defs><marker id="d3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g font-size="12">
+<rect class="bx" x="10" y="8" width="310" height="40" rx="8"/><text x="20" y="25" font-weight="700">Input</text><text x="20" y="41">(did1, "a b a")　(did2, "b c")</text>
+<line class="ln" x1="165" y1="48" x2="165" y2="66" marker-end="url(#d3)"/>
+<rect class="fmap" x="10" y="69" width="310" height="52" rx="8"/><text x="20" y="86" font-weight="700" fill="#0B7472">① Map：每個字 emit (w, 1)</text><text x="20" y="104">(a,1) (b,1) (a,1)　|　(b,1) (c,1)</text>
+<line class="ln" x1="165" y1="121" x2="165" y2="139" marker-end="url(#d3)"/>
+<rect class="fshuf" x="10" y="142" width="310" height="52" rx="8"/><text x="20" y="159" font-weight="700" fill="#8F6200">② Shuffle：按 key group（自動）</text><text x="20" y="177">a → [1,1]　b → [1,1]　c → [1]</text>
+<line class="ln" x1="165" y1="194" x2="165" y2="212" marker-end="url(#d3)"/>
+<rect class="fred" x="10" y="215" width="310" height="52" rx="8"/><text x="20" y="232" font-weight="700" fill="#3D4BAA">③ Reduce：sum(values)</text><text x="20" y="250">(a, 2)　(b, 2)　(c, 1)</text>
+<line class="ln" x1="165" y1="267" x2="165" y2="285" marker-end="url(#d3)"/>
+<rect class="bx" x="10" y="288" width="310" height="34" rx="8"/><text x="20" y="310" font-weight="700">Output 寫返 HDFS</text></g>
+</svg><figcaption>綠 = Map、黃 = Shuffle、藍 = Reduce，下面所有 MapReduce 圖都用同一套顏色</figcaption></figure>
+</div>
+{{SEC:q1:mapreduce}}
+
+<h2 id="past">五、Past paper 全答</h2>
+<p>2026s2／Revision Qs 嘅 mutual friends（圖 + pseudocode + PySpark）喺 <a href="index.html#rq">總覽 RQ1</a>；模擬卷 MB1（同時買嘅產品 pair）係同類變化題。</p>
+{{BLK:q1:photo:0-0}}
+<div class="practice"><span class="src">COMP4434 舊卷 · 同類 MapReduce pseudocode</span>
+<h4>每個城市有幾多個人擁有多過 2 架車</h4>
+<p>每行：(resident name, number-of-cars, city)，例如 (Alex, 2, HK)。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>function MAP(key = line offset, value = "name, cars, city"):
+    name, cars, city = parse(value)
+    if cars > 2:
+        emit(city, 1)                 # output: (city, 1)
+
+function REDUCE(key = city, values = [1, 1, ...]):
+    emit(city, sum(values))           # output: (city, count)</code></pre>
+<p>Filter 放喺 Map 度做，唔符合嘅記錄直接唔 emit，shuffle 嘅數據會少好多。</p>
+</div></details>
+<h4>每個部門有幾多個人工高過 $50,000 嘅 Analyst</h4>
+<p>每行：(employee_id, department, job_role, salary)。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<pre><code>function MAP(key, value = "id, dept, role, salary"):
+    id, dept, role, salary = parse(value)
+    if role == "Analyst" and salary > 50000:
+        emit(dept, 1)
+
+function REDUCE(key = dept, values):
+    emit(dept, sum(values))</code></pre>
+<p>兩個條件都要喺 Map 檢查。如果題目話 salary 有 “$55,000” 呢類格式，要先去走 $ 同逗號先轉數字。</p>
+</div></details></div>
+
+<h2 id="drill">六、MapReduce 練習（14 題）</h2>
+<p>先喺紙上寫 MAP 同 REDUCE，再打開答案。對應嘅 Spark 填充喺 <a href="P2-L3-L4.html#fill">P2</a>。</p>
+{{BLK:q1:mrpractice:0-13}}
+
+<h2 id="mcq">七、MCQ</h2>
+<div class="mcq" data-set="A"><script type="application/json">{{MCQ:q1:L1,L2}}</script></div>
+<div class="mcq" data-set="B"><script type="application/json">[
+{"t":"L1","s":"<p>A streaming service notices that users' tastes change over months and the word “sick” can mean both ill and great. Which V is this?</p>","o":["Velocity","Variability","Volume","Value"],"a":1,"e":"數據或者意思<b>隨時間變</b>、一字多義 = <b>Variability</b>。Velocity 係產生同處理得幾快。"},
+{"t":"L1","s":"<p>Storing 250 TB of logs that nobody analyses mainly fails which V?</p>","o":["Value","Variety","Velocity","Veracity"],"a":0,"e":"儲存本身冇商業價值，要變成 insight 先有 <b>Value</b>。"},
+{"t":"L2","s":"<p>HDFS is described as write-once read-many. What does that mean?</p>","o":["Files can only be read once","Files are written once and then read many times, not edited in place","Only one user can read a file","Every write is replicated many times"],"a":1,"e":"HDFS 為 batch 分析設計：寫一次、讀好多次，唔支援隨時改中間某一行。"},
+{"t":"L2","s":"<p>Why does MapReduce write intermediate results to disk?</p>","o":["Disk is faster than memory","For fault tolerance: if a worker fails, the work can be recovered","Because reducers cannot read memory","To compress the data"],"a":1,"e":"為咗 <b>fault tolerance</b>。代價係慢，尤其係 iterative 嘅演算法，所以先有 Spark。"},
+{"t":"L2","s":"<p>A Dask array of shape (8000, 6000) is created with chunks=(2000, 3000). How many chunks?</p>","o":["2","4","8","12"],"a":2,"e":"8000/2000 = 4，6000/3000 = 2，4 × 2 = <b>8</b>。"},
+{"t":"L2","s":"<p>In a MapReduce job counting residents per city who own more than 2 cars, where should the “more than 2” check be done?</p>","o":["In the reducer, after grouping","In the mapper, emitting (city, 1) only for matching rows","In the shuffle phase","It cannot be done in MapReduce"],"a":1,"e":"喺 <b>Map</b> 過濾，唔符合就唔 emit，shuffle 數據少啲，reducer 只需要 sum。"}
+]</script></div>
+
+<h2 id="short">八、短答題</h2>
+{{CONCEPT:q1:5,7,8}}
+
+<h2 id="faq">九、常見疑問</h2>
+<dl class="faq">
+<dt>Q：Map 嘅 input key 係乜？</dt><dd>通常係檔案入面嘅位置（line offset）或者 document id，好多題目唔重要，可以寫 “key: document id / line number”。重點係講清楚 value 係乜。</dd>
+<dt>Q：Shuffle 要唔要自己寫 code？</dt><dd>唔使。Shuffle 係 framework 自動做：按 key group 埋，送去同一個 reducer。畫圖時要畫出嚟，寫 pseudocode 就唔使。</dd>
+<dt>Q：Reducer 收到嘅 values 有冇排序？</dt><dd>冇保證。Inverted index 要排序或者去重複，就要喺 reducer 自己做（sorted(set(...))）。</dd>
+<dt>Q：Mutual friends 點解要 sort pair？</dt><dd>A 嘅 mapper 會出 (B,C)，B 嘅 mapper 可能出 (C,B)。唔排序就會變兩個 key，shuffle 唔會 group 埋。</dd>
+<dt>Q：6Vs 要背到幾熟？</dt><dd>老師講長題唔考背書，MCQ 會俾情境叫你揀邊個 V。記住每個 V 嘅「關鍵字」就得（見上面個表嘅第三欄）。</dd>
+</dl>

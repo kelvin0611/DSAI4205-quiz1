@@ -1,0 +1,184 @@
+<h1>P3 · L5–L6 NLP、Text Similarity、Word Embedding</h1>
+<p class="sub">長題常客：Levenshtein、BPE、TF-IDF、Skip-gram／CBOW · 對應 L5、L6、T05、T06、Practice Quiz 2、2025s1 Q2+Q4、2026s2 Q4</p>
+<ul class="toc">
+<li><a href="#exam">一、點考</a></li><li><a href="#nlp">二、L5 NLP 前處理同文字表示</a></li>
+<li><a href="#tfidf">三、TF-IDF + user profile + cosine（log₂ 版）</a></li><li><a href="#sim">四、L6 Text similarity</a></li>
+<li><a href="#emb">五、L6 Word embedding</a></li><li><a href="#past">六、Past paper 全答</a></li>
+<li><a href="#drill">七、計數 drill</a></li><li><a href="#mcq">八、MCQ</a></li>
+<li><a href="#short">九、短答題</a></li><li><a href="#faq">十、常見疑問</a></li></ul>
+
+<h2 id="exam">一、點考</h2>
+<div class="tw"><table><tr><th>題型</th><th>出現過喺</th><th>分數</th></tr>
+<tr><td>Levenshtein：填 DP 表、traceback／subproblem、句子距離</td><td>2026s2 Q4e、Quiz 2 Q2、Revision Qs</td><td>8–10</td></tr>
+<tr><td>BPE：將字串減到指定 token 數</td><td>2026s2 Q4d、Practice Quiz 2</td><td>6</td></tr>
+<tr><td>Skip-gram windows + CBOW 架構圖</td><td>2025s1 Q2a,b、Practice Quiz 2</td><td>9</td></tr>
+<tr><td>TF-IDF + user profile + cosine（<b>log₂ + 1</b>）</td><td>2025s1 Q4</td><td>20</td></tr>
+<tr><td>Embedding 定義、NLL、SGNS、Word2Vec 問題</td><td>2026s2 Q4a–c、Revision Qs</td><td>4 每題</td></tr></table></div>
+<div class="warn"><b>兩個 TF-IDF 公式唔同</b>Practice Quiz 2 用 PySpark 版 <code>ln((N+1)/(df+1))</code>；2025s1 期考 formula sheet 用 <code>log₂((N+1)/(df+1)) + 1</code>。考試<b>一定跟當張卷嘅 formula sheet</b>。</div>
+
+<h2 id="nlp">二、L5 NLP 前處理同文字表示</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>NLP 前處理：cleaning → tokenization → stop words → stemming／lemmatization → POS／NER。</li>
+<li>BPE：由單字母開始，每輪合併<b>最常出現嘅相鄰 pair</b>，解決 OOV。</li>
+<li>文字變數字：one-hot → bag of words → n-gram → <b>TF-IDF</b>（常見字權重低、罕見字權重高）。</li></ul></div>
+<div class="concept">
+<h3>BPE：每輪合併最常見嘅相鄰 pair</h3>
+<span class="lab pic">流程圖</span>
+<figure class="fig"><svg viewBox="0 0 320 300" role="img" aria-label="BPE flow" style="max-width:320px">
+<defs><marker id="b1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g font-size="12" text-anchor="middle">
+<rect class="hl" x="40" y="8" width="240" height="40" rx="8"/><text x="160" y="25">① 每個字拆成單字母 + &lt;_&gt;</text><text x="160" y="41">apple → a p p l e &lt;_&gt;</text>
+<line class="ln" x1="160" y1="48" x2="160" y2="66" marker-end="url(#b1)"/>
+<rect class="bx" x="40" y="69" width="240" height="40" rx="8"/><text x="160" y="86">② 數所有相鄰 pair 出現幾多次</text><text x="160" y="102">（要乘埋個字出現嘅次數）</text>
+<line class="ln" x1="160" y1="109" x2="160" y2="127" marker-end="url(#b1)"/>
+<rect class="bx" x="40" y="130" width="240" height="40" rx="8"/><text x="160" y="147">③ 合併次數最多嗰個 pair</text><text x="160" y="163">token 總數減少 = 嗰個次數</text>
+<line class="ln" x1="160" y1="170" x2="160" y2="188" marker-end="url(#b1)"/>
+<polygon class="ac" points="160,191 260,221 160,251 60,221"/><text x="160" y="225">夠細 token 數未？</text>
+<path class="ln" d="M260 221 L 300 221 L 300 89 L 282 89" marker-end="url(#b1)"/><text x="290" y="212">未</text>
+<line class="ln" x1="160" y1="251" x2="160" y2="269" marker-end="url(#b1)"/><text x="172" y="264">夠</text>
+<rect class="hl" x="100" y="272" width="120" height="24" rx="8"/><text x="160" y="289">停：寫最後結果</text></g>
+</svg><figcaption>每合併一次，token 總數就減「嗰個 pair 出現嘅次數」</figcaption></figure>
+<span class="lab trap">易錯</span>
+<p>數 pair 次數要計埋字嘅重複：“hug” 出現 3 次，“u g” 就有 3 次。打和揀邊個都得，但要寫明揀咗邊個。</p>
+</div>
+{{Q2SEC:nlp}}
+
+<h2 id="tfidf">三、TF-IDF + user profile + cosine（log₂ 版）</h2>
+<p>2025s1 Q4（20 分）係成份卷最多分嘅單一題目之一，套路係：① stop words + lowercase ② 計 df、IDF ③ 每套戲嘅 TF-IDF vector ④ 用 rating 計 user profile ⑤ profile 同每套戲計 cosine，揀最高。</p>
+<div class="concept">
+<h3>公式（2025s1 formula sheet）</h3>
+<span class="lab">TF</span><p>字 i 喺文件 j 出現幾多次；題目冇講就用 raw count：</p>
+$$tf_{ij} = f_{ij} \quad\text{or}\quad \frac{f_{ij}}{\max_i f_{ij}} \quad\text{or}\quad \frac{f_{ij}}{|d_j|}$$
+<span class="lab">IDF</span><p>N = 文件數，\(df_i\) = 有幾多份文件有字 i：</p>
+$$idf_i = \log_2\!\left(\frac{N+1}{df_i+1}\right) + 1$$
+<span class="lab">TF-IDF</span>
+$$w_{ij} = tf_{ij} \cdot idf_i$$
+<span class="lab">User profile</span><p>\(w_m\) = user 俾戲 m 嘅 rating − 平均 rating（正數 = 鍾意）：</p>
+$$\text{profile} = \frac{\sum_m w_m \cdot \text{TFIDF}_m}{\sum_m |w_m|}$$
+<span class="lab">Cosine</span>
+$$\cos(A,B) = \frac{A \cdot B}{\lVert A\rVert\,\lVert B\rVert}$$
+<span class="lab pic">流程圖</span>
+<div class="mflow">
+<div class="mfcol"><div class="fb">① Stop words + lowercase</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">② 數 df，計 IDF</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">③ 每份文件 TF × IDF → vector</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb hl2">④ 用 rating 加權 → profile</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb ac2">⑤ profile 同每套戲 cosine，揀最高</div></div></div>
+</div>
+
+<h3>完整示範</h3>
+<p>Movie 1：“Tony's tech and genius are incredible”（user rating 4，平均 3.5）。Movie 2：“His genius and tech are amazing”（rating 5，平均 3）。原卷第三套戲冇印出嚟，所以加一套未睇嘅 Movie 3：“His tech is amazing and incredible”，問 user 會唔會鍾意。</p>
+<details class="ans"><summary>睇逐步答案</summary><div>
+<p><b>① Stop words + lowercase</b>：刪 and、are、his、is。</p>
+<ul><li>M1：tony's, tech, genius, incredible</li><li>M2：genius, tech, amazing</li><li>M3：tech, amazing, incredible</li></ul>
+<p><b>② df 同 IDF</b>（N = 3，所以 (N+1) = 4）</p>
+<div class="tw"><table><tr><th>字</th><th>df</th><th>IDF = log₂(4/(df+1)) + 1</th></tr>
+<tr><td>tony's</td><td>1</td><td>log₂2 + 1 = <b>2</b></td></tr>
+<tr><td>tech</td><td>3</td><td>log₂1 + 1 = <b>1</b></td></tr>
+<tr><td>genius</td><td>2</td><td>log₂(4/3) + 1 = <b>1.415</b></td></tr>
+<tr><td>incredible</td><td>2</td><td><b>1.415</b></td></tr>
+<tr><td>amazing</td><td>2</td><td><b>1.415</b></td></tr></table></div>
+<div class="tip"><b>計數機</b>log₂x = log x / log 2。log₂(4/3) = 0.1249 / 0.3010 = 0.415。</div>
+<p><b>③ TF-IDF vector</b>（次序：tony's, tech, genius, incredible, amazing；每個字出現一次，TF = 1）</p>
+<pre><code>M1 = [2, 1, 1.415, 1.415, 0    ]   ‖M1‖ = 3.001
+M2 = [0, 1, 1.415, 0,     1.415]   ‖M2‖ = 2.237
+M3 = [0, 1, 0,     1.415, 1.415]   ‖M3‖ = 2.237</code></pre>
+<p><b>④ User profile</b>：w₁ = 4 − 3.5 = 0.5，w₂ = 5 − 3 = 2。</p>
+<pre><code>profile = (0.5·M1 + 2·M2) / (0.5 + 2)
+        = [1+0, 0.5+2, 0.7075+2.83, 0.7075+0, 0+2.83] / 2.5
+        = [0.4, 1, 1.415, 0.283, 1.132]     ‖profile‖ = 2.127</code></pre>
+<p><b>⑤ Cosine</b></p>
+<pre><code>profile·M3 = 0 + 1 + 0 + 0.283×1.415 + 1.132×1.415 = 3.002
+cos(profile, M3) = 3.002 / (2.127 × 2.237) = 0.631
+cos(profile, M1) = 0.659
+cos(profile, M2) = 0.968</code></pre>
+<p>Profile 最似 M2（user 最鍾意嗰套）；未睇嘅 M3 cosine = <b>0.631</b>（已用 numpy 核對）。如果要推介，就揀未睇過嘅戲入面 cosine 最高嗰套。</p>
+</div></details>
+
+<h2 id="sim">四、L6 Text similarity</h2>
+{{Q2SEC:similarity}}
+<div class="concept">
+<h3>Levenshtein DP：每格睇三個鄰居</h3>
+<span class="lab">一句講完</span>
+<p>\(D[i][j]\) = 將 source 頭 i 個字母變成 target 頭 j 個字母最少要幾多步。</p>
+$$D[i][j] = \min\begin{cases} D[i-1][j-1] + \begin{cases}0 & x_i = y_j\\ 1 & x_i \ne y_j\end{cases} & \text{match／substitute} \\ D[i-1][j] + 1 & \text{delete } x_i \\ D[i][j-1] + 1 & \text{insert } y_j \end{cases}$$
+<span class="lab pic">圖解（source 放 row、target 放 column）</span>
+<figure class="fig"><svg viewBox="0 0 260 200" role="img" aria-label="levenshtein neighbours" style="max-width:260px">
+<defs><marker id="l1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<rect class="bx" x="40" y="30" width="80" height="60"/><rect class="bx" x="120" y="30" width="80" height="60"/><rect class="bx" x="40" y="90" width="80" height="60"/><rect class="ac" x="120" y="90" width="80" height="60"/>
+<g font-size="12" text-anchor="middle"><text x="80" y="58">D[i−1][j−1]</text><text x="80" y="75">↖ 對角</text><text x="160" y="58">D[i−1][j]</text><text x="160" y="75">↑ 上面</text><text x="80" y="118">D[i][j−1]</text><text x="80" y="135">← 左邊</text><text x="160" y="125" font-weight="700">D[i][j]</text></g>
+<g class="ln"><line x1="105" y1="80" x2="135" y2="105" marker-end="url(#l1)"/><line x1="160" y1="80" x2="160" y2="100" marker-end="url(#l1)"/><line x1="110" y1="125" x2="128" y2="125" marker-end="url(#l1)"/></g>
+<g font-size="12"><text x="210" y="62">+1 delete</text><text x="8" y="170">+1 insert</text><text x="20" y="22">+0／+1 match／substitute</text></g>
+</svg><figcaption>呢個擺法：↑ = delete source 字母，← = insert target 字母；擺法調轉就調轉</figcaption></figure>
+<span class="lab eg">諗 subproblem 嘅方法</span>
+<p>淨係諗<b>最後一個字母</b>點處理：substitute／match 就兩邊都剪走最尾（對角格）；delete 就只剪 source；insert 就只剪 target。剩低嗰部分就係 table 已經計好嘅細題目，再加今次嗰步嘅 0 或 1。</p>
+</div>
+
+<div class="warn"><b>Levenshtein 擺法提醒</b>考試題目會講明邊個字串放 row、邊個放 column。Rows 係 source（X）嘅話：↑ 上面 = <b>delete</b> X 嘅字母，← 左邊 = <b>insert</b> Y 嘅字母，↖ 對角 = match／substitute。擺法調轉，insert 同 delete 就調轉。開始之前喺表旁邊寫低呢三行。</div>
+
+<h2 id="emb">五、L6 Word embedding</h2>
+<div class="key"><b>一分鐘重點</b><ul>
+<li>Word embedding = 每個字一個 dense 低維向量，意思近嘅字向量近。</li>
+<li>Skip-gram：center 估 context；CBOW：context 估 center。Hidden layer node 數 = d，output = V。</li>
+<li>SGNS 將 softmax 變二元分類（1 正例 + k 負例），快好多；兩個 model 都用 NLL 做 loss。</li></ul></div>
+{{Q2SEC:embedding}}
+<h3>NLL 同 SGNS（2026s2 Q4b、c）</h3>
+<div class="tw"><table><tr><th>概念</th><th>重點</th></tr>
+<tr><td><b>點解用 Negative Log-Likelihood</b></td><td>Skip-gram 同 CBOW 都係俾每個字一個<b>機率</b>（softmax）。訓練目標係令真實 context／center 字嘅機率最大。將所有機率相乘再取 log，相乘變相加（數值穩定、易微分）；加負號將「最大化 likelihood」變成「最小化 loss」，可以用 gradient descent。</td></tr>
+<tr><td><b>SGNS 目的</b></td><td>完整 softmax 每步要計成個 vocabulary（幾十萬字），好慢。SGNS 將問題變成<b>二元分類</b>：真 context 字（正例）vs k 個隨機抽嘅字（負例），每步只更新 k+1 個字嘅 vector，快好多，效果仍然好。</td></tr>
+<tr><td>Word2Vec 嘅限制</td><td>一個字一個固定 vector（一字多義撈埋一齊）；只睇 context，反義詞（increased／decreased）會好似；冇見過嘅字（OOV）冇 vector → 用 subword（BPE、FastText）。</td></tr></table></div>
+
+<h2 id="past">六、Past paper 全答</h2>
+<p>以下係 Practice Quiz 2 嘅題目，其中 BPE 同 Levenshtein 係 2026s2 原題，Skip-gram／CBOW 係 2025s1 原題。Revision Qs 嘅 shoe／sock 同 Word2Vec 問題喺 <a href="index.html#rq">總覽 RQ2、RQ3</a>。</p>
+{{Q2EXAM:2}}
+{{Q2EXAM:3}}
+{{Q2EXAM:4}}
+{{Q2EXAM:5}}
+
+<h2 id="drill">七、計數 drill</h2>
+{{Q2DRILL:0}}
+{{Q2DRILL:1}}
+{{Q2DRILL:2}}
+{{Q2DRILL:3}}
+{{Q2DRILL:4}}
+{{Q2DRILL:5}}
+<div class="practice"><span class="src">Levenshtein · 期考格式（6×6、index 1 係空字串）</span>
+<h4>題 7：X = “CART”（row）→ Y = “ARCS”（column）</h4>
+<p>Quiz 2 真題。填表，再由 D[5][5] 倒退返 D[1][1]，每步寫坐標同操作。</p>
+<details class="ans"><summary>睇答案</summary><div>
+<div class="tw dp"><table><tr><th class="c">idx</th><th class="c">0</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th></tr>
+<tr><th class="c">0</th><td></td><td class="c">‘’</td><td class="c">A</td><td class="c">R</td><td class="c">C</td><td class="c">S</td></tr>
+<tr><th class="c">1</th><td class="c">‘’</td><td class="c"><b>0</b></td><td class="c">1</td><td class="c">2</td><td class="c">3</td><td class="c">4</td></tr>
+<tr><th class="c">2</th><td class="c">C</td><td class="c"><b>1</b></td><td class="c">1</td><td class="c">2</td><td class="c">2</td><td class="c">3</td></tr>
+<tr><th class="c">3</th><td class="c">A</td><td class="c">2</td><td class="c"><b>1</b></td><td class="c">2</td><td class="c">3</td><td class="c">3</td></tr>
+<tr><th class="c">4</th><td class="c">R</td><td class="c">3</td><td class="c">2</td><td class="c"><b>1</b></td><td class="c">2</td><td class="c">3</td></tr>
+<tr><th class="c">5</th><td class="c">T</td><td class="c">4</td><td class="c">3</td><td class="c">2</td><td class="c"><b>2</b></td><td class="c"><b>3</b></td></tr></table></div>
+<p>距離 = 3：D[5][5]→D[5][4] insert S；D[5][4]→D[4][3] substitute T→C；D[4][3]→D[3][2] match R；D[3][2]→D[2][1] match A；D[2][1]→D[1][1] delete C。即 CART → ART → ARC → ARCS。D[5][5] 對角都係 3（substitute T→S，再 insert C），屬打和。</p>
+</div></details></div>
+
+<h2 id="mcq">八、MCQ</h2>
+<p>Set A 係 Quiz 2 溫習包嘅 L5／L6 題目；Set B 係新加嘅期考題。</p>
+<div class="mcq" data-set="A"><script type="application/json">{{Q2MCQ:L5,L6}}</script></div>
+<div class="mcq" data-set="B"><script type="application/json">[
+{"t":"L5","s":"<p>Using idf = log₂((N+1)/(df+1)) + 1 with N = 7, what is the IDF of a word with df = 3?</p>","o":["1","2","3","0"],"a":1,"e":"log₂(8/4) + 1 = 1 + 1 = <b>2</b>。"},
+{"t":"L5","s":"<p>A user rated Movie X 2 while the average rating is 3. In the user profile formula Σ w·TFIDF / Σ|w|, the weight w for X is:</p>","o":["2","−1","3","1"],"a":1,"e":"w = rating − average = 2 − 3 = <b>−1</b>，即係 user 唔鍾意，會將 profile 推離 X 嘅字。分母用絕對值 |−1| = 1。"},
+{"t":"L5","s":"<p>Why are stop words usually removed before computing TF-IDF?</p>","o":["They have high IDF","They appear in almost every document and carry little meaning","They are always misspelled","They cannot be lowercased"],"a":1,"e":"Stop words（the、and、are）差唔多每份文件都有，冇分辨力，只會令 vector 變長。"},
+{"t":"L5","s":"<p>Which is a shortcoming of TF-IDF?</p>","o":["It cannot be computed in Spark","It ignores word order and meaning, so synonyms like car and automobile are unrelated","It gives common words the highest weight","It needs labelled data"],"a":1,"e":"TF-IDF 係 bag of words：唔理語序、唔識語義、vector 又長又 sparse。"},
+{"t":"L6","s":"<p>Both Skip-gram and CBOW train with negative log-likelihood mainly because:</p>","o":["It makes the vectors sparse","Maximising the probability of the true words is equivalent to minimising −log of it, which turns products into sums and works with gradient descent","It removes the need for softmax","It sorts the vocabulary"],"a":1,"e":"最大化 likelihood ＝ 最小化 NLL；log 將相乘變相加，數值穩定又易微分。"},
+{"t":"L6","s":"<p>In Revision Qs, 'increased' and 'decreased' appear in identical sentences. What will Word2Vec most likely learn?</p>","o":["Opposite vectors","Very similar vectors, because both words share the same contexts","No vectors","Random vectors"],"a":1,"e":"Word2Vec 只睇 context，相同 context ⇒ 相似 vector，<b>反義詞都會變相似</b>。"},
+{"t":"L6","s":"<p>How does subword tokenisation help with OOV words in embeddings?</p>","o":["It deletes unknown words","An unseen word can be split into known subword pieces whose vectors are combined","It replaces every word with UNK","It increases the vocabulary to every possible word"],"a":1,"e":"例如 “unearning” 拆成 un、earn、ing，都係見過嘅 subword，可以砌返個 vector。"},
+{"t":"L6","s":"<p>What is the Levenshtein distance between “shoe” and “sock”?</p>","o":["2","3","4","1"],"a":1,"e":"s 一樣，之後 h→o、o→c、e→k 三次 substitute，或者其他同樣係 3 步嘅路。答案 <b>3</b>。"}
+]</script></div>
+
+<h2 id="short">九、短答題</h2>
+{{Q2CONCEPT:4,5,6,7,8,11}}
+
+<h2 id="faq">十、常見疑問</h2>
+<dl class="faq">
+<dt>Q：TF 同 df 有咩分別？</dt><dd>TF 數一個字喺<b>一份文件入面</b>出現幾多次；df 數有<b>幾多份文件</b>有呢個字，每份最多計 1。同一份文件有兩個 big，TF = 2，但 df 只加 1。</dd>
+<dt>Q：IDF 點解要 +1（分子分母）？</dt><dd>避免 df = 0 時除以 0（smoothing）。2025s1 版最尾再 +1，令所有文件都有嘅字 IDF = 1 而唔係 0。</dd>
+<dt>Q：Levenshtein 嘅 subproblem 點嚟？</dt><dd>淨係諗<b>最後一個字母</b>點處理：substitute／match 就兩邊都剪走最尾（對角格）；insert 就只剪 target（insert 方向嗰格）；delete 就只剪 source。剩低嗰部分就係細啲嘅題目，table 已經計咗。</dd>
+<dt>Q：CBOW hidden layer 有幾多個 node？</dt><dd>等於 embedding dimension d，同 vocabulary 大細 V、window m 都無關。Output layer 先係 V 個 node。</dd>
+<dt>Q：Skip-gram 數 pair 要唔要計 PAD？</dt><dd>題目話用 PAD 就計；兩個答案（含 PAD／唔含 PAD）都寫出嚟最穩陣。</dd>
+<dt>Q：BPE 打和點揀？</dt><dd>次數一樣嘅 pair 揀邊個都得，但要寫明你揀咗邊個，同埋最後 token 數一定要啱。</dd>
+</dl>
