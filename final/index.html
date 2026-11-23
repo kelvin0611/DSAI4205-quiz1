@@ -37,6 +37,7 @@ details.ans>div{padding:0 14px 12px}
 .q{font-weight:600;margin-top:18px}
 .faq dt{font-weight:600;margin-top:14px}.faq dd{margin:4px 0 0 0;padding-left:12px;border-left:2px solid var(--line)}
 svg{max-width:100%;height:auto;display:block;margin:10px auto}
+.katex svg{margin:0;max-width:none}
 svg text{fill:var(--ink);font-family:inherit}
 svg .ln{stroke:var(--ink);fill:none;stroke-width:1.4}
 svg .bx{fill:var(--card);stroke:var(--ink);stroke-width:1.2}
@@ -556,6 +557,20 @@ Iteration 2: A = 0.8(0.55)+0.05 = 0.49
 <div class="tip"><b>仲想練多啲？</b>做 <a href="mock2.html">模擬卷 2</a>：9 條新長題，專練 PageRank、MapReduce + PySpark、Graph analytics。</div>
 
 <h2 id="formula">五、Formula sheet 同易錯位</h2>
+<div class="warn" id="typos"><b>Slide／notebook 筆誤一覽（唔好跟錯）</b>
+<div class="tw"><table class="stack"><tr><th>邊度</th><th>寫咗</th><th>應該係</th></tr>
+<tr><td>Exam Review p.90 Levenshtein</td><td>「By deletion」框嘅說明抄咗 insertion 嗰段</td><td>跟 DP index：deletion = ← D[2][1] + 1（<a href="P3-L5-L6.html#lev">P3</a>）</td></tr>
+<tr><td>L3 p.55 <code>stdev()</code></td><td>Code 寫咗 <code>.max()</code>，出 10</td><td><code>stdev()</code> = 2.897（population）（<a href="P2-L3-L4.html#t3ops">P2</a>）</td></tr>
+<tr><td>L3 p.51 flatMap</td><td>「6 input will have 1 output」</td><td>每個 input 可以出多個 output，例如 3 個 → 6 個（<a href="P2-L3-L4.html#ops2">P2</a>）</td></tr>
+<tr><td>T2 TODO 10</td><td><code>multiplier=0.6</code></td><td>miles → km 用 <b>1.60934</b>（<a href="P1-L1-L2.html#ddf">P1</a>）</td></tr>
+<tr><td>T4 TODO 2.1、2.4</td><td>新欄叫 avg_speed</td><td>(time + timef)/2 係 <b>avg_time</b>；之後用 <b>speed</b>（<a href="P2-L3-L4.html#hills">P2</a>）</td></tr>
+<tr><td>T5 notebook TF-IDF</td><td>DF(spark, D) = 2；「IDF is the number of documents…」</td><td>DF(spark) = <b>1</b>；嗰句係 <b>DF</b> 嘅定義（<a href="P3-L5-L6.html#tfidfrdd">P3</a>）</td></tr>
+<tr><td>T6 notebook analogy</td><td>man − king + woman</td><td><b>king − man + woman ≈ queen</b>（<a href="P3-L5-L6.html#cbow">P3</a>）</td></tr>
+<tr><td>T7 notebook PageRank 公式</td><td>\(\beta M r + \beta/n\)</td><td>\(\beta M r + (1-\beta)/n\)（<a href="P4-L7.html#t7">P4</a>）</td></tr>
+<tr><td>L8 p.3</td><td>有向圖下面寫「Undirected links」</td><td>係 <b>directed</b> links 例子（<a href="P5-L8.html#notes">P5</a>）</td></tr>
+<tr><td>L8 p.58、60 eigenvector</td><td>λ 寫成 normalization constant；第一步 0.68</td><td>收斂後 norm 先等於 λ；4/√34 = 0.686（<a href="P5-L8.html#eig">P5</a>）</td></tr>
+<tr><td>Exam Review p.130 harmonic</td><td>1 + 1/2(2) + 1/3 + 1/4 = 2.5</td><td>= <b>2.58</b>；右上角 2.5 應係 2.33（<a href="P5-L8.html#harm">P5</a>）</td></tr>
+<tr><td>L4 p.6–13 UrlInfo 表</td><td>twitter.com 個 category 印咗 facebook.com；espn PR 0.9／0.6</td><td>Social Network；唔影響 top-2 答案（<a href="P2-L3-L4.html#top2">P2</a>）</td></tr></table></div></div>
 <div class="tw"><table class="stack"><tr><th>公式</th><th>寫法</th><th>易錯位</th></tr>
 <tr><td>PageRank</td><td>\(r_j = \sum_{i\to j} \beta \frac{r_i}{d_i} + \frac{1-\beta}{N}\)</td><td>d_i 係 <b>出發頁</b> 嘅 out-degree；teleport 係 (1−β)/N</td></tr>
 <tr><td>Google matrix</td><td>\(A = \beta M + (1-\beta)\left[\frac1N\right]_{N\times N}\)</td><td>M 嘅 column = from，row = to，每個 column 加埋 = 1</td></tr>

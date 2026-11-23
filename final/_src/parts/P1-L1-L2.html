@@ -20,8 +20,35 @@
 <div class="key"><b>一分鐘重點</b><ul>
 <li>Big Data 用 <b>6Vs</b> 形容：Volume（多）、Velocity（快）、Variety（雜）、Veracity（準唔準）、Value（有冇用）、Variability（會變）。MCQ 會俾情境叫你揀邊個 V。</li>
 <li>單部電腦唔夠用，就 <b>scale out</b>：將數據切細（partition）分俾好多部機一齊做，再合併結果（divide and conquer）。</li>
-<li><b>HDFS</b>：檔案切成固定大細嘅 block，每個 block 存 3 份，寫一次讀好多次。</li>
-<li><b>Dask</b>：平行版 NumPy／Pandas，將 array 切成 chunks，lazy，<code>.compute()</code> 先計。</li></ul></div>
+<li><b>HDFS</b>：檔案切成固定大細嘅 block（128 MB），每個 block 存 3 份，寫一次讀好多次。</li>
+<li>處理 big data 三條路：data reduction、efficient algorithm／data structure、分工俾多個 worker。</li>
+<li><b>Dask</b>：平行版 NumPy／Pandas，將 array 切成 chunks，lazy，<code>.compute()</code> 先計；<code>dask.compute(a, b)</code> 共享中間結果，<code>persist()</code> 留喺 memory。</li></ul></div>
+<div class="concept" id="layers">
+<h3>Big Data 嘅四層 components（L1 p.31）</h3>
+<span class="lab">一句講完</span>
+<p>由下而上：<b>儲存</b> → <b>分散式計算</b> → <b>library</b> → <b>分析／演算法</b>。上層用下層。</p>
+<span class="lab pic">圖解</span>
+<figure class="fig"><svg viewBox="0 0 330 230" role="img" aria-label="Big data components four layers" style="max-width:330px">
+<g font-size="12" text-anchor="middle">
+<rect class="ac" x="10" y="8" width="310" height="48" rx="8"/><text x="165" y="27" font-weight="700">④ Analytics and Algorithm</text><text x="165" y="45" font-size="11">Similarity search、推介系統、link analysis、可視化</text>
+<rect class="hl" x="10" y="64" width="310" height="48" rx="8"/><text x="165" y="83" font-weight="700">③ Big-Data Libraries</text><text x="165" y="101">MLlib（machine learning）、NetworkX</text>
+<rect class="bx" x="10" y="120" width="310" height="48" rx="8"/><text x="165" y="139" font-weight="700">② Distributed Computing</text><text x="165" y="157" font-size="11">Dask、MapReduce（Hadoop）、RDD（Spark）</text>
+<rect x="10" y="176" width="310" height="48" rx="8" style="fill:#F6EBCB;stroke:#8F6200"/><text x="165" y="195" font-weight="700">① Big Data Distributed Storage</text><text x="165" y="213">HDFS、key-value stores</text></g>
+</svg><figcaption>呢份溫習包嘅 P1–P5 差唔多就係由下而上行一次</figcaption></figure>
+<span class="lab trap">易錯</span>
+<p>HDFS 係<b>儲存</b>層，唔係計算層；MapReduce、Dask、RDD 係<b>計算</b>層；NetworkX 係 <b>library</b>；PageRank（link analysis）係最頂嘅<b>分析</b>層。</p>
+</div>
+<div class="concept" id="threeways">
+<h3>處理 big data 嘅三條路（L2 p.6）</h3>
+<span class="lab">一句講完</span>
+<p>CPU clock speed 已經升唔上，單線程快唔到幾多，所以只有三條路：<b>減數據</b>、<b>用好啲嘅演算法／資料結構</b>、<b>分工俾多個 worker</b>。呢科主要講第三條。</p>
+<div class="tw"><table class="stack"><tr><th>路</th><th>做法</th><th>例子</th></tr>
+<tr><td>① Data reduction</td><td>令數據細啲</td><td>Feature selection、dimensionality reduction、data compression</td></tr>
+<tr><td>② Efficient algorithm & data structure</td><td>同樣數據，搵得快啲</td><td>Indexing、tree、hash map／hash table、graph</td></tr>
+<tr><td>③ Allocate workload to multiple workers</td><td>平行處理（divide and conquer）</td><td>MapReduce、Spark、Dask</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<p>Dimensionality reduction 屬於 <b>data reduction</b>，唔係「efficient algorithm」；hash table 屬於 <b>data structure</b>。</p>
+</div>
 <div class="concept">
 <h3>Divide and conquer：平行處理嘅基本諗法</h3>
 <span class="lab">一句講完</span>
@@ -43,10 +70,10 @@
 <div class="concept">
 <h3>HDFS：分散式檔案系統</h3>
 <span class="lab">一句講完</span>
-<p>將一個大檔案切成<b>固定大細嘅 block</b>，每個 block 喺唔同機器存 <b>3 份</b>，檔案<b>寫一次、讀好多次</b>。</p>
+<p>將一個大檔案切成<b>固定大細嘅 block</b>（default <b>128 MB</b>，Exam Review p.10），每個 block 喺唔同機器存 <b>3 份</b>，檔案<b>寫一次、讀好多次</b>。</p>
 <span class="lab pic">圖解</span>
 <figure class="fig"><svg viewBox="0 0 330 200" role="img" aria-label="HDFS blocks" style="max-width:330px">
-<rect class="bx" x="10" y="10" width="310" height="34" rx="6"/><text x="165" y="32" text-anchor="middle" font-size="13">big_file.log（例如 384 MB）</text>
+<rect class="bx" x="10" y="10" width="310" height="34" rx="6"/><text x="165" y="32" text-anchor="middle" font-size="13">big_file.log（384 MB = 3 × 128 MB）</text>
 <g font-size="12" text-anchor="middle"><rect class="ac" x="10" y="54" width="100" height="26" rx="6"/><text x="60" y="71">Block 1</text><rect class="hl" x="115" y="54" width="100" height="26" rx="6"/><text x="165" y="71">Block 2</text><rect class="fshuf" x="220" y="54" width="100" height="26" rx="6" style="fill:#F6EBCB;stroke:#8F6200"/><text x="270" y="71">Block 3</text></g>
 <g font-size="12"><rect class="bx" x="10" y="100" width="95" height="90" rx="8"/><text x="57" y="118" text-anchor="middle">Node 1</text><rect class="bx" x="118" y="100" width="95" height="90" rx="8"/><text x="165" y="118" text-anchor="middle">Node 2</text><rect class="bx" x="225" y="100" width="95" height="90" rx="8"/><text x="272" y="118" text-anchor="middle">Node 3</text>
 <rect class="ac" x="20" y="128" width="75" height="16" rx="4"/><rect class="hl" x="20" y="150" width="75" height="16" rx="4"/>
@@ -88,6 +115,147 @@
 <tr><td><code>chunks=((1000,1000,…),(3000,…))</code></td><td>逐塊寫明大細</td><td>可以唔平均</td></tr></table></div>
 <div class="warn"><b>易錯</b><code>chunks</code> 係<b>每塊嘅形狀</b>，唔係「分幾多塊」。<code>chunks=1</code> 即係每塊得 1 個元素，會慢到死。建議每塊 100 MB 至 1 GB；太細 overhead 大，太大放唔落 memory。<code>rechunk</code> 好貴。</div>
 <p><b>Block algorithm 例子</b>：4×4 array 用 <code>chunks=(2,2)</code> 分 4 塊，<code>sum()</code> 先計每塊（14、22、46、54），再加埋 = 136。<code>.visualize()</code> 畫出 task graph：node = task，線 = dependency。Dask 係 <b>lazy</b>，<code>.compute()</code> 先真正計。</p>
+
+<div class="concept" id="taskgraph">
+<h3>Task graph 長咩樣：low-level vs high-level（L2 p.30–31）</h3>
+<span class="lab">一句講完</span>
+<p>Dask 每個操作都變成 task graph：<b>node = 一個 task，箭咀 = 依賴</b>。<code>.visualize()</code> 畫<b>每個 chunk</b>嘅 task（low-level）；<code>.dask.visualize()</code> 只畫<b>每一層操作</b>（high-level）。</p>
+<span class="lab pic">圖解：4 個 chunk 嘅 sum()</span>
+<div class="grid2">
+<figure class="fig"><svg viewBox="0 0 300 230" role="img" aria-label="low-level task graph" style="max-width:300px">
+<defs><marker id="tg1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g font-size="11" text-anchor="middle">
+<rect class="bx" x="5" y="10" width="62" height="26" rx="5"/><text x="36" y="27">(0,0)</text><rect class="bx" x="80" y="10" width="62" height="26" rx="5"/><text x="111" y="27">(0,1)</text><rect class="bx" x="155" y="10" width="62" height="26" rx="5"/><text x="186" y="27">(1,0)</text><rect class="bx" x="230" y="10" width="62" height="26" rx="5"/><text x="261" y="27">(1,1)</text>
+<rect class="hl" x="5" y="80" width="62" height="26" rx="5"/><text x="36" y="97">sum</text><rect class="hl" x="80" y="80" width="62" height="26" rx="5"/><text x="111" y="97">sum</text><rect class="hl" x="155" y="80" width="62" height="26" rx="5"/><text x="186" y="97">sum</text><rect class="hl" x="230" y="80" width="62" height="26" rx="5"/><text x="261" y="97">sum</text>
+<rect class="ac" x="85" y="150" width="130" height="28" rx="6"/><text x="150" y="168">sum-aggregate</text>
+<rect class="bx" x="125" y="200" width="50" height="24" rx="5"/><text x="150" y="216">()</text></g>
+<g class="ln"><line x1="36" y1="36" x2="36" y2="78" marker-end="url(#tg1)"/><line x1="111" y1="36" x2="111" y2="78" marker-end="url(#tg1)"/><line x1="186" y1="36" x2="186" y2="78" marker-end="url(#tg1)"/><line x1="261" y1="36" x2="261" y2="78" marker-end="url(#tg1)"/>
+<line x1="36" y1="106" x2="120" y2="148" marker-end="url(#tg1)"/><line x1="111" y1="106" x2="140" y2="148" marker-end="url(#tg1)"/><line x1="186" y1="106" x2="160" y2="148" marker-end="url(#tg1)"/><line x1="261" y1="106" x2="180" y2="148" marker-end="url(#tg1)"/><line x1="150" y1="178" x2="150" y2="198" marker-end="url(#tg1)"/></g>
+</svg><figcaption><b>Low-level</b>：<code>dask_arr.sum().visualize()</code><br>每個 chunk 一行，chunk 越多圖越大</figcaption></figure>
+<figure class="fig"><svg viewBox="0 0 200 230" role="img" aria-label="high-level task graph" style="max-width:200px">
+<defs><marker id="tg2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g font-size="12" text-anchor="middle"><rect class="bx" x="40" y="20" width="120" height="30" rx="6"/><text x="100" y="40">array-#0</text>
+<rect class="hl" x="40" y="100" width="120" height="30" rx="6"/><text x="100" y="120">sum-#1</text>
+<rect class="ac" x="25" y="180" width="150" height="30" rx="6"/><text x="100" y="200">sum-aggregate-#2</text></g>
+<g class="ln"><line x1="100" y1="50" x2="100" y2="98" marker-end="url(#tg2)"/><line x1="100" y1="130" x2="100" y2="178" marker-end="url(#tg2)"/></g>
+</svg><figcaption><b>High-level</b>：<code>dask_arr.sum().dask.visualize()</code><br>一層操作一個 node，唔理有幾多 chunk</figcaption></figure></div>
+<span class="lab why">點解要兩種</span>
+<p>Low-level 睇到真正有幾多個 task 可以平行（4 個 sum 互不相干，可以同時跑）；high-level 睇成條 pipeline 有咩步驟，chunk 多到幾十萬都仲睇得明。</p>
+<span class="lab trap">易錯</span>
+<p>考試叫你畫 task graph，畫 <b>low-level</b>：每個 chunk 一個 node，同一層嘅 node 冇箭咀連住（可以平行），最後先匯合（aggregate）。</p>
+</div>
+
+<div class="concept" id="lazyproof">
+<h3>Lazy 嘅證據：點解一句咁快？（L2 p.36、p.55–57）</h3>
+<span class="lab">一句講完</span>
+<p>Dask 未 <code>.compute()</code> 之前只係<b>砌 task graph</b>，所以「計」得好快；<code>.compute()</code> 先真係做嘢。</p>
+<div class="tw"><table class="stack"><tr><th>例子</th><th>寫法</th><th>Wall time</th></tr>
+<tr><td>Array mean</td><td>NumPy <code>data.mean()</code></td><td>105 ms（真計）</td></tr>
+<tr><td>Array mean</td><td>Dask <code>dask_data.mean()</code></td><td><b>3.51 ms</b>（淨係砌 graph）</td></tr>
+<tr><td>LinkedIn 5 個 table merge</td><td>pandas <code>merge(…)</code></td><td>6.95 s</td></tr>
+<tr><td>LinkedIn merge</td><td>Dask，未 compute（npartitions=100）</td><td><b>50.4 ms</b>（淨係砌 graph）</td></tr>
+<tr><td>LinkedIn merge</td><td>Dask <code>.compute()</code></td><td>4.06 s（真計，平行之後快過 pandas）</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<p>3.51 ms 唔代表 Dask 快 30 倍，因為佢根本未計。公平比較要用 <code>.compute()</code> 之後嘅時間：LinkedIn 例子係 6.95 s vs 4.06 s。</p>
+</div>
+
+<div class="concept" id="delayed">
+<h3>dask.delayed：將普通 Python function 變平行（L2 p.41–44）</h3>
+<span class="lab">一句講完</span>
+<p>Function 加 <code>@dask.delayed</code>，call 佢就唔會即刻跑，只係加一個 node 入 task graph；<code>.compute()</code> 先跑，而且冇依賴嘅 task 會<b>同時</b>跑。</p>
+<pre><code>@dask.delayed
+def inc(x):    return x + 1
+@dask.delayed
+def double(x): return x * 2
+@dask.delayed
+def add(x, y): return x + y
+
+a = inc(5)        # 未計
+b = double(5)     # 未計
+c = add(a, b)     # c = Delayed('add-…')
+c.compute()       # 6 + 10 = 16</code></pre>
+<span class="lab pic">圖解</span>
+<figure class="fig"><svg viewBox="0 0 280 150" role="img" aria-label="delayed task graph" style="max-width:280px">
+<defs><marker id="dl1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15202B"/></marker></defs>
+<g font-size="12" text-anchor="middle"><rect class="bx" x="20" y="15" width="90" height="30" rx="6"/><text x="65" y="35">inc(5) = 6</text>
+<rect class="bx" x="170" y="15" width="90" height="30" rx="6"/><text x="215" y="35">double(5) = 10</text>
+<rect class="ac" x="90" y="100" width="100" height="32" rx="6"/><text x="140" y="121">add = 16</text>
+<text x="140" y="34" fill="#0B7472" font-weight="700">同時跑</text></g>
+<g class="ln"><line x1="65" y1="45" x2="120" y2="98" marker-end="url(#dl1)"/><line x1="215" y1="45" x2="160" y2="98" marker-end="url(#dl1)"/></g>
+</svg><figcaption>inc 同 double 互不依賴，可以平行；add 要等兩個都完</figcaption></figure>
+<span class="lab eg">Loop 版（p.43–44）</span>
+<pre><code>output = []
+for i in range(100):
+    x = random.random()
+    c = add(inc(x), double(x))
+    output.append(c)
+total = dask.delayed(sum)(output)   # sum 都要 delayed
+total.compute()</code></pre>
+<p>100 組 inc／double／add 互不相干，可以分晒俾 worker；最後 <code>sum</code> 匯合。Built-in function（例如 <code>sum</code>）唔可以加 decorator，所以寫 <code>dask.delayed(sum)(output)</code>。</p>
+<span class="lab">每個 worker 幾多 thread（L2 p.44）</span>
+$$\text{threads} = \max\!\left(1,\; \left\lfloor \frac{\text{cores}}{n_{\text{workers}}} \right\rfloor\right)$$
+<p>threads = 每個 worker 嘅 thread 數；cores = 部機總共幾多 CPU core。</p>
+<p>例如 8 核、<code>Client(n_workers=2)</code> ⇒ 每個 worker 4 條 thread；3 核、4 個 worker ⇒ ⌊0.75⌋ = 0，但最少 1。</p>
+</div>
+
+<div class="concept" id="t2chunk">
+<h3>Chunk 大細實驗（T2 TODO 1–4）</h3>
+<span class="lab eg">TODO 1 vs 2：同一個 20000 × 20000 array</span>
+<div class="tw"><table class="nostack"><tr><th></th><th><code>chunks=(10000, 10000)</code></th><th><code>chunks=(30, 30)</code></th></tr>
+<tr><td>幾多塊</td><td>2 × 2 = <b>4</b></td><td>⌈20000/30⌉² = 667² = <b>444,889</b></td></tr>
+<tr><td>每塊大細（float64）</td><td>800 MB</td><td>7.2 KB</td></tr>
+<tr><td>結果</td><td>快</td><td><b>慢好多</b>（Colab 甚至會爆 memory）</td></tr></table></div>
+<span class="lab why">點解細 chunk 反而慢</span>
+<p>每塊都係一個 task。44 萬個 task，scheduler 要逐個安排、記錄依賴，呢個 <b>overhead</b> 遠大過每塊得 7 KB 嘅實際計算。建議每塊 <b>100 MB–1 GB</b>。</p>
+<span class="lab eg">TODO 3：<code>(dask_arr + dask_arr.T).mean(axis=1)</code></span>
+<p>20000 × 20000 加自己嘅 transpose 仍然係 20000 × 20000；<code>mean(axis=1)</code> 將每一行平均，結果 shape = <b>(20000,)</b>，即係「第一個 dimension 大細唔變」（solution TODO 4 嘅答案）。</p>
+</div>
+
+<div class="concept" id="rechunk">
+<h3><code>chunks</code>、<code>chunksize</code>、<code>rechunk</code>（T2 1.3）</h3>
+<div class="tw"><table class="stack"><tr><th>寫法</th><th>意思</th></tr>
+<tr><td>唔寫 chunks</td><td>Default <code>chunks='auto'</code>，Dask 自己揀</td></tr>
+<tr><td><code>dask_arr.chunksize</code></td><td>只出<b>最大</b>嗰塊嘅形狀，例如 (1000, 100, 1000)</td></tr>
+<tr><td><code>dask_arr.chunks</code></td><td>出每個 axis <b>每一塊</b>嘅大細（tuple of tuples），唔平均嘅 chunk 要睇呢個</td></tr>
+<tr><td><code>rechunk({0: -1, 1: 100, 2: "auto"})</code></td><td>Axis 0 <b>唔切</b>（−1 = 成條 axis 做一塊）；axis 1 每塊 100；axis 2 Dask 自己揀</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<p><b>−1 唔係「最後一塊」或者「錯誤」</b>，係「呢個 axis 唔切」（T2 TODO #4 問嘅就係呢個）。Rechunk 要搬數據，好貴，盡量一開始就揀啱。</p>
+</div>
+
+<div class="concept" id="ddf">
+<h3>Dask DataFrame：幾時先真計、點樣唔好重複計（T2 2.1–2.5）</h3>
+<span class="lab">讀檔：只睇第一個 file 開頭</span>
+<p><code>dd.read_csv('*.csv')</code> 唔會讀晒啲數據：佢搵到 10 個 file，每個 file 一個 partition，再<b>淨係讀第一個 file 開頭一小段</b>估 column 名同 dtype，然後當所有 partition 都係咁。估錯（例如前面全部係整數，後面有小數）就會出錯，要自己用 <code>dtype={'CRSElapsedTime': 'float64', 'TailNum': 'str', 'Cancelled': bool}</code> 指定。</p>
+<span class="lab">邊啲會觸發計算</span>
+<p><code>.compute()</code>、<code>len(ddf)</code>、<code>ddf.head()</code>、<code>ddf.tail()</code> 會真計。<code>len</code> 嘅做法：每個 file 讀入 pandas → 各自數 → 加埋 subtotal。</p>
+<span class="lab eg">T2 TODO 5–8（solution 原文）</span>
+<pre><code>len(ddf[~ddf['Cancelled']].compute())                              # 5 冇取消嘅航班數
+ddf[~ddf['Cancelled']].groupby("Origin").Origin.count().compute()  # 6 每個機場
+ddf.groupby("Origin").DepDelay.mean().compute()                    # 7 每個機場平均 delay
+ddf.groupby("DayOfWeek").DepDelay.mean().idxmax().compute()        # 8 delay 最大嗰日</code></pre>
+<span class="lab pic">共享中間結果：兩次 compute vs 一次 dask.compute</span>
+<div class="grid2">
+<figure class="fig"><div class="mfh">兩次 compute</div><div class="fb">read csv → filter → mean</div><div class="fb">read csv → filter → std</div><div class="fb hl2">讀檔同 filter 做咗<b>兩次</b></div></figure>
+<figure class="fig"><div class="mfh"><code>dask.compute(mean_delay, std_delay)</code></div><div class="fb">read csv → filter（一次）<br>→ mean 同 std 一齊計</div><div class="fb ac2">共同部分只做<b>一次</b>，快啲</div></figure></div>
+<span class="lab">persist()：將中間結果留喺 memory</span>
+<p>Dask 預設會<b>盡快刪走中間結果</b>（所以處理得到大過 memory 嘅數據），代價係下次要用就要由頭讀過。<code>ddf_jfk = ddf_jfk.persist()</code> 將「冇取消 + JFK 出發」呢個子集放入 distributed memory，之後計 mean、std 都唔使再讀檔同 filter。</p>
+<div class="tw"><table class="stack"><tr><th></th><th>Dask</th><th>Spark</th></tr>
+<tr><td>留喺 memory 俾之後重用</td><td><code>ddf.persist()</code></td><td><code>rdd.cache()</code>／<code>rdd.persist()</code></td></tr>
+<tr><td>一次過計幾個結果</td><td><code>dask.compute(a, b)</code></td><td>對 cache 咗嘅 RDD 做幾個 action</td></tr>
+<tr><td>真正觸發計算</td><td><code>.compute()</code>、<code>len</code>、<code>head</code></td><td>Action：<code>collect</code>、<code>count</code>、<code>take</code></td></tr></table></div>
+<span class="lab">map_partitions：自己寫嘅 function（TODO 10）</span>
+<pre><code>import pandas as pd
+def converter(df, multiplier=1):
+    return df * multiplier
+meta = pd.Series(name="Distance", dtype="float64")       # 話俾 Dask 知輸出長咩樣
+distance_km = ddf.Distance.map_partitions(converter, multiplier=1.60934, meta=meta)
+distance_km.head()</code></pre>
+<p><code>map_partitions</code> 將 function 套落<b>每個 partition</b>（每個係一個 pandas DataFrame）。因為 lazy，Dask 未計之前唔知輸出嘅 column 名同 dtype，所以要俾 <b>meta</b>。</p>
+<span class="lab trap">易錯</span>
+<ul><li><b>T2 solution 寫 <code>multiplier=0.6</code>，但題目要 miles → km，應該係 1.60934</b>（0.6 大約係 km → miles）。考 fill-in 答 <b>1.60934</b>。</li>
+<li><code>~ddf['Cancelled']</code> 嘅 <code>~</code> 係「not」，即係揀冇取消嘅航班。</li>
+<li><code>idxmax()</code> 出嘅係最大值嗰個 <b>index</b>（邊日），唔係最大值本身。</li></ul>
+</div>
 
 <h2 id="case">三、Big Data Vs case study（2026s2 Q1 + L1 Netflix practice）</h2>
 <p>Palantir Skywise：每次飛行 500 GB–1 TB sensor 數據、總共幾百 PB；即時處理 streaming telemetry 做 in-flight 診斷；要結合 structured（航班表、零件庫存）同 unstructured（手寫機師日誌、技術手冊、sensor time series）；有 data lineage 工具記錄每個改動，確保數據準確合規。</p>
@@ -181,6 +349,15 @@ function REDUCE(key = dept, values):
 <h2 id="mcq">七、MCQ</h2>
 <div class="mcq" data-set="A"><script type="application/json">{{MCQ:q1:L1,L2}}</script></div>
 <div class="mcq" data-set="B"><script type="application/json">[
+{"t":"L1","s":"<p>In the lecture's 'Components of Big Data', HDFS belongs to which layer?</p>","o":["Analytics and Algorithm","Big-Data Libraries","Distributed Computing","Big Data Distributed Storage"],"a":3,"e":"HDFS 同 key-value stores 係最底嘅<b>儲存</b>層；Dask、MapReduce、RDD 係計算層；MLlib、NetworkX 係 library。"},
+{"t":"L2","s":"<p>Dimensionality reduction is an example of which approach to handling big data?</p>","o":["Data reduction","Efficient data structure","Allocating work to multiple workers","Replication"],"a":0,"e":"三條路：data reduction（feature selection、<b>dimensionality reduction</b>、compression）／efficient algorithm & data structure／分工俾 worker。"},
+{"t":"L2","s":"<p><code>dask_data.mean()</code> takes 3.5 ms while NumPy's <code>data.mean()</code> takes 105 ms. Why?</p>","o":["Dask uses the GPU","Dask only builds the task graph; nothing is computed until .compute()","Dask caches the result","Dask samples the data"],"a":1,"e":"Dask 係 <b>lazy</b>，未 <code>.compute()</code> 只係砌 graph。"},
+{"t":"L2","s":"<p>A 20000 × 20000 Dask array with <code>chunks=(30, 30)</code> is much slower than with <code>chunks=(10000, 10000)</code> mainly because:</p>","o":["Each chunk is too large for memory","About 445,000 tiny tasks create huge scheduling overhead","Transpose is not supported","The array is copied to disk"],"a":1,"e":"⌈20000/30⌉² = 444,889 塊，每塊得 7 KB，scheduler overhead 遠大過計算。"},
+{"t":"L2","s":"<p>In <code>dask_arr.rechunk({0: -1, 1: 100, 2: 'auto'})</code>, what does −1 mean for axis 0?</p>","o":["Remove axis 0","Use the last chunk size","Do not split axis 0: the whole axis is one chunk","Let Dask choose"],"a":2,"e":"<b>−1 = 嗰個 axis 唔切</b>；'auto' 先係俾 Dask 揀。"},
+{"t":"L2","s":"<p>Why is <code>dask.compute(mean_delay, std_delay)</code> faster than calling <code>.compute()</code> on each?</p>","o":["It uses more workers","Shared steps (reading files, filtering) run only once","It skips the std","It persists the data to disk"],"a":1,"e":"兩次 compute 會重複讀檔同 filter；一次過 compute 共同部分只做<b>一次</b>。"},
+{"t":"L2","s":"<p>What does <code>ddf_jfk.persist()</code> do?</p>","o":["Saves to CSV","Keeps the computed subset in distributed memory so later computations skip loading and filtering","Triggers .head()","Converts to pandas"],"a":1,"e":"Dask 預設會盡快刪中間結果；persist 將佢留喺 memory，相當於 Spark 嘅 cache()。"},
+{"t":"L2","s":"<p>Why does <code>map_partitions</code> need a <code>meta</code> argument?</p>","o":["To set the number of partitions","Because computation is lazy, Dask needs to know the output's column name and dtype in advance","To sort the result","To choose the scheduler"],"a":1,"e":"Lazy：未計之前唔知輸出長咩樣，所以用 meta（例如 <code>pd.Series(name='Distance', dtype='float64')</code>）話俾佢知。"},
+{"t":"L2","s":"<p>With 8 CPU cores and <code>Client(n_workers=2)</code>, how many threads does each worker get?</p>","o":["1","2","4","8"],"a":2,"e":"max(1, ⌊8/2⌋) = <b>4</b>。"},
 {"t":"L1","s":"<p>A streaming service notices that users' tastes change over months and the word “sick” can mean both ill and great. Which V is this?</p>","o":["Velocity","Variability","Volume","Value"],"a":1,"e":"數據或者意思<b>隨時間變</b>、一字多義 = <b>Variability</b>。Velocity 係產生同處理得幾快。"},
 {"t":"L1","s":"<p>Storing 250 TB of logs that nobody analyses mainly fails which V?</p>","o":["Value","Variety","Velocity","Veracity"],"a":0,"e":"儲存本身冇商業價值，要變成 insight 先有 <b>Value</b>。"},
 {"t":"L2","s":"<p>HDFS is described as write-once read-many. What does that mean?</p>","o":["Files can only be read once","Files are written once and then read many times, not edited in place","Only one user can read a file","Every write is replicated many times"],"a":1,"e":"HDFS 為 batch 分析設計：寫一次、讀好多次，唔支援隨時改中間某一行。"},
@@ -198,5 +375,8 @@ function REDUCE(key = dept, values):
 <dt>Q：Shuffle 要唔要自己寫 code？</dt><dd>唔使。Shuffle 係 framework 自動做：按 key group 埋，送去同一個 reducer。畫圖時要畫出嚟，寫 pseudocode 就唔使。</dd>
 <dt>Q：Reducer 收到嘅 values 有冇排序？</dt><dd>冇保證。Inverted index 要排序或者去重複，就要喺 reducer 自己做（sorted(set(...))）。</dd>
 <dt>Q：Mutual friends 點解要 sort pair？</dt><dd>A 嘅 mapper 會出 (B,C)，B 嘅 mapper 可能出 (C,B)。唔排序就會變兩個 key，shuffle 唔會 group 埋。</dd>
+<dt>Q：Dask 幾時先真係計？</dt><dd><code>.compute()</code>、<code>len()</code>、<code>.head()</code>、<code>.tail()</code>。其他操作（filter、groupby、mean）只係加 node 入 task graph。</dd>
+<dt>Q：persist() 同 dask.compute(a, b) 有咩分別？</dt><dd><code>dask.compute(a, b)</code> 係同一次計算入面共享中間步驟；<code>persist()</code> 係將結果留喺 memory，<b>之後</b>幾次 compute 都可以重用。</dd>
+<dt>Q：T2 TODO 10 multiplier 填 0.6 定 1.60934？</dt><dd><b>1.60934</b>（miles → km）。Solution 寫 0.6 係錯（0.6 大約係 km → miles）。</dd>
 <dt>Q：6Vs 要背到幾熟？</dt><dd>老師講長題唔考背書，MCQ 會俾情境叫你揀邊個 V。記住每個 V 嘅「關鍵字」就得（見上面個表嘅第三欄）。</dd>
 </dl>

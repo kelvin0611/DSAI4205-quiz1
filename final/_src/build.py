@@ -40,6 +40,7 @@ details.ans>div{padding:0 14px 12px}
 .q{font-weight:600;margin-top:18px}
 .faq dt{font-weight:600;margin-top:14px}.faq dd{margin:4px 0 0 0;padding-left:12px;border-left:2px solid var(--line)}
 svg{max-width:100%;height:auto;display:block;margin:10px auto}
+.katex svg{margin:0;max-width:none}
 svg text{fill:var(--ink);font-family:inherit}
 svg .ln{stroke:var(--ink);fill:none;stroke-width:1.4}
 svg .bx{fill:var(--card);stroke:var(--ink);stroke-width:1.2}

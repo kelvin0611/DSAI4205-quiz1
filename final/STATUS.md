@@ -33,7 +33,14 @@
 - 圖表答案用 Python（numpy、networkx）核對；pyspark 裝唔到，用 Python 模擬 RDD 邏輯
 
 ## 下一步
-- **第一批完成（2026-11-23），等 Kelvin 確認先做第二批**：H1–H12 + 中優先 #17（Netflix 4V，P1）。第二批（其餘中優先 + slide 筆誤統一入「易錯」框）等 Kelvin 確認第一批先做；低優先唔做。清單狀態喺 ../revision/_audit/AUDIT.md 尾。
+- **第二批完成（2026-11-23）**：中優先其餘項目 + slide 筆誤統一入易錯框（每頁易錯框 + index #typos 一覽）；低優先唔做。之後：等 Kelvin 溫習時嘅問題補 FAQ／drill。
+  - ✅ index：#typos 筆誤一覽；7 頁全部 rebuild（build.py KaTeX √ 修正生效），mock2 拆咗一條太闊嘅公式
+  - ✅ P5 第二批 2026-11-23（degree distribution、MSN／PPI + 真實網絡共通點、harmonic 例子、edge betweenness、diameter 特殊圖、Ax = λx + strongly connected、centrality 對比、Krackhardt kite + limitations）
+  - ✅ P4 第二批 2026-11-23（PageRank score 圖 C 34.3、toy example、3-cycle + uniqueness、8 GB／10N 數字、r = βMr + (1−β)/N 推導、A–D 收斂 1/3、2/9）
+  - ✅ P3 第二批 2026-11-23（stemmer vs lemmatizer + Porter m、POS filter、one-hot、vector space cosine、Jaccard bit vector、相似度 RDD 寫法表、T06 = CBOW + shape）；build.py 修 KaTeX √ 顯示
+  - ✅ P2 第二批 2026-11-23（Redis vs RDD、ratings.csv 3 job + DAG、T3 細 operator 輸出、palindrome + inverted index 逐步、word count DataFrame、速度圖、Catalyst 前後、zipWithIndex、sub-query + window 輸出、T4 hills）
+  - ✅ P1 第二批 2026-11-23（四層 components、三條路、task graph low/high-level、lazy 證據、dask.delayed + threads 公式、T2 chunk 實驗、rechunk、Dask DataFrame dtype／dask.compute／persist／map_partitions）
+- 第一批（2026-11-23 完成，Kelvin 已確認）：H1–H12 + 中優先 #17（Netflix 4V，P1）。第二批（其餘中優先 + slide 筆誤統一入「易錯」框）等 Kelvin 確認第一批先做；低優先唔做。清單狀態喺 ../revision/_audit/AUDIT.md 尾。
   - ✅ P3（H1、H2、H3）2026-11-23
   - ✅ P1（#17 Netflix 4V practice question，#netflix）2026-11-23
   - 下一步：Kelvin 睇完第一批（P1 #netflix、P2 #ops2 #top2、P3 #lev #bpe-seg #tfidfrdd、P4 #complete #mr #t7、P5 #types #eig + betweenness 例子）確認冇問題，就做第二批（AUDIT.md「中優先」其餘 + 📝 slide 筆誤統一入易錯框）。
@@ -41,7 +48,8 @@
   - ✅ P4（H6 #complete、H7 新 section 六 #t7、H8 #mr Links.txt（順手更正舊圖 C → A 嘅錯）、H9 β 字眼；index 一分鐘重點同步改）2026-11-23
   - ✅ P2（H4 operator 表 #ops2 + cross-link 去 P3、H5 top-2 三種寫法 #top2）2026-11-23
   - build.py 修正：inline LaTeX \\( \\) 之前因為 JS 跳脫錯咗，一直冇 render，仲令普通括號被當成數學；已修好（所有頁要重新 build）。
-  - 截圖：container 用 Playwright（node）+ 本機 KaTeX（/opt/npm-tools/node_modules/katex）攔截 CDN，可以睇到 LaTeX render 效果。
+  - 檢查：除咗截圖，仲用一段 Playwright script 搵 `.katex-display` scrollWidth > clientWidth（手機要橫 scroll 嘅公式），有就拆開
+- 截圖：container 用 Playwright（node）+ 本機 KaTeX（/opt/npm-tools/node_modules/katex）攔截 CDN，可以睇到 LaTeX render 效果。
 - **進行中：完整補讀（2026-11-23 Kelvin 要求）**。之前 session 冇讀晒 lecture：L1–L4 冇讀（靠 Quiz 1/2 溫習包）、L5–L6 只睇標題、Exam Review 只讀前半、slides 嘅圖大部分冇睇、tutorial 冇讀。
   計劃同進度喺 ../revision/_audit/AUDIT.md；文字已抽好喺 ../revision/_audit/*.txt。
   做法：一份份讀（文字 + 圖片頁 contact sheet），每讀完一份即刻將發現寫入 AUDIT.md，全部讀完先改溫習包。可能要分 2–3 個 session。

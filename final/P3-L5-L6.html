@@ -37,6 +37,7 @@ details.ans>div{padding:0 14px 12px}
 .q{font-weight:600;margin-top:18px}
 .faq dt{font-weight:600;margin-top:14px}.faq dd{margin:4px 0 0 0;padding-left:12px;border-left:2px solid var(--line)}
 svg{max-width:100%;height:auto;display:block;margin:10px auto}
+.katex svg{margin:0;max-width:none}
 svg text{fill:var(--ink);font-family:inherit}
 svg .ln{stroke:var(--ink);fill:none;stroke-width:1.4}
 svg .bx{fill:var(--card);stroke:var(--ink);stroke-width:1.2}
@@ -300,6 +301,84 @@ svg.dia .tshuf{fill:var(--shuf);font-weight:600}
   <p>PySpark pipeline：<code>Tokenizer</code>（按空格切）→ <code>CountVectorizer</code>（TF；參數 minTF、minDF、vocabSize）→ <code>IDF</code>（fit 再 transform，直接輸出 TF-IDF）。另有 <code>NGram(n=2)</code>、<code>StopWordsRemover</code>。</p>
   <p><b>TF-IDF 直覺</b>：喺一份文件出現好多次、但喺成個 collection 好少文件出現嘅字，權重最高。每份文件都有嘅字 IDF = 0。</p>
 
+<div class="concept" id="stemlem">
+<h3>Stemmer vs Lemmatizer：give／giving／gave／given（L5 p.27、32）</h3>
+<span class="lab">一句講完</span>
+<p><b>Stemmer</b> 照規則剪字尾，唔識文法；<b>lemmatizer</b> 查字典（WordNet）攞返原形，但要俾佢知個字係咩詞性（POS）。</p>
+<div class="tw"><table class="nostack"><tr><th>字</th><th>Porter</th><th>Lancaster</th><th>WordNet（pos=VERB）</th></tr>
+<tr><td>give</td><td>give</td><td>giv</td><td>give</td></tr>
+<tr><td>giving</td><td>give</td><td>giv</td><td>give</td></tr>
+<tr><td>gave</td><td><b>gave</b></td><td>gav</td><td>give</td></tr>
+<tr><td>given</td><td><b>given</b></td><td>giv</td><td>give</td></tr></table></div>
+<ul><li>Porter：規則只識剪 -ing、-s 呢類，<b>不規則動詞</b>（gave、given）搞唔掂。</li>
+<li>Lancaster：剪得更狠，連 give 都變 giv；gave 變 gav，仍然同其他唔一樣。</li>
+<li>WordNet lemmatizer（俾咗 <code>wordnet.VERB</code>）：四個全部變 <b>give</b>。</li></ul>
+<span class="lab why">點解 lemmatize 要俾 POS</span>
+<p><code>lemmatize(word)</code> 唔俾 pos 就當 <b>noun</b>：“lives” → “life”。T5 notebook 嘅做法係先 <code>nltk.pos_tag</code>，tag 入面有 v（動詞）就 <code>lemmatize(word, pos='v')</code>（“lives” VBZ → “live”），否則 <code>pos='n'</code>。</p>
+<span class="lab eg">Porter 規則嘅 m 條件（Exam Review p.77）</span>
+<p>規則 <b>(m &gt; 1) EMENT → （刪走）</b>：m = 字幹入面 VC（元音 + 輔音）出現幾多次。</p>
+<ul><li>replacement → 字幹 “replac” = r·e·pl·a·c，有 2 個 VC，m = 2 &gt; 1 ⇒ 刪 ement ⇒ <b>replac</b>。</li>
+<li>cement → 字幹 “c”，m = 0 ⇒ 條件唔成立 ⇒ 保持 <b>cement</b>。</li></ul>
+<span class="lab trap">易錯</span>
+<p>Stem 唔一定係真字（replac、giv）；lemma 一定係字典入面嘅字。</p>
+</div>
+
+<div class="concept" id="posfilter">
+<h3>POS filter UDF（T5 TODO 2）</h3>
+<pre><code>def tag_and_remove(data_str):
+    cleaned_str = ''
+    nn_tags = ['NN', 'NNP', 'NNPS', 'NNS']                    # 名詞
+    jj_tags = ['JJ', 'JJR', 'JJS']                            # 形容詞
+    vb_tags = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']       # 動詞
+    nltk_tags = nn_tags + jj_tags + vb_tags
+    tagged_text = nltk.pos_tag(data_str.split())
+    for tagged_word in tagged_text:
+        if tagged_word[1] in nltk_tags:
+            cleaned_str += tagged_word[0] + ' '
+    return cleaned_str
+send_to_tag_words = udf(lambda x: str(tag_and_remove(x)), StringType())</code></pre>
+<div class="tw"><table class="stack"><tr><th>Input</th><th>Output（solution 原本輸出）</th></tr>
+<tr><td>Peter Parker is a nice guy and lives in New York.</td><td>Peter Parker <b>is</b> nice guy lives New York.</td></tr>
+<tr><td>Bruce Wayne is also a nice guy and lives in Gotham City.</td><td>Bruce Wayne is nice guy lives Gotham City.</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<ul><li><b>“is” 會保留</b>：佢係 VBZ（動詞），喺 vb_tags 入面。</li>
+<li>被刪嘅係 a（DT）、and（CC）、in（IN）、also（RB）：限定詞、連接詞、介詞、副詞。</li>
+<li>只係 split by space，所以 “York.” 連住句號。</li></ul>
+</div>
+
+<div class="concept" id="onehot">
+<h3>PySpark one-hot：StringIndexer → OneHotEncoder（L5 p.46）</h3>
+<pre><code>kind_indexer = StringIndexer(inputCol="kind", outputCol="kind_index")
+kind_encoder = OneHotEncoder(inputCol="kind_index", outputCol="kind_onehot", dropLast=False)
+name_indexer = StringIndexer(inputCol="name", outputCol="name_index")
+name_encoder = OneHotEncoder(inputCol="name_index", outputCol="name_onehot", dropLast=False)
+pipeline = Pipeline(stages=[name_indexer, name_encoder, kind_indexer, kind_encoder])
+result = pipeline.fit(data).transform(data)</code></pre>
+<div class="tw"><table class="nostack" style="font-size:13px"><tr><th>name</th><th>kind</th><th class="c">kind_index</th><th>kind_onehot</th><th>kind_dense</th></tr>
+<tr><td>Goldy</td><td>Fish</td><td class="c">2</td><td>(3,[2],[1.0])</td><td>[0, 0, 1]</td></tr>
+<tr><td>Scooby</td><td>Dog</td><td class="c">0</td><td>(3,[0],[1.0])</td><td>[1, 0, 0]</td></tr>
+<tr><td>Brian</td><td>Dog</td><td class="c">0</td><td>(3,[0],[1.0])</td><td>[1, 0, 0]</td></tr>
+<tr><td>Francine</td><td>Cat</td><td class="c">1</td><td>(3,[1],[1.0])</td><td>[0, 1, 0]</td></tr>
+<tr><td>Goldy</td><td>Dog</td><td class="c">0</td><td>(3,[0],[1.0])</td><td>[1, 0, 0]</td></tr></table></div>
+<ol class="steps"><li><b>StringIndexer</b>：出現<b>最多</b>嘅 = 0（Dog 3 次），之後 Cat、Fish（一樣多就按字母）。name 一樣：Goldy 2 次 = 0，Brian 1、Francine 2、Scooby 3。</li>
+<li><b>OneHotEncoder</b>：輸出 <b>sparse vector</b> <code>(size, [位置], [值])</code>：(3,[2],[1.0]) = 長度 3、第 2 格係 1。</li>
+<li>Slide 再用 UDF <code>vec.toArray().tolist()</code> 轉成 dense list 方便睇。</li></ol>
+<span class="lab trap">易錯</span>
+<p><code>dropLast=False</code> 先會保留晒 3 格；default <code>dropLast=True</code> 會刪最後一格（變長度 2）。Index 唔係按字母排，係按<b>出現次數</b>。</p>
+</div>
+
+<div class="concept" id="vspace">
+<h3>Vector space 熱身：D1、D2 邊個似 Q？（L5 p.56）</h3>
+<p>\(D_1 = 2T_1 + 3T_2 + 5T_3\)、\(D_2 = 3T_1 + 7T_2 + T_3\)、\(Q = 0T_1 + 0T_2 + 2T_3\)。</p>
+<p>\(D_1 \cdot Q = 2\cdot0 + 3\cdot0 + 5\cdot2 = 10\)，\(\lVert D_1\rVert = \sqrt{38} = 6.164\)，\(\lVert Q\rVert = 2\)：</p>
+<div class="fx">$$\cos(D_1, Q) = \frac{10}{6.164 \times 2} = 0.81$$</div>
+<p>\(D_2 \cdot Q = 1\cdot2 = 2\)，\(\lVert D_2\rVert = \sqrt{59} = 7.681\)：</p>
+<div class="fx">$$\cos(D_2, Q) = \frac{2}{7.681 \times 2} = 0.13$$</div>
+<p>⇒ <b>D1 似 Q 好多</b>：Q 只有 T3，D1 嘅 T3 份量最重。（numpy 核對）</p>
+<span class="lab trap">易錯</span>
+<p>D2 個 vector 長過 D1，但長度唔重要；cosine 睇嘅係<b>方向</b>（角度）。</p>
+</div>
+
 
 <h2 id="tfidf">三、TF-IDF + user profile + cosine（log₂ 版）</h2>
 <p>2025s1 Q4（20 分）係成份卷最多分嘅單一題目之一，套路係：① stop words + lowercase ② 計 df、IDF ③ 每套戲嘅 TF-IDF vector ④ 用 rating 計 user profile ⑤ profile 同每套戲計 cosine，揀最高。</p>
@@ -386,7 +465,8 @@ cos(profile, M2) = 0.968</code></pre>
 <h3>TF-IDF 全 RDD 版（TODO 1.1）</h3>
 <span class="lab">資料</span>
 <p>D0：“I am Billy studying in Computer and I am also studying in Business Course”；D1：“Ada is studying in Computer”；D2：“Billy and Ada know each other in a computer course course”。<code>text_processing</code> = split by space + lowercase。n = 3。</p>
-<div class="fx">$$\text{tfidf} = tf \times \ln\frac{n+1}{df+1} = tf \times \ln\frac{4}{df+1}$$</div>
+<div class="fx">$$\text{tfidf} = tf \times \ln\frac{n+1}{df+1}$$</div>
+<div class="fx">$$n = 3 \;\Rightarrow\; \text{tfidf} = tf \times \ln\frac{4}{df+1}$$</div>
 <span class="lab pic">資料流</span>
 <div class="mflow">
 <div class="mfcol"><div class="fb">① DF：flatMapValues → distinct → (word, 1) → reduceByKey(add)</div></div><div class="mfarr"></div>
@@ -463,6 +543,7 @@ tfidf_df.show(100, truncate=False)</code></pre>
 <p>輸出 25 行同 RDD 版一樣。DataFrame 版易讀好多，因為唔使記 <code>x[1][0][0]</code> 係乜。</p>
 </div>
 
+<div class="warn"><b>易錯：T5 notebook 嘅筆誤</b>Notebook markdown 寫「DF(spark, D) = 2」，應該係 <b>1</b>（spark 只喺 doc 0 出現；下面 IDF 用返 1，0.4055 冇錯）。同一段話「IDF is the number of documents that contains term t」，嗰個其實係 <b>DF</b> 嘅定義。跟呢頁寫法就得。</div>
 <h2 id="sim">五、L6 Text similarity</h2>
 
   
@@ -578,11 +659,39 @@ tfidf_df.show(100, truncate=False)</code></pre>
 <p>淨係諗<b>最後一個字母</b>點處理：substitute／match 就兩邊都剪走最尾（對角格）；delete 就只剪 source；insert 就只剪 target。剩低嗰部分就係 table 已經計好嘅細題目，再加今次嗰步嘅 0 或 1。</p>
 </div>
 
+<div class="concept" id="jacbit">
+<h3>Jaccard 用 bit vector 計 + Jaccard distance（L6 p.18）</h3>
+<div class="tw"><table class="nostack"><tr><th></th><th>bit vector</th><th class="c">1 嘅數目</th></tr>
+<tr><td>A</td><td><code>1 0 0 1 0 1 0 0</code></td><td class="c">3</td></tr>
+<tr><td>B</td><td><code>1 1 0 1 1 0 1 0</code></td><td class="c">5</td></tr>
+<tr><td>A AND B</td><td><code>1 0 0 1 0 0 0 0</code></td><td class="c"><b>2</b></td></tr>
+<tr><td>A OR B</td><td><code>1 1 0 1 1 1 1 0</code></td><td class="c"><b>6</b></td></tr></table></div>
+<div class="fx">$$J(A,B) = \frac{\lVert A \cap B \rVert}{\lVert A \cup B \rVert} = \frac{2}{6} = 0.33$$</div>
+<div class="fx">$$\text{Jaccard distance} = 1 - J = 0.67$$</div>
+<p>每一格代表一個 token 喺唔喺個 set 入面；AND = intersection，OR = union。（Python 核對）</p>
+</div>
+
+<div class="concept" id="simcode">
+<h3>每個相似度指標嘅 PySpark 寫法（L6 p.6、19–25、31）</h3>
+<p>Token-based 嘅都係先 <code>set(text.split(" "))</code>，再 <code>sc.parallelize</code> 變 RDD：</p>
+<div class="tw"><table class="stack"><tr><th>指標</th><th>RDD 一行</th><th>“quick brown fox” vs “quick brown dog”</th></tr>
+<tr><td>Jaccard</td><td><code>rdd1.intersection(rdd2).count() / float(rdd1.union(rdd2).distinct().count())</code></td><td>3 / 5 = 0.6</td></tr>
+<tr><td>Sørensen-Dice</td><td><code>2.0 * rdd1.intersection(rdd2).count() / (rdd1.count() + rdd2.count())</code></td><td>6 / 8 = 0.75</td></tr>
+<tr><td>Tversky（α = β = 0.5）</td><td><code>i / (i + alpha * rdd1.subtract(rdd2).count() + beta * rdd2.subtract(rdd1).count())</code></td><td>3 / (3 + 0.5 + 0.5) = 0.75</td></tr>
+<tr><td>Overlap</td><td><code>rdd1.intersection(rdd2).count() / min(rdd1.count(), rdd2.count())</code></td><td>3 / 4 = 0.75</td></tr>
+<tr><td>Hamming</td><td>DataFrame + UDF：<code>sum(e1 != e2 for e1, e2 in zip(str1, str2))</code>，長度唔同就 raise ValueError</td><td>taking vs making = 1；dump vs puma = 2</td></tr>
+<tr><td>Cosine</td><td><code>Tokenizer → CountVectorizer → Normalizer</code>，再 <code>crossJoin</code> 自己 + UDF <code>a.dot(b) / (a.norm(2) * b.norm(2))</code></td><td>0.75</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<ul><li>Jaccard 嘅 union 要加 <code>.distinct()</code>：RDD 嘅 <code>union</code> 唔會自動去重複。</li>
+<li>Tversky 嘅 \(X \setminus Y\) 用 <code>subtract</code>，兩個方向各計一次。</li>
+<li>Cosine 用 <code>crossJoin</code>（每對都比），所以輸出有 (0,0)=1.0、(0,1)=0.75、(1,0)=0.75、(1,1)=1.0。</li></ul>
+</div>
 <div class="warn"><b>Levenshtein 擺法提醒</b>老師 slides 同 L6 code：<b>target 放 row、source 放 column，↑ = insert、← = delete</b>。Quiz 2 真卷：<b>source 放 row，↑ = delete、← = insert</b>。通用規則：沿 source 軸行 = delete，沿 target 軸行 = insert。開始之前喺表旁邊寫低三行。</div>
 
 <h2 id="emb">六、L6 Word embedding</h2>
 <div class="key"><b>一分鐘重點</b><ul>
 <li>Word embedding = 每個字一個 dense 低維向量，意思近嘅字向量近。</li>
+<li>T06 notebook 係 <b>CBOW</b>：(1000, 8) → Embedding (1000, 8, 25) → mean (1000, 25) → softmax (1000, V)。</li>
 <li>Skip-gram：center 估 context；CBOW：context 估 center。Hidden layer node 數 = d，output = V。</li>
 <li>SGNS 將 softmax 變二元分類（1 正例 + k 負例），快好多；兩個 model 都用 NLL 做 loss。</li></ul></div>
 
@@ -682,6 +791,40 @@ tfidf_df.show(100, truncate=False)</code></pre>
     </div>
   </div>
 
+<div class="concept" id="cbow">
+<h3>T06 個 model 其實係 CBOW：window code 同每層 shape</h3>
+<span class="lab">一句講完</span>
+<p>Notebook 用 <b>context 字估 center 字</b>，存做 <code>cbow.csv</code>，所以係 <b>CBOW</b>（唔係 skip-gram）。</p>
+<pre><code>w = 4                                   # 每邊 4 個字 ⇒ window = 9 個字（出界補 PAD）
+def windows_to_batch(batch_windows):
+    w = batch_windows.shape[1] // 2     # 9 // 2 = 4
+    X, Y = [], []
+    for window in batch_windows:
+        X.append(np.concatenate((window[:w], window[w+1:])))   # 前 4 + 後 4 = 8 個 context id
+        Y.append(window[w])                                    # 中間嗰個 = center
+    Y = ku.to_categorical(Y, vocab_size)                       # center 變 one-hot
+    return np.array(X), Y
+
+model = Sequential()
+model.add(Embedding(input_dim=vocab_size, output_dim=25))
+model.add(Lambda(lambda x: tf.reduce_mean(x, axis=1), output_shape=(25,)))
+model.add(Dense(vocab_size, activation="softmax"))</code></pre>
+<span class="lab pic">每層 tensor shape（batch_size = 1000、dim = 25）</span>
+<div class="mflow">
+<div class="mfcol"><div class="fb">X：(1000, 8)<br>8 個 context word id</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb hl2">Embedding：(1000, 8, 25)<br>每個 id 變 25 維</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">reduce_mean(axis=1)：(1000, 25)<br>8 個 vector 平均 = hidden</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb ac2">Dense softmax：(1000, V)<br>每個字做 center 嘅機率</div></div></div>
+<div class="tw"><table class="stack"><tr><th>層</th><th>參數數目</th></tr>
+<tr><td>Embedding</td><td>\(V \times 25\)（就係我哋要嘅 word vectors）</td></tr>
+<tr><td>Lambda（mean）</td><td>0（冇參數）</td></tr>
+<tr><td>Dense</td><td>\(25 \times V + V\)（weight + bias）</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<ul><li><code>window[:w]</code> 同 <code>window[w+1:]</code> 跳過咗 <code>window[w]</code>（center），fill-in 最常挖呢三個位。</li>
+<li><code>axis=1</code> 收埋嘅係「8 個 context」嗰維，唔係 batch（axis 0）亦唔係 dim（axis 2）。</li>
+<li>Loss 用 <code>categorical_crossentropy</code>，因為 Y 係 one-hot。</li>
+<li><b>T6 notebook analogy 寫反咗</b>：<code>('man','king','woman','queen')</code> 計 \(v_1 - v_2 + v_3\) = man − king + woman；正確係 <b>king − man + woman ≈ queen</b>（跟 slide）。</li></ul>
+</div>
 <h3>NLL 同 SGNS（2026s2 Q4b、c）</h3>
 <div class="tw"><table><tr><th>概念</th><th>重點</th></tr>
 <tr><td><b>點解用 Negative Log-Likelihood</b></td><td>Skip-gram 同 CBOW 都係俾每個字一個<b>機率</b>（softmax）。訓練目標係令真實 context／center 字嘅機率最大。將所有機率相乘再取 log，相乘變相加（數值穩定、易微分）；加負號將「最大化 likelihood」變成「最小化 loss」，可以用 gradient descent。</td></tr>
@@ -849,6 +992,16 @@ tfidf_df.show(100, truncate=False)</code></pre>
 <p>Set A 係 Quiz 2 溫習包嘅 L5／L6 題目；Set B 係新加嘅期考題。</p>
 <div class="mcq" data-set="A"><script type="application/json">[{"t": "L5", "s": "<p>Studying how “draw”, “draws”, “drawing” and “undrawable” are built from a root plus affixes belongs to which area of linguistics?<\/p>", "o": ["Syntax", "Pragmatics", "Phonetics", "Morphology"], "a": 3, "e": "Morphology 研究 morpheme（最細有意義單位）點樣組成字：root + prefix／suffix。"}, {"t": "L5", "s": "<p>Mapping “am, are, is” → “be” is an example of:<\/p>", "o": ["Stemming", "Lemmatization", "Stop-word removal", "Named entity recognition"], "a": 1, "e": "Lemmatization 還原到字典形式（lemma）。Stemming 只係切詞綴，例如 computing → comput。"}, {"t": "L5", "s": "<p>Why does character tokenization usually work better than word tokenization for Chinese?<\/p>", "o": ["Chinese has no characters", "Chinese is written without spaces between words, and word tokenization gives a huge vocabulary with many rare words", "Chinese words are always one character long", "NLTK only supports characters"], "a": 1, "e": "中日韓泰冇空格分詞；每個中文字大致係一個意思單位；用詞做 token 會令 vocabulary 好大兼好多罕見字。"}, {"t": "L5", "s": "<p>Using PySpark's IDF = log((N + 1) / (df + 1)), what is the IDF of a term that appears in all 3 documents of a 3-document corpus?<\/p>", "o": ["1", "0.2877", "0", "Undefined (division by zero)"], "a": 2, "e": "log((3+1)/(3+1)) = log(1) = <b>0<\/b>。所有文件都有嘅字冇區分能力。"}, {"t": "L6", "s": "<p>What is the Levenshtein distance between “kitten” and “sitting”?<\/p>", "o": ["2", "3", "4", "6"], "a": 1, "e": "k→s（substitute）、e→i（substitute）、加 g（insert）= <b>3<\/b>。"}, {"t": "L6", "s": "<p>Which statement correctly contrasts Skip-gram and CBOW?<\/p>", "o": ["Skip-gram predicts the context words from the centre word; CBOW predicts the centre word from the context words", "Skip-gram predicts the centre word from the context; CBOW predicts the context from the centre word", "Both predict the next word only", "Skip-gram uses co-occurrence matrix factorization; CBOW uses negative sampling"], "a": 0, "e": "Skip-gram：center → context；CBOW：context → center。Co-occurrence matrix 係 GloVe。"}, {"t": "L5", "s": "<p>In the BPE token learner, what happens in each iteration?<\/p>", "o": ["The least frequent symbol is deleted", "The most frequent adjacent pair of symbols is merged and added to the vocabulary", "Each word is split into characters again", "Stop words are removed"], "a": 1, "e": "① 拆成字母 ② 搵最常見嘅相鄰 pair ③ 合併、vocabulary +1 ④ 重複至夠數。"}, {"t": "L5", "s": "<p>What is the main purpose of subword tokenization?<\/p>", "o": ["To translate text", "To remove punctuation", "To handle unknown (out-of-vocabulary) words while keeping the vocabulary small", "To tag parts of speech"], "a": 2, "e": "例如訓練有 foot、ball 但冇 football；subword 可以用已知片段砌出新字，亦減細 vocabulary。"}, {"t": "L5", "s": "<p>Using the Porter stemmer rule <code>ies → i<\/code>, what does “companies” become?<\/p>", "o": ["company", "compani", "compan", "companies"], "a": 1, "e": "Stemming 結果唔一定係真字：companies → <b>compani<\/b>。其他規則：sses → ss（classes → class）、s → （cats → cat）。"}, {"t": "L5", "s": "<p>The sparse vector <code>(5, [1, 3], [2.0, 4.0])<\/code> represents which dense vector?<\/p>", "o": ["[0.0, 2.0, 0.0, 4.0, 0.0]", "[1.0, 3.0, 2.0, 4.0, 5.0]", "[2.0, 4.0, 0.0, 0.0, 0.0]", "[0.0, 1.0, 0.0, 3.0, 0.0]"], "a": 0, "e": "格式 (size, [indices], [values])：長度 5，index 1 = 2.0、index 3 = 4.0，其他 0。"}, {"t": "L5", "s": "<p>Which is a limitation of the Bag-of-Words model?<\/p>", "o": ["It cannot count words", "It requires a GPU", "It only works for Chinese", "Word order is lost"], "a": 3, "e": "BoW 只數次數：字序冇咗、encoding 稀疏。N-gram 可以保留局部字序。"}, {"t": "L5", "s": "<p>A term gets a high TF-IDF weight in a document when it:<\/p>", "o": ["Appears in every document", "Appears often in this document but in few documents of the collection", "Is a stop word", "Appears once in a very long document"], "a": 1, "e": "TF 高（喺呢份文件多）× IDF 高（喺 collection 少）= 權重高。"}, {"t": "L5", "s": "<p>What does Named Entity Recognition (NER) do?<\/p>", "o": ["Identifies named entities such as people, locations and organisations", "Reduces words to their stems", "Splits text into sentences", "Counts word frequencies"], "a": 0, "e": "NER 自動認出 “Peter Parker”（人）、“New York”（地方）等，令文字多啲意義。"}, {"t": "L6", "s": "<p>For the word sets {The, quick, brown, fox} and {The, quick, brown, dog}, what is the Sørensen-Dice coefficient?<\/p>", "o": ["0.6", "0.5", "0.75", "1.0"], "a": 2, "e": "2 × 3 / (4 + 4) = <b>0.75<\/b>。Jaccard 係 3 / 5 = 0.6。"}, {"t": "L6", "s": "<p>What is the main weakness of Hamming distance?<\/p>", "o": ["It is slow to compute", "It only applies to strings of the same length and ignores insertions and deletions", "It always returns 0", "It needs word embeddings"], "a": 1, "e": "Hamming 只計 substitution；長度唔同就用唔到，要用 Levenshtein。"}, {"t": "L6", "s": "<p>What is the cosine similarity between the one-hot vectors of two different words such as “cat” and “feline”?<\/p>", "o": ["1", "0.5", "−1", "0"], "a": 3, "e": "唔同位置得一個 1，dot product = 0 → cosine = 0。One-hot 捉唔到相似，所以要 embedding。"}, {"t": "L6", "s": "<p>“You shall know a word by the company it keeps” expresses:<\/p>", "o": ["The distributional hypothesis: words in similar contexts have similar meanings", "The bag-of-words assumption", "The Markov assumption", "Zipf's law"], "a": 0, "e": "Firth（1957）；Harris（1954）講 oculist 同 eye-doctor 出現喺差唔多嘅環境。Word2Vec 就係建基於呢個諗法。"}, {"t": "L6", "s": "<p>Why does Skip-gram with Negative Sampling (SGNS) replace the softmax?<\/p>", "o": ["Softmax cannot output probabilities", "The softmax normalizes over the whole vocabulary V, which is very expensive; SGNS uses binary logistic regression with a sigmoid on positive and k sampled negative pairs", "To remove the need for context words", "To make embeddings one-hot"], "a": 1, "e": "Positive pair y = 1，隨機抽嘅字 y = 0。要有 negative，否則模型只要將 dot product 變大就令 loss 變細。"}, {"t": "L6", "s": "<p>What does GloVe build before learning embeddings?<\/p>", "o": ["A decision tree", "A V × V global word co-occurrence count matrix, which is then factorized", "A list of stop words", "A Levenshtein DP table"], "a": 1, "e": "GloVe = Global Vectors：用成個 corpus 嘅 co-occurrence 統計，快、捉到 global statistics。"}, {"t": "L6", "s": "<p>With king = [1, 8, 8], man = [1, 7, 0] and woman = [9, 7, 0], what is king − man + woman?<\/p>", "o": ["[9, 8, 8]", "[11, 22, 8]", "[−7, 8, 8]", "[9, 7, 0]"], "a": 0, "e": "[1−1+9, 8−7+7, 8−0+0] = <b>[9, 8, 8]<\/b> ≈ queen。"}, {"t": "L6", "s": "<p>In standard Skip-gram, every word has a centre vector <i>v<\/i> and a context vector <i>u<\/i>. Which is used as the final word embedding?<\/p>", "o": ["The context vectors U", "The one-hot vectors", "The centre-word vectors V; U is only used during training", "The average of all words"], "a": 2, "e": "Skip-gram 用 V；CBOW 一般用 context 向量。"}, {"t": "L6", "s": "<p>For “The hero saves the day” with window m = 1 and PAD at the edges, how many skip-gram (centre, context) training pairs are there?<\/p>", "o": ["5", "8", "10", "12"], "a": 2, "e": "5 個 centre word × 2 個 context = <b>10<\/b>（包括 (The, PAD) 同 (day, PAD)）。唔用 PAD 就係 8。"}, {"t": "L6", "s": "<p>Which describes the Monge-Elkan similarity?<\/p>", "o": ["A hybrid method: for each element of the first set, take the maximum secondary similarity to the second set, then average", "The number of substitutions between equal-length strings", "Intersection over union", "Twice the intersection over the total size"], "a": 0, "e": "Monge-Elkan 係唯一嘅 hybrid 方法（edit-based + token-based），計算量大，結果視乎 secondary function。B 係 Hamming，C 係 Jaccard，D 係 Dice。"}, {"t": "L5", "s": "<p>A chatbot was trained on text containing “foot” and “ball” but never “football”, and it fails when users type “football”. Which technique most directly addresses this?<\/p>", "o": ["Stop-word removal", "Subword tokenization such as Byte Pair Encoding", "POS tagging", "One-hot encoding of every word"], "a": 1, "e": "OOV（unknown word）問題 → subword：football 可以由 foot + ball 等已知片段組成。"}, {"t": "L5", "s": "<p>A search engine should match a query containing “run” with documents containing “running” and “ran”. Which pre-processing step is most suitable?<\/p>", "o": ["Stop-word removal", "Character tokenization", "Lemmatization", "Bigram encoding"], "a": 2, "e": "Lemmatization 會將 running、ran 都還原做 run。Stemming 處理到 running，但唔識將不規則嘅 ran 變 run。"}, {"t": "L5", "s": "<p>A sentiment model built on single-word features classifies “I don't like this product” as positive because of “like”. Which representation would best fix this?<\/p>", "o": ["N-gram (e.g. bigram) features so “don't like” becomes one feature", "Removing “don't” as a stop word", "Hamming distance between reviews", "Using the review ID as a feature"], "a": 0, "e": "L5／T05：phrase “don't like” 意思相反，用 n-gram 保留局部字序。刪走 “don't” 反而令情況更差。"}, {"t": "L5", "s": "<p>A corpus has 4 documents. “spark” appears in only one of them, document D2, where it occurs twice. Using raw TF and IDF = ln((N+1)/(df+1)), what is the TF-IDF of “spark” in D2?<\/p>", "o": ["0.9163", "2.7726", "0", "1.8326"], "a": 3, "e": "IDF = ln(5/2) = 0.9163；TF = 2 → 2 × 0.9163 = <b>1.8326<\/b>。"}, {"t": "L5", "s": "<p>A BPE learner starts from the corpus (“hug”,10), (“pug”,5), (“pun”,12), (“bun”,4), (“hugs”,5). Which pair is merged first?<\/p>", "o": ["p + u (17 times)", "u + g (20 times)", "u + n (16 times)", "h + u (15 times)"], "a": 1, "e": "u g 出現喺 hug(10) + pug(5) + hugs(5) = 20 次，最多。p u = pug 5 + pun 12 = 17。"}, {"t": "L6", "s": "<p>A spell-checker compares the typo “recieve” with dictionary words of different lengths and must allow insertions and deletions. Which measure fits best?<\/p>", "o": ["Hamming distance", "Jaccard index on word sets", "Levenshtein distance", "Cosine similarity of one-hot vectors"], "a": 2, "e": "Hamming 只可以比較等長字串；Levenshtein 計 insert、delete、substitute。"}, {"t": "L6", "s": "<p>A tool compares a 20-word abstract with a 2,000-word paper. Which measure gives 1.0 when every word of the abstract appears in the paper, regardless of the paper's length?<\/p>", "o": ["Jaccard index", "Sørensen-Dice coefficient", "Hamming distance", "Overlap coefficient"], "a": 3, "e": "Overlap = |A∩B| / min(|A|, |B|) = 20/20 = 1。Jaccard 同 Dice 會因為 paper 好長而好細。"}, {"t": "L6", "s": "<p>Which TWO statements about word embeddings are correct?<br>(i) Words that appear in similar contexts tend to get nearby vectors.<br>(ii) The cosine between one-hot vectors of two different words captures their similarity.<br>(iii) SGNS replaces the full softmax over V with binary classification on sampled negative words.<br>(iv) GloVe only looks inside one local context window.<\/p>", "o": ["(i) and (ii)", "(ii) and (iv)", "(i) and (iii)", "(iii) and (iv)"], "a": 2, "e": "(ii) 錯：one-hot cosine 永遠 0。(iv) 錯：GloVe 用成個 corpus 嘅 global co-occurrence。Quiz 1 Q14 都係 “Which TWO” 題型。"}, {"t": "L6", "s": "<p>A CBOW model is trained with window m = 2, embedding dimension d = 100 and vocabulary size V = 10,000. How many nodes are in the hidden (projection) layer and in the output layer?<\/p>", "o": ["4 hidden, 100 output", "100 hidden, 10,000 output", "10,000 hidden, 100 output", "200 hidden, 10,000 output"], "a": 1, "e": "Hidden = d = 100（context 向量取平均，唔係 2m × d）；output = V = 10,000 個 softmax node。"}]</script></div>
 <div class="mcq" data-set="B"><script type="application/json">[
+{"t":"L5","s":"<p>PorterStemmer on ['give', 'giving', 'gave', 'given'] gives:</p>","o":["give, give, give, give","give, give, gave, given","giv, giv, gav, giv","give, giving, gave, given"],"a":1,"e":"Porter 只識規則剪字尾，<b>不規則動詞</b> gave、given 搞唔掂。WordNet lemmatizer（pos=VERB）先會全部變 give。"},
+{"t":"L5","s":"<p><code>WordNetLemmatizer().lemmatize('lives')</code> without a pos argument returns:</p>","o":["live","life","lives","liv"],"a":1,"e":"唔俾 pos 就當 <b>noun</b> ⇒ life；俾 <code>pos='v'</code> 先係 live。"},
+{"t":"L5","s":"<p>Porter rule (m&gt;1) EMENT → ''. Which is correct?</p>","o":["cement → c","replacement → replac","replacement → replacement","cement → cem"],"a":1,"e":"replac 嘅 m = 2 &gt; 1 ⇒ 刪；cement 字幹 c 嘅 m = 0 ⇒ 保持 cement。"},
+{"t":"L5","s":"<p>In the T5 POS filter (keep NN*, JJ*, VB*), is the word 'is' kept?</p>","o":["No, it is a stop word","Yes, it is tagged VBZ","No, it is tagged DT","Only in the first sentence"],"a":1,"e":"'is' = VBZ（動詞）⇒ 保留。被刪嘅係 a、and、in、also。"},
+{"t":"L5","s":"<p>StringIndexer on kind = [Fish, Dog, Dog, Cat, Dog]. What index does Dog get?</p>","o":["0","1","2","3"],"a":0,"e":"StringIndexer 按<b>出現次數</b>排，最多嘅 = 0。Dog 出現 3 次 ⇒ 0。"},
+{"t":"L5","s":"<p>D1 = 2T1+3T2+5T3, D2 = 3T1+7T2+T3, Q = 2T3. Using cosine similarity:</p>","o":["D2 is closer (0.81)","D1 is closer (0.81 vs 0.13)","Both equal","Cannot compare"],"a":1,"e":"cos(D1,Q) = 10/(6.164×2) = 0.81；cos(D2,Q) = 2/(7.681×2) = 0.13。"},
+{"t":"L6","s":"<p>A = 10010100, B = 11011010 (bit vectors). Jaccard distance?</p>","o":["0.33","0.67","0.25","0.75"],"a":1,"e":"AND 有 2 個 1，OR 有 6 個 1 ⇒ J = 2/6 = 0.33 ⇒ distance = 1 − 0.33 = <b>0.67</b>。"},
+{"t":"L6","s":"<p>In the PySpark Jaccard code, why is <code>.distinct()</code> applied after <code>rdd1.union(rdd2)</code>?</p>","o":["To sort the tokens","RDD union keeps duplicates, so shared tokens would be counted twice","To remove stop words","It is not needed"],"a":1,"e":"RDD <code>union</code> 只係駁埋，唔去重複；冇 distinct 嘅話 union 會係 8 唔係 5。"},
+{"t":"L6","s":"<p>T06: batch_size = 1000, 8 context words, dim = 25. Shape after the Embedding layer?</p>","o":["(1000, 25)","(1000, 8, 25)","(8, 25)","(1000, V)"],"a":1,"e":"每個 id 變 25 維 ⇒ (1000, 8, 25)；reduce_mean(axis=1) 之後先係 (1000, 25)。"},
+{"t":"L6","s":"<p>The T06 notebook predicts the centre word from <code>window[:w]</code> and <code>window[w+1:]</code>. This model is:</p>","o":["Skip-gram","CBOW","SGNS","BPE"],"a":1,"e":"Context 估 center = <b>CBOW</b>（notebook 存做 cbow.csv）。"},
 {"t":"L5","s":"<p>Using idf = log₂((N+1)/(df+1)) + 1 with N = 7, what is the IDF of a word with df = 3?</p>","o":["1","2","3","0"],"a":1,"e":"log₂(8/4) + 1 = 1 + 1 = <b>2</b>。"},
 {"t":"L5","s":"<p>A user rated Movie X 2 while the average rating is 3. In the user profile formula Σ w·TFIDF / Σ|w|, the weight w for X is:</p>","o":["2","−1","3","1"],"a":1,"e":"w = rating − average = 2 − 3 = <b>−1</b>，即係 user 唔鍾意，會將 profile 推離 X 嘅字。分母用絕對值 |−1| = 1。"},
 {"t":"L5","s":"<p>Why are stop words usually removed before computing TF-IDF?</p>","o":["They have high IDF","They appear in almost every document and carry little meaning","They are always misspelled","They cannot be lowercased"],"a":1,"e":"Stop words（the、and、are）差唔多每份文件都有，冇分辨力，只會令 vector 變長。"},
@@ -890,6 +1043,8 @@ tfidf_df.show(100, truncate=False)</code></pre>
 <dt>Q：TF 同 df 有咩分別？</dt><dd>TF 數一個字喺<b>一份文件入面</b>出現幾多次；df 數有<b>幾多份文件</b>有呢個字，每份最多計 1。同一份文件有兩個 big，TF = 2，但 df 只加 1。</dd>
 <dt>Q：IDF 點解要 +1（分子分母）？</dt><dd>避免 df = 0 時除以 0（smoothing）。2025s1 版最尾再 +1，令所有文件都有嘅字 IDF = 1 而唔係 0。</dd>
 <dt>Q：Levenshtein 嘅 subproblem 點嚟？</dt><dd>淨係諗<b>最後一個字母</b>點處理：substitute／match 就兩邊都剪走最尾（對角格）；insert 就只剪 target（insert 方向嗰格）；delete 就只剪 source。剩低嗰部分就係細啲嘅題目，table 已經計咗。</dd>
+<dt>Q：Stemming 同 lemmatization 考試點分？</dt><dd>Stemming 照規則剪（Porter／Lancaster），出嚟可以唔係真字，唔識不規則動詞；lemmatization 查 WordNet，要俾 POS（唔俾當 noun）。見 <a href="#stemlem">give／gave 對比</a>。</dd>
+<dt>Q：T06 係 skip-gram 定 CBOW？</dt><dd><b>CBOW</b>：X = 8 個 context，Y = center（one-hot）。見 <a href="#cbow">CBOW 卡</a>。</dd>
 <dt>Q：↑ 係 insert 定 delete？我成日搞亂。</dt><dd>先搵 source 喺邊條軸。<b>沿 source 軸行一格 = delete，沿 target 軸行一格 = insert</b>。老師擺法（target 放 row）：↑ = insert、← = delete。Quiz 2 真卷（source 放 row）：↑ = delete、← = insert。距離數字兩個擺法都一樣。</dd>
 <dt>Q：BPE segmenter 係咪揀最長嘅 token？</dt><dd>唔係。由單字母開始，<b>按 learner 學到 merge rule 嘅次序</b>逐條 apply。見 <a href="#bpe-seg">BPE segmenter</a>。</dd>
 <dt>Q：countByValue 同 countByKey 邊個計 TF、邊個計 DF？</dt><dd>TF：<code>flatMapValues → countByValue</code>（數 (doc, word)）。DF：<code>flatMapValues → distinct → (word, doc) → countByKey</code>。見 <a href="#tfidfrdd">RDD 手計 TF-IDF</a>。</dd>

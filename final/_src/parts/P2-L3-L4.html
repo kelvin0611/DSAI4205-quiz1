@@ -1,7 +1,7 @@
 <h1>P2 · L3–L4 Spark RDD、PySpark、Hive／Shark／Spark SQL、DataFrame</h1>
 <p class="sub">Code 題必考（RDD fill-in 或者 DataFrame + UDF）· 對應 L3、L4、T03、T04、Quiz 1、Quiz 2、2025s1 Q1b、2026s2 Q2b、Revision Qs</p>
 <ul class="toc">
-<li><a href="#exam">一、點考</a></li><li><a href="#spark">二、Spark 核心概念</a></li>
+<li><a href="#exam">一、點考</a></li><li><a href="#spark">二、Spark 核心概念（＋ job／stage／DAG）</a></li>
 <li><a href="#ops">三、RDD 操作速查（＋ countByKey／countByValue／flatMapValues）</a></li><li><a href="#sql">四、Hive → Shark → Spark SQL、DataFrame（＋ top-2 三種寫法）</a></li>
 <li><a href="#past">五、Past paper 全答</a></li><li><a href="#fill">六、RDD 填充（11 題）</a></li>
 <li><a href="#dffill">七、DataFrame + UDF 填充（7 題）</a></li><li><a href="#mcq">八、MCQ</a></li>
@@ -73,6 +73,43 @@
 </div>
 {{SEC:q1:spark}}
 
+<div class="concept" id="whyrdd">
+<h3>點解唔用 Redis 咁嘅 in-memory key-value store？（L3 p.12、Exam Review p.28）</h3>
+<span class="lab">一句講完</span>
+<p>Redis／Memcached 准你<b>逐格改</b>（fine-grained update），所以要做 fault tolerance 就要將每個改動即時 replicate 去其他 node，比寫 memory 慢 <b>10–100 倍</b>。Spark 改用 <b>coarse-grained</b>：每個操作一次過轉換成個 dataset，只記低「點樣轉」（lineage），壞咗就重新計。</p>
+<div class="tw"><table class="stack"><tr><th></th><th>In-memory key-value store（Redis、Memcached）</th><th>Spark RDD</th></tr>
+<tr><td>更新方式</td><td>Fine-grained：改某一個 key 嘅 value</td><td>Coarse-grained：map／filter／join 成個 dataset</td></tr>
+<tr><td>點樣唔驚機壞</td><td>即時 replicate 數據或 log 去其他 node</td><td>記 lineage，壞咗嗰個 partition 照計劃重計</td></tr>
+<tr><td>代價</td><td>每次寫都要網絡複製，慢 10–100 倍</td><td>平時幾乎冇額外成本</td></tr>
+<tr><td>啱做咩</td><td>網站 session、cache 呢類細碎讀寫</td><td>Data-intensive batch 分析</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<p>RDD 唔係「冇 fault tolerance」，而係用 <b>lineage</b> 代替 replication 去做 fault tolerance。</p>
+</div>
+
+<div class="concept" id="jobs">
+<h3>ratings.csv：一段 code 變 3 個 job、2 個 stage（L3 p.34–36）</h3>
+<pre><code>df = spark.read.option("header", True).csv('ratings.csv')
+df_filtered = df.filter(df['rating'] > 3)
+df_result = df_filtered.groupBy("movieID").count()
+df_result.show()</code></pre>
+<span class="lab">3 個 job（Spark UI：localhost:4040）</span>
+<ol class="steps"><li><b>Job 1</b>：讀 CSV（獨立嘅 I/O，header 要先讀）。</li>
+<li><b>Job 2</b>：filter（narrow transformation，因為優化可能自成一個 job）。</li>
+<li><b>Job 3</b>：groupBy + count 要 <b>shuffle</b> ⇒ 開新 stage，再 collect 結果俾 <code>show()</code>。</li></ol>
+<span class="lab pic">DAG visualization：shuffle 切開兩個 stage</span>
+<div class="mflow">
+<div class="mfcol"><div class="mfh">Stage 1（讀 + filter）</div><div class="fb">Scan csv</div><div class="fb hl2">WholeStageCodegen (1)<br>scan + filter 合成一個 function</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">Shuffle</div><div class="fb ac2">Exchange<br>按 movieID 重新分佈數據</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="mfh">Stage 2（聚合）</div><div class="fb">AQEShuffleRead<br>讀上一個 stage shuffle 過嚟嘅數據</div><div class="fb hl2">WholeStageCodegen (2)<br>groupBy + count</div><div class="fb">mapPartitionsInternal</div></div></div>
+<div class="tw"><table class="stack"><tr><th>DAG 入面嘅名</th><th>意思</th></tr>
+<tr><td><b>Exchange</b></td><td><b>Shuffle</b>：數據喺 cluster 之間重新分佈（groupBy、join、repartition 會有）</td></tr>
+<tr><td><b>WholeStageCodegen</b></td><td>Spark SQL 優化：將幾個 physical operator 熔埋做<b>一個 Java function</b></td></tr>
+<tr><td>AQEShuffleRead</td><td>Adaptive Query Execution 讀 shuffle 數據</td></tr>
+<tr><td>mapPartitionsInternal</td><td>每個 partition 平行做一個 function</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<p>新 stage 嘅分界永遠係 <b>shuffle（Exchange）</b>：narrow transformation（filter、map）唔會開新 stage。Lineage 係：csv → Filter(rating &gt; 3) → Aggregate。</p>
+</div>
+
 <h2 id="ops">三、RDD 操作速查</h2>
 {{SEC:q1:ops}}
 <div class="concept" id="ops2">
@@ -107,6 +144,54 @@
 <li>countByKey／countByValue 係 action，後面唔可以再 <code>.map()</code>；要繼續用 RDD 就改用 <code>map((k, 1)).reduceByKey(add)</code>。</li></ul>
 </div>
 
+
+<div class="concept" id="t3ops">
+<h3>T3 notebook 嘅細 operator：輸出題（L3 p.48–55、T3）</h3>
+<div class="tw"><table class="stack"><tr><th>Code</th><th>輸出</th><th>重點</th></tr>
+<tr><td><code>[10,1,2,9,3,4,5,6,7].takeOrdered(6)</code></td><td>[1, 2, 3, 4, 5, 6]</td><td>細到大取頭 6 個（action）</td></tr>
+<tr><td><code>[10,1,2,9,3,4,5,6,7].takeOrdered(6, lambda x: -1*x)</code></td><td>[10, 9, 7, 6, 5, 4]</td><td>用負號做 key ⇒ 大到細</td></tr>
+<tr><td><code>[10,1,2,9,3,4,5,6,7].stdev()</code></td><td><b>2.897</b></td><td><b>Population</b> 標準差；<code>sampleStdev()</code> = 3.073</td></tr>
+<tr><td><code>[(1,2),(3,4),(3,6)].subtractByKey([(3,7)])</code></td><td>[(1, 2)]</td><td>兩邊都有嘅 key 全部刪，唔理 value</td></tr>
+<tr><td><code>{1,2,3}.subtract({3,4,5})</code></td><td>{1, 2}</td><td>比較成個 element</td></tr>
+<tr><td><code>[(1,2),(3,4),(3,6)].leftOuterJoin([(3,7)])</code></td><td>[(1, (2, None)), (3, (4, 7)), (3, (6, 7))]</td><td>左邊 key 全部保留，右邊冇就 None</td></tr>
+<tr><td><code>range(10).randomSplit([0.6, 0.4])</code></td><td>Slide 一次出 8 個 vs 2 個</td><td>只係<b>大約</b> 6:4，每次唔同</td></tr>
+<tr><td><code>randomSplit([0.6, 0.4], seed=1234)</code></td><td>[0, 2, 5, 6, 7, 8, 9] vs [1, 3, 4]</td><td>俾 <b>seed</b> ⇒ 每次一樣，可重現</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<ul><li><b>L3 p.55 slide 個 stdev 例子 code 其實寫咗 <code>.max()</code>，所以出 10</b>；真正 <code>stdev()</code> 係 2.897。</li>
+<li>randomSplit 嘅 weight 係<b>機率</b>，唔保證剛好 6:4。</li></ul>
+<span class="lab eg">Fill-in：T3 TODO #1（leftOuterJoin 嘅 None 換做 "error"）</span>
+<pre><code>result = kvRDD1.leftOuterJoin(kvRDD2)
+result.mapValues(lambda v: (v[0], v[1] if v[1] is not None else "error")).collect()
+# [(1, (2, 'error')), (3, (4, 7)), (3, (6, 7))]</code></pre>
+<p>leftOuterJoin 之後每個 value 係 <b>tuple</b> (左, 右)，所以 mapValues 入面嘅 <code>v</code> 要用 <code>v[0]</code>、<code>v[1]</code>。T3 solution PDF 冇呢題答案，上面係按 notebook 輸出寫嘅（已用 Python 模擬核對）。</p>
+</div>
+
+<div class="concept" id="t3steps">
+<h3>T3 逐步輸出：palindrome filter + inverted index（Exam Review p.38、take-home）</h3>
+<span class="lab eg">TODO #4：DNA k-mer 再揀出現多過一次嘅 palindrome</span>
+<pre><code>seqRDD = dnaRDD.flatMap(lambda line: generatePattern(line, k)) \
+               .reduceByKey(add).sortBy(lambda x: x[1], ascending=False)
+seqRDD = seqRDD.filter(lambda x: x[1] &gt; 1) \
+               .map(lambda x: palindromesPattern(x)) \
+               .filter(lambda x: x[1] == True)
+
+def palindromesPattern(item):      # 等於 key == key[::-1]
+    key = item[0]
+    return (key, key == key[::-1])</code></pre>
+<div class="mflow"><div class="mfcol"><div class="fb">(pattern, count)</div></div><div class="mfarr"></div><div class="mfcol"><div class="fb">filter count &gt; 1</div></div><div class="mfarr"></div><div class="mfcol"><div class="fb hl2">map → (pattern, True／False)</div></div><div class="mfarr"></div><div class="mfcol"><div class="fb ac2">filter True</div></div></div>
+<p>Slide 個 function 用兩個 loop 順住砌 <code>l</code>、倒轉砌 <code>r</code> 再比較；意思同 <code>key == key[::-1]</code> 一樣。注意 map 之後 value 由 count 變咗 True／False，<b>count 冇咗</b>。例如 'ttttt' 會保留（倒轉一樣）；'gccta' 會被濾走。</p>
+<span class="lab eg">Take-home：inverted index 每一步輸出</span>
+<div class="tw"><table class="stack"><tr><th>Step</th><th>Code</th><th>輸出（節錄）</th></tr>
+<tr><td>1 讀檔</td><td><code>spark.textFile('documents.txt')</code></td><td>'D1 || the cat sat on the mat ', …</td></tr>
+<tr><td>2 分 id 同字</td><td><code>map(lambda x: x.split('||')).map(lambda p: (p[0].strip(), p[1].strip()))</code></td><td>('D1', 'the cat sat on the mat'), …</td></tr>
+<tr><td>3 (word, doc)</td><td><code>flatMap(lambda pair: [(w.strip().lower(), pair[0]) for w in pair[1].split()])</code></td><td>('the','D1'), ('cat','D1'), …, <b>('the','D1')</b> 第二次</td></tr>
+<tr><td>4 去重 + group</td><td><code>distinct().groupByKey()</code></td><td>('the', &lt;ResultIterable&gt;)：睇唔到內容</td></tr>
+<tr><td>5 排序</td><td><code>map(lambda x: (x[0], sorted(list(x[1])))).sortByKey()</code></td><td>('a',['D2']), ('brown',['D2','D3','D4']), …, ('the',['D1','D3','D4'])</td></tr></table></div>
+<span class="lab trap">易錯</span>
+<ul><li>D1 有兩個 the，所以要 <b>distinct 先 groupByKey</b>，唔係 D1 會出兩次。</li>
+<li>groupByKey 出 <code>ResultIterable</code>，要 <code>list()</code> 先睇到；<code>sorted(list(…))</code> 令 doc id 有次序。</li>
+<li><code>sortByKey()</code> 排嘅係 <b>word</b>（key），唔係 doc 數目。</li></ul>
+</div>
 
 <h2 id="sql">四、Hive → Shark → Spark SQL、DataFrame</h2>
 <div class="key"><b>一分鐘重點</b><ul>
@@ -192,6 +277,144 @@ ORDER BY category, rank;</code></pre>
 <li>Slide 嘅 UrlInfo 表有兩個筆誤：twitter.com 嘅 category 印咗 “facebook.com”（Mapper 2 例子係 Social Network）、espn.com PageRank 一處寫 0.9 一處寫 0.6。唔影響答案（呢題唔用 PageRank）。</li></ul>
 </div>
 {{SEC:q2:sparksql}}
+
+<div class="concept" id="wcdf">
+<h3>Word count：RDD vs DataFrame（Exam Review p.55）</h3>
+<div>
+<div><div class="mfh">RDD 版</div><pre><code>rdd = sc.textFile("/tmp/data.txt")
+rdd.flatMap(lambda line: line.split(" ")) \
+   .map(lambda word: (word, 1)) \
+   .reduceByKey(lambda a, b: a + b) \
+   .sortBy(lambda x: x[1], ascending=False) \
+   .take(10)</code></pre></div>
+<div><div class="mfh">DataFrame 版</div><pre><code>from pyspark.sql.functions import desc
+df = spark.read.text("/tmp/data.txt")   # 一欄叫 value
+df.selectExpr("explode(split(value, ' ')) as word") \
+  .groupby("word").count() \
+  .orderBy(desc("count")) \
+  .take(10)</code></pre></div></div>
+<div class="tw"><table class="stack"><tr><th>步驟</th><th>RDD</th><th>DataFrame</th></tr>
+<tr><td>一行變好多個字</td><td><code>flatMap(split)</code></td><td><code>explode(split(value, ' '))</code></td></tr>
+<tr><td>數每個字</td><td><code>map((w, 1))</code> + <code>reduceByKey(add)</code></td><td><code>groupby("word").count()</code></td></tr>
+<tr><td>排序</td><td><code>sortBy(x[1], ascending=False)</code></td><td><code>orderBy(desc("count"))</code></td></tr></table></div>
+<span class="lab trap">易錯</span>
+<p><code>spark.read.text</code> 讀入嚟每行係一個 row，<b>欄名固定叫 <code>value</code></b>。<code>split</code> 出 array，要 <code>explode</code> 先拆成一個字一行（等於 flatMap）。Count 之後個欄名叫 <code>count</code>。</p>
+</div>
+
+<div class="concept" id="perf">
+<h3>RDD vs DataFrame 速度（L4 p.47）</h3>
+<figure class="fig"><svg viewBox="0 0 330 210" role="img" aria-label="RDD vs DataFrame runtime bar chart" style="max-width:330px">
+<g font-size="11.5">
+<text x="110" y="24" text-anchor="end">RDD Python</text><rect class="ac" x="116" y="12" width="190" height="18" rx="3"/><text x="300" y="25" text-anchor="end" font-weight="700">≈ 9.5 s</text>
+<text x="110" y="52" text-anchor="end">RDD Scala</text><rect class="ac" x="116" y="40" width="84" height="18" rx="3"/><text x="206" y="53">≈ 4.2 s</text>
+<text x="110" y="88" text-anchor="end">DataFrame SQL</text><rect class="hl" x="116" y="76" width="40" height="18" rx="3"/><text x="162" y="89">≈ 2 s</text>
+<text x="110" y="116" text-anchor="end">DataFrame R</text><rect class="hl" x="116" y="104" width="40" height="18" rx="3"/><text x="162" y="117">≈ 2 s</text>
+<text x="110" y="144" text-anchor="end">DataFrame Python</text><rect class="hl" x="116" y="132" width="40" height="18" rx="3"/><text x="162" y="145">≈ 2 s</text>
+<text x="110" y="172" text-anchor="end">DataFrame Scala</text><rect class="hl" x="116" y="160" width="40" height="18" rx="3"/><text x="162" y="173">≈ 2 s</text>
+<line x1="116" y1="6" x2="116" y2="186" stroke="#566273"/><text x="200" y="203" text-anchor="middle" fill="#566273">執行時間，越短越好（slide 圖約數）</text></g>
+</svg></figure>
+<span class="lab why">點解</span>
+<ul><li><b>DataFrame 用咩語言都一樣快</b>：SQL、R、Python、Scala 全部經 <b>Catalyst</b> 變成同一個 physical plan，真正跑嘅係 JVM code。</li>
+<li><b>RDD Python 最慢</b>：lambda 係 Python object，Spark 睇唔入去優化唔到，仲要喺 JVM 同 Python 之間搬數據（serialization）。</li></ul>
+<span class="lab trap">易錯</span>
+<p>MCQ 問「用 Python 寫 DataFrame 係咪慢過 Scala？」答<b>唔係</b>，差唔多一樣；慢嘅係 Python <b>RDD</b>。</p>
+</div>
+
+<div class="concept" id="pushdown">
+<h3>Catalyst 優化前後（L4 p.44）</h3>
+<pre><code>SELECT sum(v) FROM (
+  SELECT t1.id, 1+2+t1.value AS v
+  FROM t1 JOIN t2
+  WHERE t1.id = t2.id AND t2.id &gt; 50000) tmp</code></pre>
+<div class="grid2">
+<figure class="fig"><div class="mfh">優化前（照寫嘅次序）</div>
+<div class="fb">SCAN t1　SCAN t2</div><div class="fb">JOIN（成個 t2 都 join）</div><div class="fb ac2">FILTER t2.id &gt; 50000</div><div class="fb">PROJECT 1+2+t1.value</div><div class="fb">AGGREGATE sum(v)</div></figure>
+<figure class="fig"><div class="mfh">優化後</div>
+<div class="fb">SCAN t1　SCAN t2 → <b>FILTER t2.id &gt; 50000</b></div><div class="fb hl2">JOIN（只 join 過濾後嘅 t2）</div><div class="fb">PROJECT <b>3</b>+t1.value</div><div class="fb">AGGREGATE sum(v)</div></figure></div>
+<div class="tw"><table class="stack"><tr><th>優化</th><th>做咗咩</th></tr>
+<tr><td><b>Predicate pushdown</b></td><td>將 filter 推到 scan 之後、join 之前：join 嘅數據少好多</td></tr>
+<tr><td><b>Constant folding</b></td><td><code>1+2</code> 喺 compile 時已經變 3，唔使每行計一次</td></tr>
+<tr><td>Loop unrolling</td><td>將逐行 loop 變成一串直接嘅操作，減少 loop control overhead</td></tr></table></div>
+<span class="lab why">點解 RDD 做唔到</span>
+<p>DataFrame 有 <b>schema</b>，Catalyst 知道 filter 只用 t2.id，先敢搬佢去前面。RDD 嘅 lambda 係 black box，Spark 唔知入面做乜，唔敢郁。</p>
+</div>
+
+<div class="concept" id="zip">
+<h3>由 text file 砌 DataFrame（L4 p.71）</h3>
+<pre><code>lines = spark.sparkContext.textFile("/tmp/persons.txt").zipWithIndex()
+lines_without_first_row = lines.filter(lambda x: x[1] &gt; 0).map(lambda x: x[0])
+parts = lines_without_first_row.map(lambda x: x.split(','))
+people = parts.map(lambda x: Row(name=x[0], age=int(x[1]),
+                                 gender=x[2], salary=int(x[3]))).toDF()
+people.createOrReplaceTempView('user')</code></pre>
+<div class="mflow">
+<div class="mfcol"><div class="fb">zipWithIndex<br>(line, 0), (line, 1)…</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">filter index &gt; 0<br>跳過 header</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">split(',')</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb hl2">Row(…)，int() 轉型</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb ac2">toDF()</div></div></div>
+<span class="lab trap">易錯</span>
+<ul><li><code>zipWithIndex</code> 出 <b>(element, index)</b>：index 喺第二位，所以係 <code>x[1] &gt; 0</code>，之後 <code>map(lambda x: x[0])</code> 攞返原本嗰行。</li>
+<li>Text file 讀入嚟全部係 string，age、salary 要自己 <code>int()</code>。</li></ul>
+</div>
+
+<div class="concept" id="subq">
+<h3>Sub-query 同 window function 嘅輸出（L4 p.75–77）</h3>
+<div class="grid2">
+<div class="tw"><table class="nostack" style="font-size:13px"><tr><th>id</th><th>name</th></tr><tr><td>1</td><td>John</td></tr><tr><td>2</td><td>Alice</td></tr><tr><td>3</td><td>Bob</td></tr><tr><td>4</td><td>Emily</td></tr><tr><td>5</td><td>David</td></tr><tr><td>6</td><td>Sarah</td></tr><tr><td>7</td><td>Michael</td></tr><tr><td>8</td><td>Lisa</td></tr><tr><td>9</td><td>William</td></tr></table><p class="sub" style="margin:4px 0 0">employees</p></div>
+<div class="tw"><table class="nostack" style="font-size:13px"><tr><th>dept</th><th>id</th><th>salary</th></tr><tr><td>HR</td><td>1</td><td>60000</td></tr><tr><td>HR</td><td>2</td><td>55000</td></tr><tr><td>HR</td><td>3</td><td>58000</td></tr><tr><td>IT</td><td>4</td><td>70000</td></tr><tr><td>IT</td><td>5</td><td>72000</td></tr><tr><td>IT</td><td>6</td><td>68000</td></tr><tr><td>Sales</td><td>7</td><td>75000</td></tr><tr><td>Sales</td><td>8</td><td>78000</td></tr><tr><td>Sales</td><td>9</td><td>77000</td></tr></table><p class="sub" style="margin:4px 0 0">salaries</p></div></div>
+<span class="lab eg">Sub-query：人工高過平均嘅員工</span>
+<pre><code>SELECT name FROM employees
+WHERE id IN (
+    SELECT id FROM salaries
+    WHERE salary &gt; (SELECT AVG(salary) FROM salaries))</code></pre>
+<ol class="steps"><li>最入面：AVG(salary) = 613000 / 9 = <b>68,111.1</b></li>
+<li>中間：salary &gt; 68,111.1 嘅 id = 4, 5, 7, 8, 9</li>
+<li>外面：<b>Emily、David、Michael、Lisa、William</b>（Sarah 68,000 差少少唔夠）</li></ol>
+<span class="lab eg">Window function：每個部門內排人工</span>
+<pre><code>employee_salary = spark.sql("""select salaries.*, employees.name
+    from salaries left join employees on salaries.id = employees.id""")
+window_spec = Window.partitionBy("department").orderBy(F.desc("salary"))
+employee_salary.withColumn("rank", F.rank().over(window_spec)).show()</code></pre>
+<div class="tw"><table class="nostack"><tr><th>department</th><th>name</th><th class="c">salary</th><th class="c">rank</th></tr>
+<tr><td>HR</td><td>John</td><td class="c">60000</td><td class="c">1</td></tr><tr><td>HR</td><td>Bob</td><td class="c">58000</td><td class="c">2</td></tr><tr><td>HR</td><td>Alice</td><td class="c">55000</td><td class="c">3</td></tr>
+<tr><td>IT</td><td>David</td><td class="c">72000</td><td class="c">1</td></tr><tr><td>IT</td><td>Emily</td><td class="c">70000</td><td class="c">2</td></tr><tr><td>IT</td><td>Sarah</td><td class="c">68000</td><td class="c">3</td></tr>
+<tr><td>Sales</td><td>Lisa</td><td class="c">78000</td><td class="c">1</td></tr><tr><td>Sales</td><td>William</td><td class="c">77000</td><td class="c">2</td></tr><tr><td>Sales</td><td>Michael</td><td class="c">75000</td><td class="c">3</td></tr></table></div>
+<p>兩個輸出都已用 SQLite 跑過。</p>
+<span class="lab trap">易錯</span>
+<ul><li>salaries 冇名，要先 <b>left join employees</b> 攞 name，先可以 rank。</li>
+<li><code>partitionBy</code> = 每個部門各自由 1 排；<code>F.desc("salary")</code> = 人工高嘅排第一。</li></ul>
+</div>
+
+<div class="concept" id="hills">
+<h3>T4 TODO 2：hills DataFrame 一條龍</h3>
+<div class="mflow">
+<div class="mfcol"><div class="fb">read.csv(header=True, inferSchema=True)</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">avg_time = (time + timef) / 2</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">speed = dist / avg_time</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb">兩個 df select 同樣 4 欄 → union</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb hl2">groupby rownames → avg('speed') → sort</div></div><div class="mfarr"></div>
+<div class="mfcol"><div class="fb ac2">diff_score = climb / dist → when 分級 → count</div></div></div>
+<pre><code>hills = hills.withColumn('avg_time', (col('time') + col('timef')) / 2)
+hills = hills.withColumn('speed', col('dist') / col('avg_time'))
+hills_union = hills.select('rownames', 'climb', 'dist', 'speed') \
+    .union(hills2.select('rownames', 'climb', 'dist', 'speed'))
+hills_union.groupby("rownames").avg('speed') \
+    .sort('avg(speed)', ascending=False).show(5)          # Acmony 14.32 第一
+hills_union_diff = hills_union.withColumn('diff_score', col('climb') / col('dist'))
+hills_union_diff.withColumn('level',                        # 重建（PDF 截斷）
+    when(col('diff_score') &lt; 200, 'Easy')
+    .when(col('diff_score') &lt; 350, 'Moderate')
+    .otherwise('Difficult')).groupby("level").count().show()
+# Difficult 29、Easy 29、Moderate 33</code></pre>
+<div class="tip"><b>重建標記</b>T4 solution PDF 嘅 TODO 2.7（<code>when</code> 嗰段）截斷咗，上面係<b>重建</b>（兩個 df 嘅變數名 hills／hills2 都係示意）；輸出數字（29／29／33、Acmony 14.32）係 PDF 截圖見到嘅原本輸出。</div>
+<span class="lab trap">易錯</span>
+<ul><li><b>NULL 會傳染</b>：timef 係 NULL 嗰行（例如 Cornalees），avg_time 同 speed 都變 NULL。</li>
+<li>Aggregate 之後個欄名自動變 <code>avg(speed)</code>，sort 要寫 <code>'avg(speed)'</code>。</li>
+<li><code>union</code> 係按<b>欄位次序</b>合併，唔係按欄名，所以兩邊要 select 同一個次序。</li>
+<li><code>when</code> 由上而下<b>第一個成立就停</b>，所以第二個條件唔使寫 <code>&gt;= 200</code>。</li>
+<li>Notebook 筆誤：TODO 2.1 叫個新欄做 “avg_speed”，其實係 <b>avg_time</b>；TODO 2.4 寫 avg_speed，solution 用 <b>speed</b>。考試跟題目寫嘅欄名。</li></ul>
+</div>
 
 <h2 id="past">五、Past paper 全答</h2>
 <div class="practice"><span class="src">2025s1 Q1(b) · 10 分</span>
@@ -281,6 +504,17 @@ df_audited = df_temp.select(
 <div class="mcq" data-set="A"><script type="application/json">{{MCQ:q1:L3}}</script></div>
 <div class="mcq" data-set="B"><script type="application/json">{{MCQ:q2:L4}}</script></div>
 <div class="mcq" data-set="C"><script type="application/json">[
+{"t":"L3","s":"<p>Why does Spark avoid fine-grained updates like Redis for fault tolerance?</p>","o":["Redis cannot store strings","Fine-grained updates need data/log replication across nodes, 10–100× slower than memory writes","Spark has no memory","Redis is not distributed"],"a":1,"e":"逐格改要即時 replicate；Spark 用 coarse-grained transformation + <b>lineage</b>。"},
+{"t":"L3","s":"<p>In a Spark DAG visualization, what does an <b>Exchange</b> node represent?</p>","o":["A broadcast join hint","A shuffle: data is redistributed across the cluster","Reading a CSV","Writing to HDFS"],"a":1,"e":"Exchange = <b>shuffle</b>（groupBy、join、repartition），亦係 stage 嘅分界。"},
+{"t":"L3","s":"<p>What does <b>WholeStageCodegen</b> do?</p>","o":["Splits a stage into tasks","Fuses several physical operators into one Java function","Caches the stage","Retries failed tasks"],"a":1,"e":"例如將 Scan csv + filter 合成一個 function。"},
+{"t":"L3","s":"<p><code>sc.parallelize([10,1,2,9,3,4,5,6,7]).takeOrdered(3, lambda x: -1*x)</code> returns:</p>","o":["[1, 2, 3]","[10, 9, 7]","[7, 6, 5]","[10, 1, 2]"],"a":1,"e":"Key 用負號 ⇒ 大到細，取頭 3：<b>[10, 9, 7]</b>。"},
+{"t":"L3","s":"<p><code>[(1,2),(3,4),(3,6)].subtractByKey([(3,7)])</code> returns:</p>","o":["[(1,2),(3,4),(3,6)]","[(1,2)]","[(3,4),(3,6)]","[]"],"a":1,"e":"Key 3 喺兩邊都有，全部刪走（唔理 value）。"},
+{"t":"L3","s":"<p>Why add <code>seed=1234</code> to <code>randomSplit([0.6, 0.4])</code>?</p>","o":["To make the split exactly 6:4","To make the split reproducible every run","To speed it up","To sort the output"],"a":1,"e":"Seed 令每次切法一樣；比例仍然只係大約 6:4。"},
+{"t":"L4","s":"<p>In the DataFrame word count, what does <code>explode(split(value, ' '))</code> do?</p>","o":["Counts words","Turns each line's array of words into one row per word","Removes spaces","Sorts the words"],"a":1,"e":"等於 RDD 嘅 <b>flatMap</b>；之後 groupby('word').count()。"},
+{"t":"L4","s":"<p>According to the lecture's benchmark, which is slowest?</p>","o":["DataFrame with Python","DataFrame with SQL","RDD with Python","DataFrame with Scala"],"a":2,"e":"DataFrame 唔理語言都 ≈ 2 s（同一個 Catalyst plan）；<b>RDD Python</b> ≈ 9.5 s 最慢。"},
+{"t":"L4","s":"<p>Catalyst rewrites <code>1+2+t1.value</code> as <code>3+t1.value</code>. This is:</p>","o":["Predicate pushdown","Constant folding","Loop unrolling","Join reordering"],"a":1,"e":"Compile 時計好常數 = <b>constant folding</b>。將 filter 搬去 join 前先係 predicate pushdown。"},
+{"t":"L4","s":"<p>Salaries: 60000, 55000, 58000, 70000, 72000, 68000, 75000, 78000, 77000. How many employees earn above the average?</p>","o":["4","5","6","3"],"a":1,"e":"平均 68,111；高過嘅有 70000、72000、75000、78000、77000 = <b>5</b> 個（68000 唔夠）。"},
+{"t":"L4","s":"<p>In the hills example, <code>timef</code> is NULL for one row. What is <code>(time + timef)/2</code> for that row?</p>","o":["time/2","time","NULL","0"],"a":2,"e":"NULL 加任何嘢都係 <b>NULL</b>，之後 speed 都會變 NULL。"},
 {"t":"L3","s":"<p><code>rdd = [('Mazda',2018), ('Mazda',2019), ('Ferrari',2019)]</code>. What does <code>rdd.countByValue()</code> return?</p>","o":["{2018: 1, 2019: 2}","{('Mazda',2018): 1, ('Mazda',2019): 1, ('Ferrari',2019): 1}","{'Mazda': 2, 'Ferrari': 1}","An RDD"],"a":1,"e":"countByValue 數<b>成個 element</b>（成個 tuple），唔係 value。{Mazda: 2, Ferrari: 1} 係 countByKey。兩個都係 action，返回 dict。"},
 {"t":"L3","s":"<p><code>rdd = [('a', 1), ('b', 2), ('c', 3)]</code>. How many elements does <code>rdd.flatMapValues(lambda x: [x, x*10])</code> have?</p>","o":["3","6","1","9"],"a":1,"e":"每個 element 變 2 個：(a,1)(a,10)(b,2)(b,20)(c,3)(c,30) = <b>6</b>。用 mapValues 就係 3 個，value 係 list。"},
 {"t":"L3","s":"<p>Which line gives the document frequency of each word from <code>(doc, [words])</code>?</p>","o":["flatMapValues(lambda x: x).countByValue()","flatMapValues(lambda x: x).distinct().map(lambda x: (x[1], x[0])).countByKey()","flatMapValues(lambda x: x).countByKey()","mapValues(len).countByKey()"],"a":1,"e":"distinct 去走同一份文件嘅重複字，再將 word 放 key 位 countByKey。A 係 TF；C 數嘅係每份文件有幾多個字。"},
@@ -306,6 +540,8 @@ df_audited = df_temp.select(
 <dt>Q：col 係咪改名？</dt><dd>唔係。<code>col("x")</code> 係「揀出 x 呢個 column」；改名用 <code>.alias()</code>；withColumn 第一個參數係新 column 嘅名。</dd>
 <dt>Q：countByKey 同 reduceByKey 有咩分別？</dt><dd>結果一樣係「每個 key 幾多次」，但 countByKey 係 <b>action</b>，即刻返回 Python dict 去 driver；<code>map(lambda x: (x[0], 1)).reduceByKey(add)</code> 係 transformation，結果仲係 RDD，可以再 join（T5 TF-IDF 就係咁做）。</dd>
 <dt>Q：Top-2 per category 考 pseudocode 要寫幾多？</dt><dd>兩個 job 各寫 Map 同 Reduce，寫清楚 emit 乜 key、乜 value；Job 1 mapper 要加 "visit"／"info" tag；Job 2 reducer sort desc 取頭 2，emit ((category, rank), (URL, count))。</dd>
+<dt>Q：點樣分 job 同 stage？</dt><dd>Action（例如 show、collect）觸發 job；一個 job 入面遇到 shuffle（Exchange）就切新 stage；每個 stage 每個 partition 一個 task。</dd>
+<dt>Q：stdev() 係 population 定 sample？</dt><dd>RDD <code>stdev()</code> 係 population（除 n）：[10,1,2,9,3,4,5,6,7] → 2.897；sample 版用 <code>sampleStdev()</code> = 3.073。Slide p.55 個例子 code 寫咗 max()，唔好跟。</dd>
 <dt>Q：唔識 list comprehension 點算？</dt><dd>用普通 for loop 加 append 一樣得分，例如 mutual friends 嘅雙重 loop。</dd>
 <dt>Q：UDF return type 寫錯會點？</dt><dd>唔會報錯，個 column 會變 null。所以 schema／return type 一定要同實際回傳嘅嘢夾。</dd>
 </dl>

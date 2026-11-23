@@ -51,6 +51,7 @@
 <figcaption>有向：Twitter follow、網頁 link</figcaption></figure></div>
 <span class="lab trap">易錯</span>
 <p>有向圖每個 node 有 <b>in-degree</b>（指入嚟）同 <b>out-degree</b>（指出去）兩個數；距離亦唔對稱，\(d(A,B)\) 可以唔等於 \(d(B,A)\)。</p>
+<p><b>Slide 筆誤</b>：L8 p.3 有向圖下面寫「Examples of Undirected links」（URLs、phone calls、metabolic reactions），其實係 <b>directed</b> links 嘅例子。</p>
 </div>
 
 <div class="concept">
@@ -72,11 +73,36 @@ $$\langle k \rangle = \frac{1}{N}\sum_i k_i = \frac{2E}{N}$$
 <p>寫 \(E/N\) 係錯嘅（漏咗 ×2）。可以用「degree 加埋 = 2E」嚟檢查自己有冇數漏 edge。</p>
 </div>
 
+<div class="concept" id="degdist">
+<h3>2b. Degree distribution \(P(k)\)（L8 p.8–9、22，Exam Review p.117）</h3>
+<span class="lab">一句講完</span>
+<p>隨便揀一粒 node，佢 degree 係 k 嘅機率：</p>
+$$P(k) = \frac{N_k}{N}$$
+<p>\(N_k\) = degree 係 k 嘅 node 數目，N = node 總數。</p>
+<span class="lab pic">Slide 例子（10 粒 node）</span>
+<div class="grid2">
+<figure class="fig"><svg viewBox="0 0 200 120" role="img" aria-label="degree distribution graph" style="max-width:200px">
+<g class="ln"><line x1="20" y1="25" x2="55" y2="60"/><line x1="65" y1="15" x2="55" y2="60"/><line x1="65" y1="15" x2="85" y2="45"/><line x1="55" y1="60" x2="85" y2="45"/><line x1="85" y1="45" x2="115" y2="45"/><line x1="115" y1="45" x2="150" y2="25"/><line x1="115" y1="45" x2="180" y2="55"/><line x1="115" y1="45" x2="125" y2="80"/><line x1="25" y1="100" x2="75" y2="105"/></g>
+<g font-size="10" text-anchor="middle"><circle class="ac" cx="20" cy="25" r="8"/><text x="20" y="28">1</text><circle class="ac" cx="65" cy="15" r="8"/><text x="65" y="18">2</text><circle class="ac" cx="55" cy="60" r="8"/><text x="55" y="63">3</text><circle class="ac" cx="85" cy="45" r="8"/><text x="85" y="48">3</text><circle class="ac" cx="115" cy="45" r="8"/><text x="115" y="48">4</text><circle class="ac" cx="150" cy="25" r="8"/><text x="150" y="28">1</text><circle class="ac" cx="180" cy="55" r="8"/><text x="180" y="58">1</text><circle class="ac" cx="125" cy="80" r="8"/><text x="125" y="83">1</text><circle class="ac" cx="25" cy="100" r="8"/><text x="25" y="103">1</text><circle class="ac" cx="75" cy="105" r="8"/><text x="75" y="108">1</text></g></svg>
+<figcaption>圈入面嘅數字 = 嗰粒 node 嘅 degree</figcaption></figure>
+<figure class="fig"><svg viewBox="0 0 200 130" role="img" aria-label="degree distribution bar chart" style="max-width:200px">
+<g font-size="10"><line x1="30" y1="105" x2="190" y2="105" stroke="#15202B"/><line x1="30" y1="10" x2="30" y2="105" stroke="#15202B"/>
+<rect class="ac" x="45" y="27" width="26" height="78"/><rect class="ac" x="80" y="92" width="26" height="13"/><rect class="ac" x="115" y="79" width="26" height="26"/><rect class="ac" x="150" y="92" width="26" height="13"/>
+<g text-anchor="middle"><text x="58" y="120">1</text><text x="93" y="120">2</text><text x="128" y="120">3</text><text x="163" y="120">4</text><text x="58" y="22">0.6</text><text x="93" y="87">0.1</text><text x="128" y="74">0.2</text><text x="163" y="87">0.1</text></g>
+<text x="190" y="120" text-anchor="end">k</text><text x="34" y="12">P(k)</text></g></svg>
+<figcaption>6 粒 degree 1、1 粒 degree 2、2 粒 degree 3、1 粒 degree 4</figcaption></figure></div>
+<p>\(P(1) = 6/10 = 0.6\)、\(P(2) = 0.1\)、\(P(3) = 0.2\)、\(P(4) = 0.1\)，加埋 = 1。（networkx 核對）</p>
+<pre><code>node_degree = [j for (i, j) in G.degree]   # G.degree 出 (node, degree) pairs</code></pre>
+<span class="lab trap">易錯</span>
+<ul><li>真實網絡（例如 MSN）嘅 degree distribution <b>好 skewed</b>：大部分人得幾個朋友，極少數人有好多。普通 axis 睇唔到，要用 <b>log-log</b> 圖。</li>
+<li>\(P(k)\) 係<b>比例</b>（除 N），唔係 node 數目。</li></ul>
+</div>
 <div class="concept">
 <h3>3. Density：個 graph 有幾密</h3>
 <span class="lab">一句講完</span>
 <p>Density = 實際有幾多條 edge ÷ 最多可以有幾多條 edge。</p>
-$$\text{Undirected: } \frac{E}{N(N-1)/2} = \frac{\langle k\rangle}{N-1} \qquad\qquad \text{Directed: } \frac{E}{N(N-1)}$$
+$$\text{Undirected: } \frac{E}{N(N-1)/2} = \frac{\langle k\rangle}{N-1}$$
+$$\text{Directed: } \frac{E}{N(N-1)}$$
 <span class="lab why">點解分母係 \(N(N-1)/2\)</span>
 <p>N 個 node 兩兩之間最多連一條線：第一個 node 可以連 N−1 個，第二個再連 N−2 個…… 加埋 \(= N(N-1)/2\)。有向圖每對可以有兩條（A→B 同 B→A），所以唔使除 2。</p>
 <span class="lab pic">圖解</span>
@@ -98,7 +124,8 @@ $$\text{Undirected: } \frac{E}{N(N-1)/2} = \frac{\langle k\rangle}{N-1} \qquad\q
 <h3>4. Distance、diameter、平均路徑長度</h3>
 <span class="lab">一句講完</span>
 <p>Distance \(d(i,j)\) = 由 i 去 j <b>最短</b>要行幾多條 edge；diameter = 所有 node 對之間 distance 嘅<b>最大值</b>。</p>
-$$\text{diameter} = \max_{i,j}\, d(i,j) \qquad\qquad \bar{\ell} = \frac{1}{N(N-1)}\sum_{i \ne j} d(i,j)$$
+$$\text{diameter} = \max_{i,j}\, d(i,j)$$
+$$\bar{\ell} = \frac{1}{N(N-1)}\sum_{i \ne j} d(i,j)$$
 <span class="lab why">有咩用</span>
 <p>平均路徑短，資訊傳得快：互聯網傳數據快啲、電網損耗少啲。MSN 平均路徑只係 6.6，即係「六度分隔」嘅 small world。</p>
 <span class="lab pic">圖解：graph G 入面最遠嘅一對</span>
@@ -111,6 +138,8 @@ $$\text{diameter} = \max_{i,j}\, d(i,j) \qquad\qquad \bar{\ell} = \frac{1}{N(N-1
 <ol class="steps"><li>搵「最邊」嘅 node（degree 細、喺角落），例如 B、G、A。</li>
 <li>計佢哋之間嘅最短路徑：B→G = 3、A→G = 3（A–C–D–G 或者 A–E–F–G）、A→B = 2。</li>
 <li>確定冇一對大過 3 → diameter = 3。</li></ol>
+<span class="lab eg">特殊圖（L8 p.15，<code>nx.diameter</code>）</span>
+<ul><li>環形 <code>cycle_graph(10)</code>：diameter = <b>5</b>（N 粒成個圈，最遠係對面，⌊N/2⌋）。</li><li>完全圖 <code>complete_graph(10)</code>：diameter = <b>1</b>（個個都直接連住）。</li></ul>
 <span class="lab trap">易錯</span>
 <p>Diameter 唔係「最長嘅路徑」（可以兜好多圈），而係「<b>最短</b>路徑入面最長嗰個」。每一對都要用最短行法。</p>
 </div>
@@ -119,7 +148,8 @@ $$\text{diameter} = \max_{i,j}\, d(i,j) \qquad\qquad \bar{\ell} = \frac{1}{N(N-1
 <h3>5. Clustering coefficient（CC）：你啲朋友係咪都係朋友</h3>
 <span class="lab">一句講完</span>
 <p>Node i 嘅 CC = 佢嘅鄰居之間<b>實際</b>有幾多條 edge ÷ 鄰居之間<b>最多</b>可以有幾多條。</p>
-$$C_i = \frac{e_i}{k_i(k_i-1)/2} = \frac{2e_i}{k_i(k_i-1)} \qquad\qquad \bar{C} = \frac{1}{N}\sum_i C_i$$
+$$C_i = \frac{e_i}{k_i(k_i-1)/2} = \frac{2e_i}{k_i(k_i-1)}$$
+$$\bar{C} = \frac{1}{N}\sum_i C_i$$
 <span class="lab why">點解要咁計</span>
 <p>社交網絡入面，「朋友嘅朋友都係朋友」好常見。CC 量度呢個「圍埋一齊」嘅程度：1 = 鄰居全部互相認識，0 = 鄰居之間完全唔認識。MSN 嘅平均 CC 係 0.11。</p>
 <span class="lab pic">圖解：計 E 嘅 CC</span>
@@ -156,6 +186,24 @@ $$C_i = \frac{e_i}{k_i(k_i-1)/2} = \frac{2e_i}{k_i(k_i-1)} \qquad\qquad \bar{C} 
 <path class="ln" d="M240 212 L 280 212 L 280 28 L 252 28" marker-end="url(#g2)"/><text x="248" y="204" font-size="12">有</text>
 </svg><figcaption>冇未到過嘅 node 就完成；只得一個 component 即係個 graph 係 connected</figcaption></figure>
 </div>
+<div class="concept" id="realnet">
+<h3>7. 真實網絡嘅數字：MSN 同 PPI（L8 p.19–26）</h3>
+<div class="tw"><table class="stack"><tr><th>量度</th><th>MSN Messenger（1 個月）</th><th>PPI（protein interaction）</th></tr>
+<tr><td>規模</td><td>2.45 億人登入、1.8 億人有傾偈、&gt; 300 億段對話</td><td>2018 個 protein</td></tr>
+<tr><td>N／E</td><td>N = 1.8 億、E = 13 億（傾過至少一個 message 就連線，無向）</td><td>N = 2018、E = 2930</td></tr>
+<tr><td>平均 degree ⟨k⟩</td><td>14.4</td><td>2.9</td></tr>
+<tr><td>平均路徑</td><td>6.6（90% node 喺 8 步內到）</td><td>5.8</td></tr>
+<tr><td>Clustering coefficient</td><td>0.11</td><td>0.12</td></tr>
+<tr><td>Giant component</td><td>佔 99.9%</td><td>185 個 component，最大 1647 node（81%）</td></tr></table></div>
+<span class="lab">真實網絡四個共通點</span>
+<ol class="steps"><li><b>Degree distribution 好 skewed</b>（要 log-log 先睇到）。</li>
+<li><b>平均路徑短</b>（small world，六度分隔）。</li>
+<li><b>Clustering coefficient 高過同樣大細嘅 random graph</b>：朋友嘅朋友好大機會係朋友。</li>
+<li>有一個 <b>giant connected component</b> 包住大部分 node。</li></ol>
+<span class="lab trap">易錯</span>
+<p>MSN 有 1.8 億 node 但 ⟨k⟩ 只係 14.4 ⇒ density 接近 0（好 sparse），但平均路徑仍然只係 6.6：sparse 唔代表遠。</p>
+</div>
+
 <h2 id="cent">三、Centrality：邊個 node 最重要</h2>
 <div class="key"><b>一分鐘重點</b><ul>
 <li><b>Degree</b>：朋友最多。<b>Closeness</b>：去邊都近。<b>Betweenness</b>：人哋要經你先搵到對方（橋樑）。<b>Eigenvector</b>：你嘅朋友都重要。</li>
@@ -202,7 +250,8 @@ $$C_i = \frac{e_i}{k_i(k_i-1)/2} = \frac{2e_i}{k_i(k_i-1)} \qquad\qquad \bar{C} 
 <h3>2. Closeness centrality</h3>
 <span class="lab">一句講完</span>
 <p>去其他所有 node 嘅距離加埋越細，你就越「中心」。</p>
-$$C_{clos}(x) = \frac{1}{\sum_y d(y,x)} \qquad \text{normalised: } \frac{N-1}{\sum_y d(y,x)}$$
+$$C_{clos}(x) = \frac{1}{\sum_y d(y,x)}$$
+$$\text{normalised: } \frac{N-1}{\sum_y d(y,x)}$$
 <span class="lab pic">圖解（lecture slide 38）</span>
 <figure class="fig"><svg viewBox="0 0 330 110" role="img" aria-label="closeness path" style="max-width:330px">
 <g class="ln"><line x1="35" y1="45" x2="295" y2="45"/></g>
@@ -219,6 +268,18 @@ $$C_{harm}(x) = \sum_{y \ne x} \frac{1}{d(y,x)}$$
 <p>去唔到嘅 node \(1/\infty = 0\)，唔會搞到成條數變 0。例：鄰居 1 個、距離 2 嘅 2 個、距離 3、4 各 1 個：\(1 + \tfrac12 \times 2 + \tfrac13 + \tfrac14 \approx 2.58\)。</p>
 </div>
 
+<div class="concept" id="harm">
+<h3>2b. Harmonic centrality 例子（Exam Review p.130）</h3>
+<figure class="fig"><svg viewBox="0 0 300 170" role="img" aria-label="harmonic example tree" style="max-width:300px">
+<g class="ln"><line x1="40" y1="25" x2="90" y2="80"/><line x1="40" y1="140" x2="90" y2="80"/><line x1="90" y1="80" x2="150" y2="80"/><line x1="150" y1="80" x2="210" y2="80"/><line x1="210" y1="80" x2="260" y2="25"/><line x1="160" y1="145" x2="220" y2="145"/></g>
+<g text-anchor="middle" font-size="11"><circle class="hl" cx="40" cy="25" r="18"/><text x="40" y="29">2.58</text><circle class="hl" cx="40" cy="140" r="18"/><text x="40" y="144">2.58</text><circle class="ac" cx="90" cy="80" r="20"/><text x="90" y="84">3.83</text><circle class="hl" cx="150" cy="80" r="19"/><text x="150" y="84">3.5</text><circle class="hl" cx="210" cy="80" r="19"/><text x="210" y="84">3.17</text><circle class="hl" cx="260" cy="25" r="18"/><text x="260" y="29">2.33</text><circle class="bx" cx="160" cy="145" r="15"/><text x="160" y="149">1</text><circle class="bx" cx="220" cy="145" r="15"/><text x="220" y="149">1</text></g></svg>
+<figcaption>兩個分開嘅 component：closeness 會出事，harmonic 冇問題（networkx 核對）</figcaption></figure>
+<p>左上角嗰粒：鄰居 1 個（1/1）、距離 2 嘅 2 個（1/2 × 2）、距離 3 嘅 1 個（1/3）、距離 4 嘅 1 個（1/4）；右下嗰對去唔到，算 0：</p>
+$$C_{harm} = \frac11 + \frac12(2) + \frac13 + \frac14 = 2.58$$
+<span class="lab trap">易錯</span>
+<ul><li>Slide 寫「= 2.5」同圖上 2.5、3.8、3.1，都係截斷咗；準確值係 2.58、3.83、3.17。右上角嗰粒 slide 寫 2.5，但照計係 1 + 1/2 + 1/3 + 2 × 1/4 = 2.33。考試自己計就以計出嚟嘅數為準。</li>
+<li>右下兩粒只得對方：harmonic = 1/1 = 1。</li></ul>
+</div>
 <div class="concept">
 <h3>3. Betweenness centrality</h3>
 <span class="lab">一句講完</span>
@@ -271,11 +332,24 @@ $$C_{bet}(v) = \sum_{s \ne v \ne t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
 <p>有幾條一樣短嘅路徑時要<b>攤分</b>（partial credit）；唔好當成全部經你。</p>
 </div>
 
+<div class="concept" id="edgebet">
+<h3>3b. Edge betweenness（L8 p.50）</h3>
+<span class="lab">一句講完</span>
+<p>將 betweenness 由 node 搬去 <b>edge</b>：數有幾多條最短路徑行經呢條 edge。連接兩個 cluster 嘅 <b>bridge</b> 分數最高，所以剪走佢就分到 community（community detection 嘅基礎）。</p>
+<figure class="fig"><svg viewBox="0 0 300 120" role="img" aria-label="edge betweenness example" style="max-width:300px">
+<g class="ln"><line x1="30" y1="25" x2="30" y2="95"/><line x1="30" y1="25" x2="95" y2="60"/><line x1="30" y1="95" x2="95" y2="60"/><line x1="205" y1="60" x2="270" y2="25"/><line x1="205" y1="60" x2="270" y2="95"/><line x1="270" y1="25" x2="270" y2="95"/></g>
+<line x1="95" y1="60" x2="205" y2="60" stroke="#BF4A14" stroke-width="4"/>
+<g text-anchor="middle" font-size="12"><circle class="bx" cx="30" cy="25" r="12"/><text x="30" y="29">1</text><circle class="bx" cx="30" cy="95" r="12"/><text x="30" y="99">2</text><circle class="hl" cx="95" cy="60" r="12"/><text x="95" y="64">3</text><circle class="hl" cx="205" cy="60" r="12"/><text x="205" y="64">4</text><circle class="bx" cx="270" cy="25" r="12"/><text x="270" y="29">5</text><circle class="bx" cx="270" cy="95" r="12"/><text x="270" y="99">6</text>
+<text x="150" y="50" font-weight="700" fill="#BF4A14">9</text><text x="68" y="36">4</text><text x="18" y="64">1</text><text x="68" y="94">4</text></g></svg>
+<figcaption>自己整嘅例子（networkx 核對）：bridge 3–4 = 3 × 3 = 9；三角形入面 1–3、2–3 = 4，1–2 = 1</figcaption></figure>
+<p>Slide 嘅圖：兩個 cluster 之間嗰條 bridge b = 16，另一條 b = 7.5（有兩條一樣短嘅路徑時攤分，所以會有 .5）。</p>
+</div>
 <div class="concept">
 <h3 id="eig">4. Eigenvector centrality</h3>
 <span class="lab">一句講完</span>
 <p>你嘅分數 = 你鄰居分數加埋。連住重要人物，你都重要。</p>
-$$c \leftarrow A\,c, \qquad c \leftarrow \frac{c}{\lVert c \rVert_2}$$
+$$c \leftarrow A\,c$$
+$$c \leftarrow \frac{c}{\lVert c \rVert_2}$$
 <span class="lab eg">例子</span>
 <p>A–B、A–C、A–D、C–D，由 \(c^{(0)} = [1,1,1,1]\) 開始：A = B+C+D = 3、B = A = 1、C = A+D = 2、D = A+C = 2；除 \(\sqrt{18}\) 得 [0.707, 0.236, 0.471, 0.471]。繼續 iterate 收斂去 [0.612, 0.282, 0.523, 0.523]。PageRank 同 Katz 都係佢嘅變種。</p>
 <span class="lab">Slide algorithm（L8 p.59）</span>
@@ -300,11 +374,40 @@ $$c \leftarrow A\,c, \qquad c \leftarrow \frac{c}{\lVert c \rVert_2}$$
 <tr><td><b>÷ node 1</b></td><td class="c"><b>1</b></td><td class="c"><b>1.41</b></td><td class="c"><b>1.27</b></td><td class="c"><b>0.52</b></td><td class="c"><b>1</b></td></tr></table></div>
 <ul><li>\(A c^{(0)}\) = [2, 4, 3, 1, 2]，即係 degree；\(\lVert\cdot\rVert_2 = \sqrt{34} = 5.831\)。</li><li>\(A c^{(1)}\) = [1.20, 1.37, 1.37, 0.69, 1.20]，÷ 2.668 得 \(c^{(2)}\)。</li><li>之後擺嚟擺去慢慢收斂（λ ≈ 2.686）；最後一行係 slide 嘅寫法：全部除 node 1。</li></ul>
 <p>第一步 \(A c^{(0)}\) 永遠等於每粒 node 嘅 degree。之後 node 2（degree 4，又連住 1、3、5）最高；node 4 只連住 node 2，但因為 node 2 重要，佢都有 0.52，唔係 0。（numpy 核對；slide 第一步寫 0.68，係 0.686 截斷，node 4 收斂值 0.527 slide 寫 0.52。）</p>
+<span class="lab">理論（L8 p.58）</span>
+$$C_{eig}(x) = \frac{1}{\lambda} \sum_{y \to x} C_{eig}(y)$$
+<p>寫成 matrix 就係 eigenvector 嘅定義：</p>
+$$A\,x = \lambda\,x$$
+<p>Power iteration 會收斂到 adjacency matrix 嘅 <b>dominant eigenvector</b>，λ 就係 dominant eigenvalue（上面例子 λ ≈ 2.686）。<b>條件：graph 要 strongly connected</b>（有向圖每粒 node 都去得到每粒）；唔係嘅話冇 in-link 嘅 node 會變 0，分數會唔準。</p>
+<div class="warn"><b>易錯：slide 嘅寫法</b>Slide p.58 將 λ 寫成「normalization constant \(\sqrt{\sum c_i^2}\)」。嚴格講，每一步除嘅 L2 norm 只係喺<b>收斂之後</b>先等於 λ。Slide p.60 第一步寫 0.68，係 4/√34 = 0.686 截斷。</div>
 <span class="lab trap">易錯</span>
 <ul><li>除 <b>L2 norm</b>（√平方和），唔係除總和；兩個做法比例一樣，但數字唔同，答題要跟 slide。</li>
 <li>無向圖 A 係對稱；\(A c\) 嘅第 i 格 = node i 所有鄰居嘅分數加埋。</li></ul>
 </div>
 
+<div class="concept" id="compare">
+<h3>4b. 同一個圖，三種 centrality 揀出唔同 node（L8 p.52）</h3>
+<div class="tw"><table class="stack"><tr><th>圖</th><th>Degree</th><th>Closeness</th><th>Betweenness</th></tr>
+<tr><td>Star（中心 + 5 粒 leaf）</td><td>中心最大</td><td>中心最大</td><td>中心最大（5×4/2 = 10）</td></tr>
+<tr><td>Path A–B–C–D–E</td><td>中間 3 粒一樣（2），頭尾 1</td><td>C 最大（0.667）</td><td>C 最大（4）</td></tr>
+<tr><td>Bow-tie（兩個三角形 + 中間 d）</td><td><b>c、e 最大</b>（3）；d 得 2</td><td><b>d 最大</b>（0.6）</td><td><b>d 最大</b>（9）</td></tr></table></div>
+<p>Star 所有指標都一致；path 嘅 degree 分唔到中間三粒；bow-tie 中間嗰粒 degree 細，但係唯一嘅橋，所以 betweenness 最大。（networkx 核對）</p>
+</div>
+
+<div class="concept" id="kite">
+<h3>4c. 冇一個 centrality 係最好：Krackhardt kite（L8 p.63–65）</h3>
+<figure class="fig"><svg viewBox="0 0 300 280" role="img" aria-label="Krackhardt kite" style="max-width:300px"><g class="ln"><line x1="110" y1="30" x2="190" y2="30"/><line x1="110" y1="30" x2="60" y2="80"/><line x1="110" y1="30" x2="150" y2="80"/><line x1="110" y1="30" x2="110" y2="130"/><line x1="190" y1="30" x2="150" y2="80"/><line x1="190" y1="30" x2="240" y2="80"/><line x1="190" y1="30" x2="190" y2="130"/><line x1="60" y1="80" x2="150" y2="80"/><line x1="60" y1="80" x2="110" y2="130"/><line x1="150" y1="80" x2="240" y2="80"/><line x1="150" y1="80" x2="110" y2="130"/><line x1="150" y1="80" x2="190" y2="130"/><line x1="240" y1="80" x2="190" y2="130"/><line x1="110" y1="130" x2="190" y2="130"/><line x1="110" y1="130" x2="150" y2="178"/><line x1="190" y1="130" x2="150" y2="178"/><line x1="150" y1="178" x2="150" y2="220"/><line x1="150" y1="220" x2="150" y2="262"/></g><g text-anchor="middle"><circle class="bx" cx="110" cy="30" r="15"/><text x="110" y="34" font-size="9.5">And</text><circle class="bx" cx="190" cy="30" r="15"/><text x="190" y="34" font-size="9.5">Bev</text><circle class="bx" cx="60" cy="80" r="15"/><text x="60" y="84" font-size="9.5">Car</text><circle class="ac" cx="150" cy="80" r="15"/><text x="150" y="84" font-size="9.5">Dia</text><circle class="bx" cx="240" cy="80" r="15"/><text x="240" y="84" font-size="9.5">Ed</text><circle class="hl" cx="110" cy="130" r="15"/><text x="110" y="134" font-size="9.5">Fer</text><circle class="hl" cx="190" cy="130" r="15"/><text x="190" y="134" font-size="9.5">Gar</text><circle class="bx" cx="150" cy="178" r="15" style="fill:#E2E6F8;stroke:#3D4BAA;stroke-width:1.6"/><text x="150" y="182" font-size="9.5">Hea</text><circle class="bx" cx="150" cy="220" r="15"/><text x="150" y="224" font-size="9.5">Ike</text><circle class="bx" cx="150" cy="262" r="15"/><text x="150" y="266" font-size="9.5">Jan</text></g></svg><figcaption>紅 = degree 最高（Diane 6）；綠 = closeness 最高（Fernando、Garth 0.643）；藍 = betweenness 最高（Heather 14）</figcaption></figure>
+<div class="tw"><table class="nostack"><tr><th>Centrality</th><th>最重要</th><th>點解</th></tr>
+<tr><td>Degree</td><td>Diane</td><td>朋友最多（6）</td></tr>
+<tr><td>Closeness</td><td>Fernando、Garth</td><td>去邊都近</td></tr>
+<tr><td>Betweenness</td><td>Heather</td><td>上面一大堆去 Ike、Jane 一定要經佢</td></tr></table></div>
+<p>以上用 networkx 自帶嘅 <code>krackhardt_kite_graph()</code> 計。Slide p.64 用嘅係 degree、eigenvector、betweenness 三幅圖；networkx 計 eigenvector 最高都係 Diane。</p>
+<span class="lab">Limitations（L8 p.64–65）</span>
+<ol class="steps"><li>啱一個 application 嘅 centrality，對另一個 application 未必啱。</li>
+<li>Centrality 只係<b>排次序</b>，唔量度 node 之間差幾多。</li>
+<li>識別「最重要 node」嘅特徵，唔一定適用於其他 node。</li></ol>
+<p>研究入面最多人用 degree，其次 betweenness、closeness、eigenvector；但<b>冇一個係最好</b>，要睇問題。</p>
+</div>
 <div class="concept">
 <h3>5. 認 centrality 圖（必考位）</h3>
 <span class="lab pic">示意圖</span>
@@ -404,6 +507,13 @@ c(1) = [0.707, 0.236, 0.471, 0.471]</code></pre>
 
 <h2 id="mcq">六、MCQ</h2>
 <div class="mcq" data-set="A"><script type="application/json">[
+{"t":"L8","s":"<p>A graph has 10 nodes: 6 with degree 1, 1 with degree 2, 2 with degree 3, 1 with degree 4. What is P(3)?</p>","o":["2","0.2","0.3","3/10"],"a":1,"e":"P(k) = N_k / N = 2/10 = <b>0.2</b>。"},
+{"t":"L8","s":"<p>Why is the MSN degree distribution plotted on log-log axes?</p>","o":["Because degrees are negative","It is heavily skewed: most nodes have few links, a few have very many","To make it a straight line by definition","Because N is small"],"a":1,"e":"真實網絡 degree 好 skewed，普通 axis 只見到一條貼住 0 嘅線。"},
+{"t":"L8","s":"<p>What is the diameter of <code>nx.cycle_graph(10)</code>?</p>","o":["1","5","9","10"],"a":1,"e":"環形最遠係對面：⌊10/2⌋ = <b>5</b>。complete_graph(10) 先係 1。"},
+{"t":"L8","s":"<p>Which edge usually has the highest edge betweenness?</p>","o":["An edge inside a dense cluster","A bridge connecting two clusters","A self-loop","Any edge of a leaf"],"a":1,"e":"兩個 cluster 之間嘅最短路徑全部要經 bridge；剪走佢就分到 community。"},
+{"t":"L8","s":"<p>In the Krackhardt kite, which node has the highest betweenness?</p>","o":["Diane (highest degree)","Fernando","Heather","Jane"],"a":2,"e":"Heather 係去 Ike、Jane 嘅唯一通道；degree 最高係 Diane，closeness 最高係 Fernando、Garth。冇一個 centrality 係最好。"},
+{"t":"L8","s":"<p>Eigenvector centrality converges to the dominant eigenvector of A. What condition does the lecture require?</p>","o":["The graph must be a tree","The graph must be strongly connected","All degrees must be equal","The graph must be undirected"],"a":1,"e":"要 <b>strongly connected</b>；否則有啲 node 分數會變 0。"},
+{"t":"L8","s":"<p>Which three properties are common to the real networks in the lecture (MSN, PPI)?</p>","o":["Uniform degree, long paths, low clustering","Skewed degree, short paths, clustering higher than random","Complete graph, diameter 1, no components","Only one node with high degree"],"a":1,"e":"Skewed degree distribution、small world（平均路徑短）、CC 高過 random，仲有 giant component。"},
 {"t":"L8","s":"<p>An undirected graph has 10 nodes and 15 edges. What is its average degree?</p>","o":["1.5","3","15","0.33"],"a":1,"e":"⟨k⟩ = 2E/N = 30/10 = <b>3</b>。唔好漏 ×2。"},
 {"t":"L8","s":"<p>Same graph (10 nodes, 15 edges). What is its density?</p>","o":["15/90","15/45","10/15","2/3"],"a":1,"e":"無向圖最多 N(N−1)/2 = 45 條：density = 15/45 = <b>1/3</b>。15/90 係有向圖嘅分母。"},
 {"t":"L8","s":"<p>Which best defines the diameter of a graph?</p>","o":["The longest path in the graph","The maximum shortest-path distance between any pair of nodes","The average distance between nodes","The number of nodes on the largest component"],"a":1,"e":"Diameter = <b>最短路徑入面最長嗰個</b>。"},
